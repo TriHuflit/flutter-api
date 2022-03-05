@@ -31,7 +31,9 @@ namespace Flutter.Backend.DAL.Implementations
         public IEnumerable<T> FindBy(Expression<Func<T, bool>> specification)
         {
             throw new NotImplementedException();
+           
         }
+
 
         public Task<IEnumerable<T>> FindByAsync(Expression<Func<T, bool>> specification)
         {
@@ -53,10 +55,16 @@ namespace Flutter.Backend.DAL.Implementations
             throw new NotImplementedException();
         }
 
+        public  async Task<T> GetAsync(Expression<Func<T, bool>> specification)
+        {
+            var data = await _mongoCollection.FindAsync(specification);
+            return data.FirstOrDefault();
+        }
+
         //protected virtual IMongoCollection<T> GetDbCollection()
         //{
 
-            
+
         //    var database = _dbClient.GetDatabase("Flutter-Project");
         //    var collection = database.GetCollection<T>(typeof(T).Name);
 

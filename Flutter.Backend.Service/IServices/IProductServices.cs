@@ -1,9 +1,7 @@
 ﻿using Flutter.Backend.DAL.Domains;
+using Flutter.Backend.Service.Models.Dtos;
 using Flutter.Backend.Service.Models.Requests;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Flutter.Backend.Service.IServices
@@ -12,6 +10,6 @@ namespace Flutter.Backend.Service.IServices
     {
         public Product Add(CreateProduct product);
 
-        public IEnumerable<Product> GetAll();
+        public Task<AppActionResultMessage<IList<DtoProduct>>> GetAll();
     }
 }
