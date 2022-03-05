@@ -1,8 +1,12 @@
 using Autofac;
+using AutoMapper;
 using Flutter.Backend.Api.Controllers;
 using Flutter.Backend.DAL.Contracts;
+using Flutter.Backend.DAL.Domains;
 using Flutter.Backend.DAL.Implementations;
 using Flutter.Backend.Service.IServices;
+using Flutter.Backend.Service.Models.Dtos;
+using Flutter.Backend.Service.Models.Mappers;
 using Flutter.Backend.Service.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -30,7 +34,7 @@ namespace Flutter.Backend.Api
         }
 
         public IConfiguration Configuration { get; }
-
+       
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
@@ -56,11 +60,15 @@ namespace Flutter.Backend.Api
                 options.SuppressModelStateInvalidFilter = true;
             });
 
-            services.AddTransient<IProductServices,ProductServices>();
+            services.AddTransient<IProductServices,ProductService>();
             services.AddTransient<IProductRespository, ProductRespository>();
+            services.AddTransient<IMessageService, MessageService>();
+            services.AddTransient<IMessageRespository, MessageResResponsitory>();
+            services.AddAutoMapper(typeof(AutoMapperProfile).Assembly);
             services.AddSingleton<IMongoClient, MongoClient>(sp => new MongoClient(Configuration.GetConnectionString("UrlConnection")));
 
         }
+    
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

@@ -15,6 +15,8 @@ namespace Flutter.Backend.DAL.Contexts
 
         Task<T> Get(string Id);
 
+        Task<T> GetAsync(Expression<Func<T, bool>> specification);
+
         IEnumerable<T> FindBy(Expression<Func<T, bool>> specification);
 
         Task<IEnumerable<T>> FindByAsync(Expression<Func<T, bool>> specification);

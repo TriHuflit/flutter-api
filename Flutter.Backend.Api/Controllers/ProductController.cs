@@ -27,10 +27,13 @@ namespace Flutter.Backend.Api.Controllers
         }
 
         [HttpGet]
-        public ActionResult GetAllProduct()
+        public IActionResult GetAllProduct()
         {
-            var result = _productService.GetAll();
-
+            var result = _productService.GetAll().Result;
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result.Detail);
+            }
             return Ok(result);
         }
     }
