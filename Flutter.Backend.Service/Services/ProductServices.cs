@@ -31,5 +31,10 @@ namespace Flutter.Backend.Service.Services
 
             return newProduct;
         }
+
+        public IEnumerable<Product> GetAll()
+        {
+            return _productRespository.GetAll();
+        }
     }
 }

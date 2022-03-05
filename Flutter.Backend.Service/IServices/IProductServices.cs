@@ -11,5 +11,7 @@ namespace Flutter.Backend.Service.IServices
     public interface IProductServices
     {
         public Product Add(CreateProduct product);
+
+        public IEnumerable<Product> GetAll();
     }
 }
