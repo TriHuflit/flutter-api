@@ -45,7 +45,7 @@ namespace Flutter.Backend.DAL.Implementations
 
         public IEnumerable<T> GetAll()
         {
-            throw new NotImplementedException();
+           return _mongoCollection.Find( _ => true).ToList();
         }
 
         public void Update(T item)
