@@ -18,7 +18,7 @@ namespace Flutter.Backend.Service.Services
             var result = await _messageRespository.GetAsync(x=>x.Key==key);
             if(result == null)
             {
-                return "Lỗi";
+                return key;
             }
             return  result.MessageResponse;
         }
