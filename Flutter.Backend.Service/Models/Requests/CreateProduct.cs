@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Flutter.Backend.DAL.Implementations
+namespace Flutter.Backend.Service.Models.Requests
 {
-    internal class MongoConnection
+    public class CreateProduct
     {
+        public string Name { get; set; }
     }
 }
