@@ -19,11 +19,11 @@ namespace Flutter.Backend.Api.Controllers
 
 
         [HttpPost]
-        public ActionResult CreateProduct(CreateProduct product)
+        public ActionResult CreateProduct(CreateProduct request)
         {
-           var result =  _productService.Add(product);
+           var result =  _productService.Add(request);
 
-           return Ok(result);
+           return Ok(result.Result);
         }
 
         [HttpGet]

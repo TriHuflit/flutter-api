@@ -14,25 +14,36 @@ namespace Flutter.Backend.Service.Services
     {
         private readonly IProductRespository _productRespository;
         private readonly IMapper _mapper;
-       
+        private readonly IValidationService _validationService;
+
         public ProductService(IProductRespository productRespository,
             IMapper mapper,
+            IValidationService validationService,
             IMessageService messageService) : base(messageService)
         {
             _productRespository = productRespository;   
             _mapper = mapper;
+            _validationService = validationService;
         }
 
-        public Product Add(CreateProduct product)
+        public async Task<AppActionResultMessage<DtoProduct>> Add(CreateProduct request)
         {
+            var result = new AppActionResultMessage<DtoProduct>();
+            if (!_validationService.ValidateEmailFormat(request.Name))
+            {
+                return await BuildError(result,ERR_MSG_EMAIL_ISVALID_FORMART, nameof(request.Name));
+            }
+
 
             var newProduct = new Product
             {
-                Name = product.Name,
+                Name = request.Name,
             };
             _productRespository.Add(newProduct);
 
-            return newProduct;
+            var dtoProduct = _mapper.Map<Product,DtoProduct>(newProduct);
+
+            return await BuildResult(result,dtoProduct,MSG_SAVE_SUCCESSFULLY);
         }
 
         public async  Task<AppActionResultMessage<IList<DtoProduct>>> GetAll()
