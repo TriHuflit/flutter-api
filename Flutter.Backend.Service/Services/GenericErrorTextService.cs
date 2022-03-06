@@ -16,7 +16,12 @@ namespace Flutter.Backend.Service.Services
         {
             _messageService = messageService;
         }
-
+        public async Task<AppActionResultMessage<T>> BuildResult(AppActionResultMessage<T> result, T data, string key)
+        {
+            var resultMessage = await _messageService.GetMessage(key);
+            result.BuildResult(data, resultMessage);
+            return result;
+        }
         public async Task<AppActionResultMessage<IList<T>>> BuildResult(AppActionResultMessage<IList<T>> result, IEnumerable<T> data, string key)
         {
             var resultMessage = await _messageService.GetMessage(key);           
@@ -25,12 +30,7 @@ namespace Flutter.Backend.Service.Services
         }
 
 
-        public async Task<AppActionResultMessage<T>> BuildResult(AppActionResultMessage<T> result, T data, string key)
-        {
-            var resultMessage = await _messageService.GetMessage(key);
-            result.BuildResult(data, resultMessage);
-            return result;
-        }
+       
 
         public async Task<AppActionResultMessage<IList<T>>> BuildError(AppActionResultMessage<IList<T>> result, string key)
         {

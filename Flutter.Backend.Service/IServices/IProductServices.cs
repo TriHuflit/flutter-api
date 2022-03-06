@@ -8,7 +8,7 @@ namespace Flutter.Backend.Service.IServices
 {
     public interface IProductServices
     {
-        public Product Add(CreateProduct product);
+        public Task<AppActionResultMessage<DtoProduct>> Add(CreateProduct request);
 
         public Task<AppActionResultMessage<IList<DtoProduct>>> GetAll();
     }
