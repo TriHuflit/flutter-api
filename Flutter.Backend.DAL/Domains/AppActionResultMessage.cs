@@ -11,9 +11,9 @@ namespace Flutter.Backend.DAL.Domains
             : base(data)
         {
         }
-        public new AppActionResultMessage<TData> BuildResult(TData data, string detail = null)
+        public new AppActionResultMessage<TData> BuildResult(TData data, string message = null)
         {
-            SetInfo(success: true, detail);
+            SetInfo(success: true, message);
             base.Data = data;
             return this;
         }

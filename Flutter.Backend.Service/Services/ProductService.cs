@@ -38,15 +38,15 @@ namespace Flutter.Backend.Service.Services
         public async  Task<AppActionResultMessage<IList<DtoProduct>>> GetAll()
         {
             var result = new AppActionResultMessage<IList<DtoProduct>>();
-            
+           
             var product = _productRespository.GetAll();
             if( product == null)
             {
-               return await BuildError(result,ERR_MSG_NOT_FOUND);
+               return await BuildError(result,ERR_MSG_PRODUCTS_NOT_FOUND);
             }
            
             var dtoProduct = _mapper.Map<IEnumerable<Product>,List<DtoProduct>>(product);
-            return await BuildResult(result, dtoProduct, ERR_MSG_SUCCESSFULLY);
+            return await BuildResult(result, dtoProduct, MSG_FIND_SUCCESSFULLY);
         }
     }
 }

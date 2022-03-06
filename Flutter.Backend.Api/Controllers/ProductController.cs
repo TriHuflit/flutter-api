@@ -32,7 +32,7 @@ namespace Flutter.Backend.Api.Controllers
             var result = _productService.GetAll().Result;
             if (!result.IsSuccess)
             {
-                return BadRequest(result.Detail);
+                return BadRequest(result.Message);
             }
             return Ok(result);
         }

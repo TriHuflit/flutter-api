@@ -12,14 +12,14 @@ namespace Flutter.Backend.DAL.Domains
 
         public TData Data { get; set; }
 
-        public TDetail Detail { get; set; }
+        public TDetail Message { get; set; }
 
 
         public AppActionResult()
         {
             IsSuccess = false;
             Data = default(TData);
-            Detail = null;
+            Message = null;
         }
 
         public AppActionResult(TData data)
@@ -27,9 +27,9 @@ namespace Flutter.Backend.DAL.Domains
             BuildResult(data);
         }
 
-        public AppActionResult<TData, TDetail> BuildResult(TData data, TDetail detail = null)
+        public AppActionResult<TData, TDetail> BuildResult(TData data, TDetail message = null)
         {
-            SetInfo(success: true, detail);
+            SetInfo(success: true, message);
             Data = data;
             return this;
         }
@@ -40,10 +40,10 @@ namespace Flutter.Backend.DAL.Domains
             return this;
         }
 
-        public AppActionResult<TData, TDetail> SetInfo(bool success, TDetail detail = null)
+        public AppActionResult<TData, TDetail> SetInfo(bool success, TDetail message = null)
         {
             IsSuccess = success;
-            Detail = detail;
+            Message = message;
             return this;
         }
     }
