@@ -1,13 +1,13 @@
-﻿
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Flutter.Backend.Service.Models.Dtos
+namespace Flutter.Backend.Service.Models.Requests
 {
-    public class DtoProduct
+    public class BaseRequestProduct
     {
-        /// <summary>
-        /// Id of product.
-        /// </summary>
-        public string Id { get; set; }
         /// <summary>
         /// Category of product
         /// </summary>
@@ -23,18 +23,6 @@ namespace Flutter.Backend.Service.Models.Dtos
         /// Name of product | Rules : MaxLenght 50
         /// </summary>      
         public string Name { get; set; }
-
-        /// <summary>
-        /// Price at least of product.
-        /// </summary>
-
-        public decimal FromPrice { get; set; }
-
-        /// <summary>
-        /// Price at most of product.
-        /// </summary>
-
-        public decimal ToPrice { get; set; }
 
         /// <summary>
         /// Short  Description of product. | Rules : MaxLenght 50

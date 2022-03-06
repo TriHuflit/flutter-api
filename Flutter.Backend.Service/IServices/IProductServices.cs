@@ -8,8 +8,16 @@ namespace Flutter.Backend.Service.IServices
 {
     public interface IProductServices
     {
-        public Task<AppActionResultMessage<DtoProduct>> Add(CreateProduct request);
+        Task<AppActionResultMessage<DtoProduct>> Add(CreateRequestProduct request);
 
-        public Task<AppActionResultMessage<IList<DtoProduct>>> GetAll();
+        Task<AppActionResultMessage<DtoProduct>> Update(UpdateRequestProduct request);
+
+        Task<AppActionResultMessage<DtoProduct>> Delete(string request);
+
+        Task<AppActionResultMessage<IList<DtoProduct>>> Search(SearchRequestProduct request);
+
+        Task<AppActionResultMessage<IList<DtoProduct>>> GetAll();
+
+        Task<AppActionResultMessage<DtoProduct>> Get(string request);
     }
 }
