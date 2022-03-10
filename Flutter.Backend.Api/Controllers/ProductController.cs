@@ -3,6 +3,8 @@ using Flutter.Backend.Service.IServices;
 using Flutter.Backend.Service.Models.Requests;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
+using System.Threading.Tasks;
 
 namespace Flutter.Backend.Api.Controllers
 {
@@ -20,72 +22,69 @@ namespace Flutter.Backend.Api.Controllers
 
         [HttpPost]
         [Route("create")]
-        public ActionResult CreateProduct(CreateRequestProduct request)
+        public async Task<IActionResult> CreateProduct([Required] CreateRequestProduct request)
         {
-            var result =  _productService.Add(request).Result;
+            var result = await  _productService.CreateProductAsync(request);
             if (!result.IsSuccess)
             {
-                return BadRequest(result.Message);
+                return BadRequest(result);
             }
             return Ok(result);
         }
 
         [HttpPut]
         [Route("update")]
-        public ActionResult UpdateProduct(UpdateRequestProduct request)
+        public async Task<IActionResult> UpdateProduct(UpdateRequestProduct request)
         {
-            var result = _productService.Update(request).Result;
+            var result = await _productService.UpdateProductAsync(request);
             if (!result.IsSuccess)
             {
-                return BadRequest(result.Message);
+                return BadRequest(result);
             }
             return Ok(result);
         }
 
         [HttpDelete]
         [Route("delete")]
-        public ActionResult DeleteProduct(string request)
+        public async Task<IActionResult> DeleteProduct(string request)
         {
-            var result = _productService.Delete(request).Result;
+            var result =  await _productService.DeleteProductAsync(request);
             if (!result.IsSuccess)
             {
-                return BadRequest(result.Message);
+                return BadRequest(result);
             }
             return Ok(result);
         }
 
         [HttpPost]
         [Route("search")]
-        public ActionResult SearchProduct(SearchRequestProduct request)
+        public async Task<IActionResult> SearchProduct(SearchRequestProduct request)
         {
-            var result = _productService.Search(request).Result;
-            if (!result.IsSuccess)
-            {
-                return BadRequest(result.Message);
-            }
+            var result = await _productService.SearchProductAsync(request);
+
             return Ok(result);
         }
 
         [HttpGet]
         [Route("all")]
-        public IActionResult GetAllProducts()
+        public async Task<IActionResult> GetAllProducts()
         {
-            var result = _productService.GetAll().Result;
+            var result = await _productService.GetAllProductAsync();
             if (!result.IsSuccess)
             {
-                return BadRequest(result.Message);
+                return BadRequest(result);
             }
             return Ok(result);
         }
 
         [HttpGet]
         [Route("details/{productId}")]
-        public IActionResult GetProduct(string productId)
+        public async Task<IActionResult> GetProduct(string productId)
         {
-            var result = _productService.Get(productId).Result;
+            var result = await _productService.GetProductAsync(productId);
             if (!result.IsSuccess)
             {
-                return BadRequest(result.Message);
+                return BadRequest(result);
             }
             return Ok(result);
         }

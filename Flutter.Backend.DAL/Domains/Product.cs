@@ -1,4 +1,5 @@
 ﻿using MongoDB.Bson;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -14,21 +15,52 @@ namespace Flutter.Backend.DAL.Domains
         /// <summary>
         /// IDCategory of product.
         /// </summary>
-        [Required]
-        public ObjectId CategoryID { get; set; }
+        public ObjectId CategoryId { get; set; }
 
         /// <summary>
         /// IDBrand of product.
         /// </summary>
-        [Required]
-        public ObjectId BrandID { get; set; }
+        public ObjectId BrandId { get; set; }
 
         /// <summary>
         /// Name of product.| Rules : MaxLenght 50
-        /// </summary>
-        [Required]
-        [MaxLength (50)]
+        /// </summary>     
         public string Name { get; set; }
+
+        /// <summary>
+        /// Feature of product
+        /// </summary>     
+        public List<string> Feature { get; set; }
+
+        /// <summary>
+        /// Crytal of product.
+        /// </summary>     
+        public ObjectId CrytalId { get; set; }
+
+        /// <summary>
+        /// Machine of product.
+        /// </summary>     
+        public string Machine { get; set; }
+
+        /// <summary>
+        /// Guarantee of product
+        /// </summary>     
+        public DateTime Guarantee { get; set; }
+
+        /// <summary>
+        /// Ablert  of product.
+        /// </summary>     
+        public ObjectId AblertId { get; set; }
+
+        /// <summary>
+        /// WaterProof.
+        /// </summary>     
+        public ObjectId WaterProofId { get; set; }
+
+        /// <summary>
+        /// MadeIn of product.| Rules : MaxLenght 50
+        /// </summary>     
+        public string MadeIn { get; set; }
 
         /// <summary>
         /// Price at least of product.
@@ -43,20 +75,18 @@ namespace Flutter.Backend.DAL.Domains
         /// <summary>
         /// Short  Description of product. | Rules : MaxLenght 50
         /// </summary>
-        [Required]
+        
         public string Description { get; set; }
 
         /// <summary>
         /// Thumbnail image of product.
         /// </summary>
-        [Required]
-        [MaxLength(50)]
+
         public string Thumbnail { get; set; }
 
         /// <summary>
         /// Active product.
         /// </summary>
-        [Required]
         public bool IsShow { get; set; }
     }
 }

@@ -1,28 +1,31 @@
-﻿using static Flutter.Backend.Common.Contains.MessageResContains;
-using Flutter.Backend.DAL.Contracts;
+﻿using Flutter.Backend.DAL.Contracts;
 using Flutter.Backend.DAL.Domains;
 using Flutter.Backend.Service.IServices;
 using Flutter.Backend.Service.Models.Requests;
+using Flutter.Backend.Service.Models.Dtos;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Flutter.Backend.Service.Models.Dtos;
 using AutoMapper;
 using MongoDB.Bson;
-using Flutter.Backend.Service.Settings;
+using static Flutter.Backend.Common.Contains.MessageResContains;
 
 namespace Flutter.Backend.Service.Services
 {
-    public class ProductService : GenericErrorTextService<DtoProduct>, IProductServices
+    public class ProductService : GenericErrorTextService, IProductServices
     {
         private readonly IProductRespository _productRespository;
         private readonly IMapper _mapper;
 
+        private readonly IUploadImageService _uploadImageService;
+
         public ProductService(IProductRespository productRespository,
-            IMapper mapper,      
+            IMapper mapper,
+            IUploadImageService uploadImageService,
             IMessageService messageService) : base(messageService)
         {
             
-            _productRespository = productRespository;   
+            _productRespository = productRespository; 
+            _uploadImageService = uploadImageService;
             _mapper = mapper;          
            
         }
@@ -32,42 +35,68 @@ namespace Flutter.Backend.Service.Services
         /// </summary>
         /// <param name="request">The request.</param>
         /// <returns></returns>
-        public async Task<AppActionResultMessage<DtoProduct>> Add(CreateRequestProduct request)
+        public async Task<AppActionResultMessage<DtoProduct>> CreateProductAsync(CreateRequestProduct request)
         {
             var result = new AppActionResultMessage<DtoProduct>();
-            
-            if(!ObjectId.TryParse(request.CategoryID, out ObjectId idCategory))
+
+            if (!ObjectId.TryParse(request.CategoryId, out ObjectId objidCategory))
             {
-                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART,nameof(request.CategoryID));
-            }
-            if (!ObjectId.TryParse(request.BrandID, out ObjectId idBrand))
-            {
-                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.BrandID));
+                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.CategoryId));
             }
 
+            if (!ObjectId.TryParse(request.BrandId, out ObjectId objidBrand))
+            {
+                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.BrandId));
+            }
+
+            if (!ObjectId.TryParse(request.CrytalId, out ObjectId objidCrytal))
+            {
+                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.CrytalId));
+            }
+
+            if (!ObjectId.TryParse(request.WaterProofId, out ObjectId objidWaterProof))
+            {
+                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.WaterProofId));
+            }
+
+            if (!ObjectId.TryParse(request.AblertId, out ObjectId objidAblert))
+            {
+                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.AblertId));
+            }
 
             var newProduct = new Product
             {
-                CategoryID = idCategory,
-                BrandID = idBrand,
+                CategoryId = objidCategory,
+                BrandId = objidBrand,
+                CrytalId = objidCrytal,
+                AblertId = objidAblert,
+                WaterProofId = objidWaterProof,
+                Machine = request.Machine,
+                Feature = request.Feature,
                 Name = request.Name,
                 Description = request.Description,
                 IsShow = request.IsShow,
             };
 
+            if (string.IsNullOrEmpty(request.Thumbnail))
+            {
+                return await BuildError(result,ERR_MSG_EMPTY_DATA, nameof(request.Thumbnail));
+            }
+            var validateImage = await _uploadImageService.UploadImage(request.Thumbnail);
 
+            if(!validateImage.IsSuccess)
+            {
+                return await BuildError(result,validateImage.Message);
+            }
 
-
-
+            newProduct.Thumbnail = validateImage.Data.ToString();
 
             newProduct.SetFullInfo("6215d37df635e2f104e1839a", "administator@gmail.com");
 
             _productRespository.Add(newProduct);
             
 
-            var dtoProduct = _mapper.Map<Product,DtoProduct>(newProduct);
-
-            return await BuildResult(result,dtoProduct,MSG_SAVE_SUCCESSFULLY);
+            return await BuildResult(result,newProduct.Id.ToString(),MSG_SAVE_SUCCESSFULLY);
         }
 
         /// <summary>
@@ -76,21 +105,38 @@ namespace Flutter.Backend.Service.Services
         /// <param name="request">The request.</param>
         /// <returns></returns>
         /// <exception cref="System.NotImplementedException"></exception>
-        public async Task<AppActionResultMessage<DtoProduct>> Update(UpdateRequestProduct request)
+        public async Task<AppActionResultMessage<DtoProduct>> UpdateProductAsync(UpdateRequestProduct request)
         {
             var result = new AppActionResultMessage<DtoProduct>();
 
             if (!ObjectId.TryParse(request.Id, out ObjectId idProduct))
             {
-                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.CategoryID));
+                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.Id));
             }
-            if (!ObjectId.TryParse(request.CategoryID, out ObjectId idCategory))
+
+            if (!ObjectId.TryParse(request.CategoryId, out ObjectId idCategory))
             {
-                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.CategoryID));
+                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.CategoryId));
             }
-            if (!ObjectId.TryParse(request.BrandID, out ObjectId idBrand))
+
+            if (!ObjectId.TryParse(request.BrandId, out ObjectId idBrand))
             {
-                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.BrandID));
+                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.BrandId));
+            }
+
+            if (!ObjectId.TryParse(request.CrytalId, out ObjectId objidCrytal))
+            {
+                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.CrytalId));
+            }
+
+            if (!ObjectId.TryParse(request.WaterProofId, out ObjectId objidWaterProof))
+            {
+                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.WaterProofId));
+            }
+
+            if (!ObjectId.TryParse(request.AblertId, out ObjectId objidAblert))
+            {
+                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.AblertId));
             }
 
             var product = _productRespository.Get(idProduct);
@@ -106,7 +152,7 @@ namespace Flutter.Backend.Service.Services
         /// <param name="request">The request.</param>
         /// <returns></returns>
         /// <exception cref="System.NotImplementedException"></exception>
-        public Task<AppActionResultMessage<DtoProduct>> Delete(string request)
+        public Task<AppActionResultMessage<DtoProduct>> DeleteProductAsync (string request)
         {
             throw new System.NotImplementedException();
         }
@@ -117,7 +163,7 @@ namespace Flutter.Backend.Service.Services
         /// <param name="request">The request.</param>
         /// <returns></returns>
         /// <exception cref="System.NotImplementedException"></exception>
-        public async Task<AppActionResultMessage<DtoProduct>> Get(string request)
+        public async Task<AppActionResultMessage<DtoProduct>> GetProductAsync (string request)
         {
             var result = new AppActionResultMessage<DtoProduct>();
             
@@ -137,7 +183,7 @@ namespace Flutter.Backend.Service.Services
         /// Gets all products.
         /// </summary>
         /// <returns></returns>
-        public async  Task<AppActionResultMessage<IList<DtoProduct>>> GetAll()
+        public async  Task<AppActionResultMessage<IList<DtoProduct>>> GetAllProductAsync()
         {
             var result = new AppActionResultMessage<IList<DtoProduct>>();
            
@@ -157,18 +203,14 @@ namespace Flutter.Backend.Service.Services
         /// <param name="request">The request.</param>
         /// <returns></returns>
         /// <exception cref="System.NotImplementedException"></exception>
-        public Task<AppActionResultMessage<IList<DtoProduct>>> Search(SearchRequestProduct request)
+        public Task<AppActionResultMessage<IList<DtoProduct>>> SearchProductAsync(SearchRequestProduct request)
         {
             throw new System.NotImplementedException();
         }
 
 
         #region private method
-        private bool isValidUploadImage(string image)
-        {
-
-            return true;
-        }
+       
         #endregion private method
     }
 }

@@ -65,6 +65,7 @@ namespace Flutter.Backend.Api
             services.AddTransient<IProductRespository, ProductRespository>();
             services.AddTransient<IMessageService, MessageService>();
             services.AddTransient<IMessageRespository, MessageResResponsitory>();
+            services.AddTransient<IUploadImageService, UploadImageService>();
             services.AddTransient<IValidationService, ValidationService>();
             services.AddAutoMapper(typeof(AutoMapperProfile).Assembly);
             services.AddSingleton<IMongoClient, MongoClient>(sp => new MongoClient(Configuration.GetConnectionString("UrlConnection")));
