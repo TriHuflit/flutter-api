@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace Flutter.Backend.Service.Models.Requests
 {
-    public class CreateProduct
+    public class CreateRequestProduct : BaseRequestProduct
     {
-        public string Name { get; set; }
+       
+      
     }
 }

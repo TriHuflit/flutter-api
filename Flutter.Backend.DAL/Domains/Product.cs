@@ -1,18 +1,92 @@
 ﻿using MongoDB.Bson;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Flutter.Backend.DAL.Domains
 {
-    public class Product
+    public class Product : AuditLogSystem
     {
         /// <summary>
-        /// Gets or sets the identifier.
+        /// ID of product.
         /// </summary>
         public ObjectId Id { get; set; }
 
         /// <summary>
-        /// Gets or sets the name.
+        /// IDCategory of product.
         /// </summary>
+        public ObjectId CategoryId { get; set; }
+
+        /// <summary>
+        /// IDBrand of product.
+        /// </summary>
+        public ObjectId BrandId { get; set; }
+
+        /// <summary>
+        /// Name of product.| Rules : MaxLenght 50
+        /// </summary>     
         public string Name { get; set; }
+
+        /// <summary>
+        /// Feature of product
+        /// </summary>     
+        public List<string> Feature { get; set; }
+
+        /// <summary>
+        /// Crytal of product.
+        /// </summary>     
+        public ObjectId CrytalId { get; set; }
+
+        /// <summary>
+        /// Machine of product.
+        /// </summary>     
+        public string Machine { get; set; }
+
+        /// <summary>
+        /// Guarantee of product
+        /// </summary>     
+        public DateTime Guarantee { get; set; }
+
+        /// <summary>
+        /// Ablert  of product.
+        /// </summary>     
+        public ObjectId AblertId { get; set; }
+
+        /// <summary>
+        /// WaterProof.
+        /// </summary>     
+        public ObjectId WaterProofId { get; set; }
+
+        /// <summary>
+        /// MadeIn of product.| Rules : MaxLenght 50
+        /// </summary>     
+        public string MadeIn { get; set; }
+
+        /// <summary>
+        /// Price at least of product.
+        /// </summary>
+        public decimal FromPrice { get; set; }
+
+        /// <summary>
+        /// Price at most of product.
+        /// </summary>    
+        public decimal ToPrice { get; set; }
+
+        /// <summary>
+        /// Short  Description of product. | Rules : MaxLenght 50
+        /// </summary>
+        
+        public string Description { get; set; }
+
+        /// <summary>
+        /// Thumbnail image of product.
+        /// </summary>
+
+        public string Thumbnail { get; set; }
+
+        /// <summary>
+        /// Active product.
+        /// </summary>
+        public bool IsShow { get; set; }
     }
 }

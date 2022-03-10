@@ -10,7 +10,9 @@ namespace Flutter.Backend.Service.Models.Mappers
         public AutoMapperProfile()
         {
             CreateMap<Product,DtoProduct>(MemberList.Destination)
-                .ForMember(l => l.Id,opt => opt.MapFrom(x=>x.Id.ToString()));
+                .ForMember(l => l.Id,opt => opt.MapFrom(x=>x.Id.ToString()))
+                .ForMember(l => l.CategoryID, opt => opt.MapFrom(x => x.CategoryId.ToString()))
+                .ForMember(l => l.BrandID, opt => opt.MapFrom(x => x.BrandId.ToString()));
         }
     }
 }

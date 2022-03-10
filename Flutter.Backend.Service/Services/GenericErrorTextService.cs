@@ -1,14 +1,11 @@
 ﻿using Flutter.Backend.DAL.Domains;
 using Flutter.Backend.Service.IServices;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Flutter.Backend.Service.Services
 {
-    public class GenericErrorTextService<T>
+    public class GenericErrorTextService
     {
         private readonly IMessageService _messageService;
 
@@ -16,23 +13,40 @@ namespace Flutter.Backend.Service.Services
         {
             _messageService = messageService;
         }
-        public async Task<AppActionResultMessage<T>> BuildResult(AppActionResultMessage<T> result, T data, string key)
+
+
+        public async Task<AppActionResultMessage<T>> BuildResult<T>(AppActionResultMessage<T> result, string data, string key)
         {
             var resultMessage = await _messageService.GetMessage(key);
             result.BuildResult(data, resultMessage);
             return result;
         }
-        public async Task<AppActionResultMessage<IList<T>>> BuildResult(AppActionResultMessage<IList<T>> result, IEnumerable<T> data, string key)
+
+        public async Task<AppActionResultMessage<T>> BuildResult<T>(AppActionResultMessage<T> result, T data, string key)
+        {
+            var resultMessage = await _messageService.GetMessage(key);
+            result.BuildResult(data, resultMessage);
+            return result;
+        }
+
+        public async Task<AppActionResultMessage<T>> BuildResult<T>(AppActionResultMessage<T> result,string key)
+        {
+            var resultMessage = await _messageService.GetMessage(key);
+            result.BuildResult(resultMessage);
+            return result;
+        }
+
+        public async Task<AppActionResultMessage<IList<T>>> BuildResult<T>(AppActionResultMessage<IList<T>> result, IEnumerable<T> data, string key)
         {
             var resultMessage = await _messageService.GetMessage(key);           
             result.BuildResult(data, resultMessage);          
             return result;
         }
 
+     
 
-       
 
-        public async Task<AppActionResultMessage<IList<T>>> BuildError(AppActionResultMessage<IList<T>> result, string key)
+        public async Task<AppActionResultMessage<IList<T>>> BuildError<T>(AppActionResultMessage<IList<T>> result, string key)
         {
             var errorMessage =await _messageService.GetMessage(key);          
             result.BuildError(errorMessage);
@@ -40,7 +54,7 @@ namespace Flutter.Backend.Service.Services
             return result;
         }
 
-        public async Task<AppActionResultMessage<T>> BuildError(AppActionResultMessage<T> result, string key)
+        public async Task<AppActionResultMessage<T>> BuildError<T>(AppActionResultMessage<T> result, string key)
         {
             var errorMessage = await _messageService.GetMessage(key);
             result.BuildError(errorMessage);
@@ -48,7 +62,7 @@ namespace Flutter.Backend.Service.Services
             return result;
         }
 
-        public async Task<AppActionResultMessage<T>> BuildError(AppActionResultMessage<T> result, string key,params object[] objectError)
+        public async Task<AppActionResultMessage<T>> BuildError<T>(AppActionResultMessage<T> result, string key,params object[] objectError)
         {
             var errorMessage = await _messageService.GetMessage(key);
             errorMessage = string.Format(errorMessage, objectError);

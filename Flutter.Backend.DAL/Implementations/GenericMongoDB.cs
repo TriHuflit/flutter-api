@@ -1,4 +1,5 @@
 ﻿using Flutter.Backend.DAL.Contexts;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
@@ -40,9 +41,9 @@ namespace Flutter.Backend.DAL.Implementations
             throw new NotImplementedException();
         }
 
-        public Task<T> Get(string Id)
+        public T Get(ObjectId Id)
         {
-            throw new NotImplementedException();
+            return _mongoCollection.Find(Builders<T>.Filter.Eq("_id",Id)).FirstOrDefault();
         }
 
         public IEnumerable<T> GetAll()
@@ -70,5 +71,6 @@ namespace Flutter.Backend.DAL.Implementations
 
         //    return collection;
         //}
+
     }
 }

@@ -8,6 +8,7 @@ using Flutter.Backend.Service.IServices;
 using Flutter.Backend.Service.Models.Dtos;
 using Flutter.Backend.Service.Models.Mappers;
 using Flutter.Backend.Service.Services;
+using Flutter.Backend.Service.Settings;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -64,12 +65,16 @@ namespace Flutter.Backend.Api
             services.AddTransient<IProductRespository, ProductRespository>();
             services.AddTransient<IMessageService, MessageService>();
             services.AddTransient<IMessageRespository, MessageResResponsitory>();
+            services.AddTransient<IUploadImageService, UploadImageService>();
             services.AddTransient<IValidationService, ValidationService>();
             services.AddAutoMapper(typeof(AutoMapperProfile).Assembly);
             services.AddSingleton<IMongoClient, MongoClient>(sp => new MongoClient(Configuration.GetConnectionString("UrlConnection")));
+            services.Configure<CloundinarySetting>(Configuration.GetSection(nameof(CloundinarySetting)));
+            services.AddSingleton<ICloundinarySetting>(sp =>
+               sp.GetRequiredService<IOptions<CloundinarySetting>>().Value);
 
         }
-    
+
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

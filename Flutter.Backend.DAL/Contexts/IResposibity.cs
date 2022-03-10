@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MongoDB.Bson;
+using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -13,7 +14,7 @@ namespace Flutter.Backend.DAL.Contexts
 
         IEnumerable<T> GetAll();
 
-        Task<T> Get(string Id);
+        T Get(ObjectId Id);
 
         Task<T> GetAsync(Expression<Func<T, bool>> specification);
 
