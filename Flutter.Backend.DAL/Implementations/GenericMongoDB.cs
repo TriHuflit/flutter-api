@@ -41,9 +41,10 @@ namespace Flutter.Backend.DAL.Implementations
             throw new NotImplementedException();
         }
 
-        public T Get(ObjectId Id)
+        public virtual async Task<T> Get(Expression<Func<T, bool>> specification)
         {
-            return _mongoCollection.Find(Builders<T>.Filter.Eq("_id",Id)).FirstOrDefault();
+            var data = await _mongoCollection.FindAsync(specification);
+            return  data.FirstOrDefault();
         }
 
         public IEnumerable<T> GetAll()

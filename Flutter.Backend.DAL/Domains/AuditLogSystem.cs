@@ -9,6 +9,9 @@ namespace Flutter.Backend.DAL.Domains
 {
     public class AuditLogSystem
     {
+
+        public ObjectId Id { get; set; }
+
         public string CreatedByName { get; set; }
 
         public DateTime? CreatedByTime { get; set; }

@@ -83,6 +83,6 @@ namespace Flutter.Backend.Service.Models.Requests
         /// <summary>
         /// Active product.
         /// </summary>
-        public bool IsShow { get; set; }
+        public int IsShow { get; set; }
     }
 }

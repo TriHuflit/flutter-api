@@ -1,15 +1,17 @@
 ﻿using Flutter.Backend.DAL.Domains;
 using Flutter.Backend.Service.IServices;
-using System.Web;
 using System.Threading.Tasks;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
-using static Flutter.Backend.Common.Contains.MessageResContains;
+using static Flutter.Backend.Common.Contains.MessageResConstain;
 using Flutter.Backend.Service.Settings;
-using System.Drawing;
 using System.IO;
 using System;
 using Flutter.Backend.Common.Contains;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Formats;
 
 namespace Flutter.Backend.Service.Services
 {
@@ -78,13 +80,13 @@ namespace Flutter.Backend.Service.Services
                 return await BuildError(result, ERR_MSG_UPLOAD_FILE_SIZE_OVER_MAXIMUM);
             }
 
-            var imgIcon = BytesToImage(imageData);
-            if (imgIcon == null)
+            var imgIcon = BytesToImage(imageData, out IImageFormat format);
+             if (imgIcon == null)
             {
                 return await BuildError(result, ERR_MSG_IMAGE_INVALID_WITH_BYTE_TYPE);
             }
 
-            var imgFormat = imgIcon.RawFormat.ToString().ToLower();
+            var imgFormat = format.Name.ToLower();
             if (imgFormat != ImageFormatConstant.JPEG && imgFormat != ImageFormatConstant.PNG)
             {
                 return await BuildError(result, ERR_MSG_INVALID_IMAGE_DATA);
@@ -98,15 +100,18 @@ namespace Flutter.Backend.Service.Services
             return (double)dataSizeInBytes / 1048576.0;
         }
 
-        private Bitmap BytesToImage(byte[] imgBytes)
+        private Image BytesToImage(byte[] imgBytes , out IImageFormat format)
         {
-            Bitmap result = null;
-            if (imgBytes != null)
+            Stream outputStream = new MemoryStream();
+
+            using (var image = Image.Load(imgBytes, out format))
             {
-                MemoryStream stream = new MemoryStream(imgBytes);
-                result = (Image.FromStream(stream) as Bitmap);
+                image.Mutate(c => c.Grayscale());
+                image.Save(outputStream, format);
+                
+                
+                return image;
             }
-            return result;
         }
 
         private string Base64ToImage(string image)

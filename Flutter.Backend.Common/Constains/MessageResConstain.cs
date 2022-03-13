@@ -1,6 +1,6 @@
 ﻿namespace Flutter.Backend.Common.Contains
 {
-    public static class MessageResContains
+    public static class MessageResConstain
     {
         /// <summary>
         /// Message response error 

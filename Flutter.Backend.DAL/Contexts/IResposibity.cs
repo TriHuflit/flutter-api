@@ -14,7 +14,7 @@ namespace Flutter.Backend.DAL.Contexts
 
         IEnumerable<T> GetAll();
 
-        T Get(ObjectId Id);
+       Task<T> Get(Expression<Func<T, bool>> specification);
 
         Task<T> GetAsync(Expression<Func<T, bool>> specification);
 

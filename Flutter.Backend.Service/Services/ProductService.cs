@@ -7,7 +7,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
 using MongoDB.Bson;
-using static Flutter.Backend.Common.Contains.MessageResContains;
+using static Flutter.Backend.Common.Contains.MessageResConstain;
+using Flutter.Backend.Common.Contains;
 
 namespace Flutter.Backend.Service.Services
 {
@@ -109,17 +110,17 @@ namespace Flutter.Backend.Service.Services
         {
             var result = new AppActionResultMessage<DtoProduct>();
 
-            if (!ObjectId.TryParse(request.Id, out ObjectId idProduct))
+            if (!ObjectId.TryParse(request.Id, out ObjectId objProductId))
             {
                 return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.Id));
             }
 
-            if (!ObjectId.TryParse(request.CategoryId, out ObjectId idCategory))
+            if (!ObjectId.TryParse(request.CategoryId, out ObjectId objCategoryId))
             {
                 return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.CategoryId));
             }
 
-            if (!ObjectId.TryParse(request.BrandId, out ObjectId idBrand))
+            if (!ObjectId.TryParse(request.BrandId, out ObjectId objBrandId))
             {
                 return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.BrandId));
             }
@@ -139,7 +140,17 @@ namespace Flutter.Backend.Service.Services
                 return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.AblertId));
             }
 
-            var product = _productRespository.Get(idProduct);
+            var product = await _productRespository.Get(p => p.Id == objProductId);
+
+
+   
+
+
+
+
+
+
+
 
             var dtoProduct = _mapper.Map<Product, DtoProduct>(product);
 
@@ -152,9 +163,27 @@ namespace Flutter.Backend.Service.Services
         /// <param name="request">The request.</param>
         /// <returns></returns>
         /// <exception cref="System.NotImplementedException"></exception>
-        public Task<AppActionResultMessage<DtoProduct>> DeleteProductAsync (string request)
+        public async Task<AppActionResultMessage<string>> DeleteProductAsync (string productId)
         {
-            throw new System.NotImplementedException();
+            var result = new AppActionResultMessage<string>();
+
+            if(!ObjectId.TryParse(productId,out ObjectId objProductId))
+            {
+                return await BuildError(result,ERR_MSG_ID_ISVALID_FORMART,nameof(productId));
+            }
+
+            var product = await _productRespository.Get(p => p.Id == objProductId);
+            if(product == null)
+            {
+                return await BuildError(result,ERR_MSG_EMPTY_DATA,nameof(product));
+            }
+
+            product.IsShow = ProductConstain.DELETE;
+
+            product.SetFullInfo("6215d37df635e2f104e1839a", "administator@gmail.com");
+            _productRespository.Update(product);
+
+            return await BuildResult(result, MSG_DELETE_SUCCESSFULLY);
         }
 
         /// <summary>
@@ -167,11 +196,11 @@ namespace Flutter.Backend.Service.Services
         {
             var result = new AppActionResultMessage<DtoProduct>();
             
-            if(!ObjectId.TryParse(request, out ObjectId idProduct))
+            if(!ObjectId.TryParse(request, out ObjectId objProductId))
             {
                 return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request));
             }
-            var product =_productRespository.Get(idProduct);
+            var product = await _productRespository.Get(p => p.Id == objProductId);
 
             var dtoproduct = _mapper.Map<Product,DtoProduct>(product);
 
