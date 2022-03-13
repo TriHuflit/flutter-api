@@ -8,11 +8,6 @@ namespace Flutter.Backend.DAL.Domains
     public class Product : AuditLogSystem
     {
         /// <summary>
-        /// ID of product.
-        /// </summary>
-        public ObjectId Id { get; set; }
-
-        /// <summary>
         /// IDCategory of product.
         /// </summary>
         public ObjectId CategoryId { get; set; }
@@ -87,6 +82,6 @@ namespace Flutter.Backend.DAL.Domains
         /// <summary>
         /// Active product.
         /// </summary>
-        public bool IsShow { get; set; }
+        public int IsShow { get; set; }
     }
 }

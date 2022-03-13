@@ -12,12 +12,12 @@ namespace Flutter.Backend.Service.IServices
 
         Task<AppActionResultMessage<DtoProduct>> UpdateProductAsync(UpdateRequestProduct request);
 
-        Task<AppActionResultMessage<DtoProduct>> DeleteProductAsync(string request);
+        Task<AppActionResultMessage<string>> DeleteProductAsync(string productId);
 
         Task<AppActionResultMessage<IList<DtoProduct>>> SearchProductAsync(SearchRequestProduct request);
 
         Task<AppActionResultMessage<IList<DtoProduct>>> GetAllProductAsync();
 
-        Task<AppActionResultMessage<DtoProduct>> GetProductAsync(string request);
+        Task<AppActionResultMessage<DtoProduct>> GetProductAsync(string productId);
     }
 }
