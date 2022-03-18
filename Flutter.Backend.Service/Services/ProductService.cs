@@ -42,9 +42,9 @@ namespace Flutter.Backend.Service.Services
         /// </summary>
         /// <param name="request">The request.</param>
         /// <returns></returns>
-        public async Task<AppActionResultMessage<DtoProduct>> CreateProductAsync(CreateRequestProduct request)
+        public async Task<AppActionResultMessage<string>> CreateProductAsync(CreateRequestProduct request)
         {
-            var result = new AppActionResultMessage<DtoProduct>();
+            var result = new AppActionResultMessage<string>();
 
             var validateResult = await ValidateProductAsync(request);
             if (!validateResult.IsSuccess)
@@ -266,11 +266,19 @@ namespace Flutter.Backend.Service.Services
         public async Task<AppActionResultMessage<IList<DtoProduct>>> SearchProductAsync(SearchRequestProduct request)
         {
             var result = new AppActionResultMessage<IList<DtoProduct>>();
+            int pageIndex = request.PageIndex;
+            int pageSize = request.PageSize;
+            string keySearch = request.KeySearch.ToLower();
+            var categories = await _categoryRespository.FindByAsync(c => c.Name.ToLower().Contains(keySearch));
+            if(categories != null)
+            {
+               
+            }
+            var brand = await _brandRespository.FindByAsync(b => b.Name.ToLower().Contains(keySearch));
 
+            var product = await _productRespository.FindByAsync(p => p.Name.ToLower().Contains(keySearch));
 
-
-            var product = await _productRespository.FindByAsync(p => p.Name == request.KeySearch);
-
+            
 
             return await BuildResult(result, MSG_FIND_SUCCESSFULLY);
         }
@@ -307,17 +315,17 @@ namespace Flutter.Backend.Service.Services
             }
 
 
-            var brand = await _brandRespository.FindByAsync(x => x.Id == objBrandId);
-            if(brand == null)
-            {
-                return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, nameof(brand));
-            }
+            //var brand = await _brandRespository.FindByAsync(x => x.Id == objBrandId);
+            //if(brand == null)
+            //{
+            //    return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, nameof(brand));
+            //}
 
-            var category = await _categoryRespository.FindByAsync(x => x.Id == objCategoryId);
-            if (category == null)
-            {
-                return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, nameof(category));
-            }
+            //var category = await _categoryRespository.FindByAsync(x => x.Id == objCategoryId);
+            //if (category == null)
+            //{
+            //    return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, nameof(category));
+            //}
 
             var productInfo = new ProductInfo
             {
