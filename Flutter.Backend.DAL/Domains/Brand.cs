@@ -1,12 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using MongoDB.Bson;
 
 namespace Flutter.Backend.DAL.Domains
 {
-    internal class Brand
+    public class Brand : AuditLogSystem
     {
+        public ObjectId CategoryId { get; set; }
+
+        public string Name { get; set; }
+
+        public string ImageBrand { get; set; } 
+
+        public int IsShow  { get; set; }    
+
+        
     }
 }

@@ -60,13 +60,11 @@ namespace Flutter.Backend.Api
             {
                 options.SuppressModelStateInvalidFilter = true;
             });
-
-            services.AddTransient<IProductServices,ProductService>();
+            services.AddInterfaceServices();
             services.AddTransient<IProductRespository, ProductRespository>();
-            services.AddTransient<IMessageService, MessageService>();
-            services.AddTransient<IMessageRespository, MessageResResponsitory>();
-            services.AddTransient<IUploadImageService, UploadImageService>();
-            services.AddTransient<IValidationService, ValidationService>();
+            services.AddTransient<ICategoryRespository, CaterogyRespository>();
+            services.AddTransient<IBrandRespository, BrandRespository>();
+            services.AddTransient<IMessageRespository, MessageResResponsitory>();          
             services.AddAutoMapper(typeof(AutoMapperProfile).Assembly);
             services.AddSingleton<IMongoClient, MongoClient>(sp => new MongoClient(Configuration.GetConnectionString("UrlConnection")));
             services.Configure<CloundinarySetting>(Configuration.GetSection(nameof(CloundinarySetting)));

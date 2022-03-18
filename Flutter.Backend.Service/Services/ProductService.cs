@@ -15,20 +15,26 @@ namespace Flutter.Backend.Service.Services
     public class ProductService : GenericErrorTextService, IProductServices
     {
         private readonly IProductRespository _productRespository;
+        private readonly ICategoryRespository _categoryRespository;
+        private readonly IBrandRespository _brandRespository;
         private readonly IMapper _mapper;
 
         private readonly IUploadImageService _uploadImageService;
 
         public ProductService(IProductRespository productRespository,
             IMapper mapper,
+            ICategoryRespository categoryRespository,
+            IBrandRespository brandRespository,
             IUploadImageService uploadImageService,
             IMessageService messageService) : base(messageService)
         {
-            
-            _productRespository = productRespository; 
+
+            _productRespository = productRespository;
+            _categoryRespository = categoryRespository;
+            _brandRespository = brandRespository;
             _uploadImageService = uploadImageService;
-            _mapper = mapper;          
-           
+            _mapper = mapper;
+
         }
 
         /// <summary>
@@ -40,38 +46,20 @@ namespace Flutter.Backend.Service.Services
         {
             var result = new AppActionResultMessage<DtoProduct>();
 
-            if (!ObjectId.TryParse(request.CategoryId, out ObjectId objidCategory))
+            var validateResult = await ValidateProductAsync(request);
+            if (!validateResult.IsSuccess)
             {
-                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.CategoryId));
+                
             }
-
-            if (!ObjectId.TryParse(request.BrandId, out ObjectId objidBrand))
-            {
-                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.BrandId));
-            }
-
-            if (!ObjectId.TryParse(request.CrytalId, out ObjectId objidCrytal))
-            {
-                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.CrytalId));
-            }
-
-            if (!ObjectId.TryParse(request.WaterProofId, out ObjectId objidWaterProof))
-            {
-                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.WaterProofId));
-            }
-
-            if (!ObjectId.TryParse(request.AblertId, out ObjectId objidAblert))
-            {
-                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.AblertId));
-            }
+            var productInfo = validateResult.Data;
 
             var newProduct = new Product
             {
-                CategoryId = objidCategory,
-                BrandId = objidBrand,
-                CrytalId = objidCrytal,
-                AblertId = objidAblert,
-                WaterProofId = objidWaterProof,
+                CategoryId = productInfo.CategoryId,
+                BrandId = productInfo.BrandId,
+                CrytalId = productInfo.CrytalId,
+                AblertId = productInfo.AblertId,
+                WaterProofId = productInfo.WaterProofId,
                 Machine = request.Machine,
                 Feature = request.Feature,
                 Name = request.Name,
@@ -81,23 +69,22 @@ namespace Flutter.Backend.Service.Services
 
             if (string.IsNullOrEmpty(request.Thumbnail))
             {
-                return await BuildError(result,ERR_MSG_EMPTY_DATA, nameof(request.Thumbnail));
+                return await BuildError(result, ERR_MSG_EMPTY_DATA, nameof(request.Thumbnail));
             }
             var validateImage = await _uploadImageService.UploadImage(request.Thumbnail);
 
-            if(!validateImage.IsSuccess)
+            if (!validateImage.IsSuccess)
             {
-                return await BuildError(result,validateImage.Message);
+                return await BuildError(result, validateImage.Message);
             }
 
             newProduct.Thumbnail = validateImage.Data.ToString();
-
-            newProduct.SetFullInfo("6215d37df635e2f104e1839a", "administator@gmail.com");
+            newProduct.SetCreatedInFo("6215d37df635e2f104e1839a", "administator@gmail.com");
 
             _productRespository.Add(newProduct);
-            
 
-            return await BuildResult(result,newProduct.Id.ToString(),MSG_SAVE_SUCCESSFULLY);
+
+            return await BuildResult(result, newProduct.Id.ToString(), MSG_SAVE_SUCCESSFULLY);
         }
 
         /// <summary>
@@ -106,55 +93,95 @@ namespace Flutter.Backend.Service.Services
         /// <param name="request">The request.</param>
         /// <returns></returns>
         /// <exception cref="System.NotImplementedException"></exception>
-        public async Task<AppActionResultMessage<DtoProduct>> UpdateProductAsync(UpdateRequestProduct request)
+        public async Task<AppActionResultMessage<string>> UpdateProductAsync(UpdateRequestProduct request)
         {
-            var result = new AppActionResultMessage<DtoProduct>();
+            var result = new AppActionResultMessage<string>();
 
             if (!ObjectId.TryParse(request.Id, out ObjectId objProductId))
             {
                 return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.Id));
             }
 
-            if (!ObjectId.TryParse(request.CategoryId, out ObjectId objCategoryId))
-            {
-                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.CategoryId));
-            }
-
-            if (!ObjectId.TryParse(request.BrandId, out ObjectId objBrandId))
-            {
-                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.BrandId));
-            }
-
-            if (!ObjectId.TryParse(request.CrytalId, out ObjectId objidCrytal))
-            {
-                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.CrytalId));
-            }
-
-            if (!ObjectId.TryParse(request.WaterProofId, out ObjectId objidWaterProof))
-            {
-                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.WaterProofId));
-            }
-
-            if (!ObjectId.TryParse(request.AblertId, out ObjectId objidAblert))
-            {
-                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.AblertId));
-            }
-
             var product = await _productRespository.Get(p => p.Id == objProductId);
+            if (product == null)
+            {
+                return await BuildError(result, ERR_MSG_EMPTY_DATA, nameof(product));
+            }
 
+            var validateResult = await ValidateProductAsync(request);
+            if (!validateResult.IsSuccess)
+            {
+                return result.BuildError(validateResult.Message);
+            }
 
-   
+            var productInfo = validateResult.Data;
 
+            if (!string.IsNullOrEmpty(request.CategoryId))
+            {
+                product.CategoryId = productInfo.CategoryId;
+            }
 
+            if (!string.IsNullOrEmpty(request.BrandId))
+            {
+                product.BrandId = productInfo.BrandId;
+            }
 
+            if (!string.IsNullOrEmpty(request.CrytalId))
+            {
+                product.CrytalId = productInfo.CrytalId;
+            }
 
+            if (!string.IsNullOrEmpty(request.AblertId))
+            {
+                product.AblertId = productInfo.AblertId;
+            }
 
+            if (!string.IsNullOrEmpty(request.WaterProofId))
+            {
+                product.WaterProofId = productInfo.WaterProofId;
+            }
 
+            if (!string.IsNullOrEmpty(request.Name))
+            {
+                product.Name = request.Name;
+            }
 
+            if (!string.IsNullOrEmpty(request.Description))
+            {
+                product.Description = request.Description;
+            }
 
-            var dtoProduct = _mapper.Map<Product, DtoProduct>(product);
+            if (request.Feature.Count > 0)
+            {
+                product.Feature = request.Feature;
+            }
 
-            return await BuildResult(result,dtoProduct, MSG_UPDATE_SUCCESSFULLY);
+            if (!string.IsNullOrEmpty(request.Machine))
+            {
+                product.Machine = request.Machine;
+            }
+
+            if (!string.IsNullOrEmpty(request.MadeIn))
+            {
+                product.MadeIn = request.MadeIn;
+            }
+
+            if (request.IsShow.HasValue)
+            {
+                product.IsShow = request.IsShow;
+            }
+
+            if (request.Guarantee.HasValue)
+            {
+                product.Guarantee = request.Guarantee;
+            }
+
+            
+
+            product.SetUpdatedInFo("6215d37df635e2f104e1839a", "administator@gmail.com");
+            _productRespository.Update(product);
+
+            return await BuildResult(result, product.Id.ToString(), MSG_UPDATE_SUCCESSFULLY);
         }
 
         /// <summary>
@@ -163,19 +190,19 @@ namespace Flutter.Backend.Service.Services
         /// <param name="request">The request.</param>
         /// <returns></returns>
         /// <exception cref="System.NotImplementedException"></exception>
-        public async Task<AppActionResultMessage<string>> DeleteProductAsync (string productId)
+        public async Task<AppActionResultMessage<string>> DeleteProductAsync(string productId)
         {
             var result = new AppActionResultMessage<string>();
 
-            if(!ObjectId.TryParse(productId,out ObjectId objProductId))
+            if (!ObjectId.TryParse(productId, out ObjectId objProductId))
             {
-                return await BuildError(result,ERR_MSG_ID_ISVALID_FORMART,nameof(productId));
+                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(productId));
             }
 
             var product = await _productRespository.Get(p => p.Id == objProductId);
-            if(product == null)
+            if (product == null)
             {
-                return await BuildError(result,ERR_MSG_EMPTY_DATA,nameof(product));
+                return await BuildError(result, ERR_MSG_EMPTY_DATA, nameof(product));
             }
 
             product.IsShow = ProductConstain.DELETE;
@@ -192,37 +219,41 @@ namespace Flutter.Backend.Service.Services
         /// <param name="request">The request.</param>
         /// <returns></returns>
         /// <exception cref="System.NotImplementedException"></exception>
-        public async Task<AppActionResultMessage<DtoProduct>> GetProductAsync (string request)
+        public async Task<AppActionResultMessage<DtoProduct>> GetProductAsync(string request)
         {
             var result = new AppActionResultMessage<DtoProduct>();
-            
-            if(!ObjectId.TryParse(request, out ObjectId objProductId))
+
+            if (!ObjectId.TryParse(request, out ObjectId objProductId))
             {
                 return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request));
             }
+
             var product = await _productRespository.Get(p => p.Id == objProductId);
+            if (product == null)
+            {
+                return await BuildResult(result, ERR_MSG_PRODUCT_NOT_FOUND, nameof(product));
+            }
 
-            var dtoproduct = _mapper.Map<Product,DtoProduct>(product);
+            var dtoproduct = _mapper.Map<Product, DtoProduct>(product);
+            return await BuildResult(result, dtoproduct, MSG_FIND_SUCCESSFULLY);
 
-            return await BuildResult(result,dtoproduct, MSG_FIND_SUCCESSFULLY);
-            
         }
 
         /// <summary>
         /// Gets all products.
         /// </summary>
         /// <returns></returns>
-        public async  Task<AppActionResultMessage<IList<DtoProduct>>> GetAllProductAsync()
+        public async Task<AppActionResultMessage<IList<DtoProduct>>> GetAllProductAsync()
         {
             var result = new AppActionResultMessage<IList<DtoProduct>>();
-           
-            var product = _productRespository.GetAll();
-            if( product == null)
+
+            var product = await _productRespository.GetAll();
+            if (product == null)
             {
-               return await BuildError(result,ERR_MSG_PRODUCTS_NOT_FOUND);
+                return await BuildResult(result, ERR_MSG_PRODUCTS_NOT_FOUND);
             }
-           
-            var dtoProduct = _mapper.Map<IEnumerable<Product>,List<DtoProduct>>(product);
+
+            var dtoProduct = _mapper.Map<IEnumerable<Product>, List<DtoProduct>>(product);
             return await BuildResult(result, dtoProduct, MSG_FIND_SUCCESSFULLY);
         }
 
@@ -232,14 +263,88 @@ namespace Flutter.Backend.Service.Services
         /// <param name="request">The request.</param>
         /// <returns></returns>
         /// <exception cref="System.NotImplementedException"></exception>
-        public Task<AppActionResultMessage<IList<DtoProduct>>> SearchProductAsync(SearchRequestProduct request)
+        public async Task<AppActionResultMessage<IList<DtoProduct>>> SearchProductAsync(SearchRequestProduct request)
         {
-            throw new System.NotImplementedException();
+            var result = new AppActionResultMessage<IList<DtoProduct>>();
+
+
+
+            var product = await _productRespository.FindByAsync(p => p.Name == request.KeySearch);
+
+
+            return await BuildResult(result, MSG_FIND_SUCCESSFULLY);
         }
 
 
         #region private method
-       
+        private async Task<AppActionResultMessage<ProductInfo>> ValidateProductAsync(BaseRequestProduct request)
+        {
+            var result = new AppActionResultMessage<ProductInfo>();
+           
+            if (!ObjectId.TryParse(request.CategoryId, out ObjectId objCategoryId))
+            {
+                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.CategoryId));
+            }
+
+            if (!ObjectId.TryParse(request.BrandId, out ObjectId objBrandId))
+            {
+                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.BrandId));
+            }
+
+            if (!ObjectId.TryParse(request.CrytalId, out ObjectId objCrytalId))
+            {
+                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.CrytalId));
+            }
+
+            if (!ObjectId.TryParse(request.WaterProofId, out ObjectId objWaterProofId))
+            {
+                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.WaterProofId));
+            }
+
+            if (!ObjectId.TryParse(request.AblertId, out ObjectId objAblertId))
+            {
+                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.AblertId));
+            }
+
+
+            var brand = await _brandRespository.FindByAsync(x => x.Id == objBrandId);
+            if(brand == null)
+            {
+                return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, nameof(brand));
+            }
+
+            var category = await _categoryRespository.FindByAsync(x => x.Id == objCategoryId);
+            if (category == null)
+            {
+                return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, nameof(category));
+            }
+
+            var productInfo = new ProductInfo
+            {
+                CategoryId = objCategoryId,
+                BrandId = objBrandId,
+                AblertId = objAblertId,
+                WaterProofId = objWaterProofId,
+                CrytalId = objCrytalId,
+            };
+
+            return  result.BuildResult(productInfo);
+        }
         #endregion private method
+
+        #region private class method
+        private class ProductInfo
+        {
+            public ObjectId CategoryId { get; set; }
+
+            public ObjectId BrandId { get; set; }
+
+            public ObjectId CrytalId { get; set; }
+
+            public ObjectId WaterProofId { get; set; }
+
+            public ObjectId AblertId { get; set; }
+        }
+        #endregion private class method
     }
 }

@@ -15,7 +15,7 @@
         public const string ERR_MSG_UPLOAD_FILE_SIZE_OVER_MAXIMUM = "ERR_MSG_UPLOAD_FILE_SIZE_OVER_MAXIMUM";
         public const string ERR_MSG_INVALID_IMAGE_DATA = "ERR_MSG_INVALID_IMAGE_DATA";
         public const string ERR_MSG_IMAGE_INVALID_WITH_BYTE_TYPE = "ERR_MSG_IMAGE_INVALID_WITH_BYTE_TYPE";
-
+        public const string ERR_MSG_DATA_NOT_FOUND = "ERR_MSG_DATA_NOT_FOUND";
 
         /// <summary>
         /// Message response result
