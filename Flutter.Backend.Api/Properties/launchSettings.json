@@ -4,7 +4,7 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "http://localhost:38702",
+      "applicationUrl": "https://htcwatch-api.herokuapp.com/",
       "sslPort": 44357
     }
   },
