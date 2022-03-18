@@ -1,11 +1,9 @@
 ﻿using Flutter.Backend.DAL.Contexts;
-using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 using System.Threading.Tasks;
 
 
@@ -17,7 +15,7 @@ namespace Flutter.Backend.DAL.Implementations
         private readonly IMongoCollection<T> _mongoCollection;
 
         public GenericMongoDB(IMongoClient dbClient)
-        {     
+        {
             var database = dbClient.GetDatabase("Flutter-Project");
             var collection = database.GetCollection<T>(typeof(T).Name);
 
@@ -32,7 +30,7 @@ namespace Flutter.Backend.DAL.Implementations
         public IEnumerable<T> FindBy(Expression<Func<T, bool>> specification)
         {
             throw new NotImplementedException();
-           
+
         }
 
 
@@ -44,12 +42,13 @@ namespace Flutter.Backend.DAL.Implementations
         public virtual async Task<T> Get(Expression<Func<T, bool>> specification)
         {
             var data = await _mongoCollection.FindAsync(specification);
-            return  data.FirstOrDefault();
+            return data.FirstOrDefault();
         }
 
-        public IEnumerable<T> GetAll()
+        public virtual async Task<IEnumerable<T>> GetAll()
         {
-           return _mongoCollection.Find( _ => true).ToList();
+            var data = await _mongoCollection.FindAsync(_ => true);
+            return data.ToList();
         }
 
         public void Update(T item)
@@ -57,7 +56,7 @@ namespace Flutter.Backend.DAL.Implementations
             throw new NotImplementedException();
         }
 
-        public  async Task<T> GetAsync(Expression<Func<T, bool>> specification)
+        public async Task<T> GetAsync(Expression<Func<T, bool>> specification)
         {
             var data = await _mongoCollection.FindAsync(specification);
             return data.FirstOrDefault();

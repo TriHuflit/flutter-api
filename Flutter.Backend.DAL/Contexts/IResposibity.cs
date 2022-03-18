@@ -12,7 +12,7 @@ namespace Flutter.Backend.DAL.Contexts
 
         void Update(T item);
 
-        IEnumerable<T> GetAll();
+        Task<IEnumerable<T>> GetAll();
 
        Task<T> Get(Expression<Func<T, bool>> specification);
 

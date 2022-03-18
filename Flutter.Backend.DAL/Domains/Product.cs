@@ -1,7 +1,6 @@
 ﻿using MongoDB.Bson;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 
 namespace Flutter.Backend.DAL.Domains
 {
@@ -40,7 +39,7 @@ namespace Flutter.Backend.DAL.Domains
         /// <summary>
         /// Guarantee of product
         /// </summary>     
-        public DateTime Guarantee { get; set; }
+        public DateTime? Guarantee { get; set; }
 
         /// <summary>
         /// Ablert  of product.
@@ -82,6 +81,6 @@ namespace Flutter.Backend.DAL.Domains
         /// <summary>
         /// Active product.
         /// </summary>
-        public int IsShow { get; set; }
+        public int? IsShow { get; set; }
     }
 }

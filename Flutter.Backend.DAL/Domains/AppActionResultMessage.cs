@@ -1,7 +1,7 @@
 ﻿
 namespace Flutter.Backend.DAL.Domains
 {
-    public class AppActionResultMessage<TData> : AppActionResult<object, string>
+    public class AppActionResultMessage<TData> : AppActionResult<TData, string>
     {
         public AppActionResultMessage()
         {
@@ -11,7 +11,7 @@ namespace Flutter.Backend.DAL.Domains
             : base(data)
         {
         }
-        public new AppActionResultMessage<TData> BuildResult(TData data, string message = null)
+        public AppActionResultMessage<TData> BuildResult(TData data, string message = null)
         {
             SetInfo(success: true, message);
             base.Data = data;
