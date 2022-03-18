@@ -8,7 +8,7 @@ namespace Flutter.Backend.Service.IServices
 {
     public interface IProductServices
     {
-        Task<AppActionResultMessage<DtoProduct>> CreateProductAsync(CreateRequestProduct request);
+        Task<AppActionResultMessage<string>> CreateProductAsync(CreateRequestProduct request);
 
         Task<AppActionResultMessage<string>> UpdateProductAsync(UpdateRequestProduct request);
 

@@ -1,5 +1,6 @@
 ﻿using Flutter.Backend.DAL.Domains;
 using Flutter.Backend.Service.IServices;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -18,7 +19,7 @@ namespace Flutter.Backend.Service.Services
         public async Task<AppActionResultMessage<T>> BuildResult<T>(AppActionResultMessage<T> result, string data, string key)
         {
             var resultMessage = await _messageService.GetMessage(key);
-            result.BuildResult(data, resultMessage);
+            result.BuildResult((T)Convert.ChangeType(data, typeof(T)), resultMessage);
             return result;
         }
 
@@ -32,14 +33,15 @@ namespace Flutter.Backend.Service.Services
         public async Task<AppActionResultMessage<T>> BuildResult<T>(AppActionResultMessage<T> result,string key)
         {
             var resultMessage = await _messageService.GetMessage(key);
-            result.BuildResult(resultMessage);
+            result.BuildResult((T)Convert.ChangeType(resultMessage, typeof(T)));
             return result;
         }
 
         public async Task<AppActionResultMessage<IList<T>>> BuildResult<T>(AppActionResultMessage<IList<T>> result, IEnumerable<T> data, string key)
         {
-            var resultMessage = await _messageService.GetMessage(key);           
-            result.BuildResult(data, resultMessage);          
+            var resultMessage = await _messageService.GetMessage(key);
+            var Data = (IList<T>)Convert.ChangeType(data, typeof(IList<T>));
+            result.BuildResult(Data,resultMessage);          
             return result;
         }
 
