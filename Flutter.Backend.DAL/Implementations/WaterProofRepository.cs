@@ -4,9 +4,9 @@ using MongoDB.Driver;
 
 namespace Flutter.Backend.DAL.Implementations
 {
-    public class BrandRespository : GenericMongoDB<Brand> , IBrandRepository
+    public class WaterProofRepository : GenericMongoDB<WaterProof> , IWaterProofRepository
     {
-        public BrandRespository(IMongoClient dbClient) : base(dbClient)
+        public WaterProofRepository(IMongoClient dbClient) : base(dbClient)
         {
 
         }

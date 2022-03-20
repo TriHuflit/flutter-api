@@ -129,11 +129,11 @@ namespace Flutter.Backend.Api.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("all")]
-        public async Task<IActionResult> GetAllProducts()
+        public async Task<IActionResult> GetAllProducts([FromQuery] PaginationRequest request)
         {
             try
             {
-                var result = await _productService.GetAllProductAsync();
+                var result = await _productService.GetAllProductAsync(request);
                 if (!result.IsSuccess)
                 {
                     return NotFound(result);

@@ -1,26 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Flutter.Backend.Service.Models.Requests
+﻿namespace Flutter.Backend.Service.Models.Requests
 {
-    public class SearchRequestProduct
+    public class SearchRequestProduct : PaginationRequest
     {
+
+
         /// <summary>
         /// Key search product
         /// </summary>
         public string KeySearch { get; set; }
 
         /// <summary>
-        /// Page Index of search
+        /// Category search product
         /// </summary>
-        public int PageIndex { get; set; }
+        public string CategorySearch { get; set; }
 
-        /// <summary>
-        /// Page Size of search
+        /// <summary>s
+        /// Brand search product
         /// </summary>
-        public int PageSize { get; set; }
+        public string BrandSearch { get; set; }
+
     }
 }

@@ -4,7 +4,7 @@ using MongoDB.Driver;
 
 namespace Flutter.Backend.DAL.Implementations
 {
-    public class CaterogyRespository : GenericMongoDB<Category> , ICategoryRespository
+    public class CaterogyRespository : GenericMongoDB<Category> , ICategoryRepository
     {
         public CaterogyRespository(IMongoClient dbClient) : base(dbClient)
         {

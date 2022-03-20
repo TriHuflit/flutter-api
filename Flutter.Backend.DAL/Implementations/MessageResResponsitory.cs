@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Flutter.Backend.DAL.Implementations
 {
-    public class MessageResResponsitory : GenericMongoDB<MessageRes>, IMessageRespository
+    public class MessageResResponsitory : GenericMongoDB<MessageRes>, IMessageRepository
     {
         public MessageResResponsitory(IMongoClient dbClient) : base(dbClient)
         {

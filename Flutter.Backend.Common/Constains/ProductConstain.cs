@@ -1,4 +1,4 @@
-﻿namespace Flutter.Backend.Common.Contains
+﻿namespace Flutter.Backend.Common.Constains
 {
     public static class ProductConstain
     {

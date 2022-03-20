@@ -14,10 +14,10 @@ namespace Flutter.Backend.Service.IServices
 
         Task<AppActionResultMessage<string>> DeleteProductAsync(string productId);
 
-        Task<AppActionResultMessage<IList<DtoProduct>>> SearchProductAsync(SearchRequestProduct request);
+        Task<AppActionResultMessage<IEnumerable<DtoProduct>>> SearchProductAsync(SearchRequestProduct request);
 
-        Task<AppActionResultMessage<IList<DtoProduct>>> GetAllProductAsync();
+        Task<AppActionResultMessage<IEnumerable<DtoProduct>>> GetAllProductAsync(PaginationRequest request);
 
-        Task<AppActionResultMessage<DtoProduct>> GetProductAsync(string productId);
+        Task<AppActionResultMessage<DtoProductDetail>> GetProductAsync(string productId);
     }
 }

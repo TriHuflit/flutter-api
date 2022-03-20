@@ -3,7 +3,7 @@ using Flutter.Backend.DAL.Domains;
 
 namespace Flutter.Backend.DAL.Contracts
 {
-    public interface IBrandRespository : IResposibity<Brand>
+    public interface IProductRepository : IReposibity<Product>
     {
     }
 }

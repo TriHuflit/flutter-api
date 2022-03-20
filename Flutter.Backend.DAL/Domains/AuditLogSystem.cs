@@ -14,15 +14,15 @@ namespace Flutter.Backend.DAL.Domains
 
         public string CreatedByName { get; set; }
 
-        public DateTime? CreatedByTime { get; set; }
+        public DateTime CreatedByTime { get; set; }
 
-        public ObjectId? CreatedByID { get; set; }
+        public ObjectId CreatedByID { get; set; }
 
         public string UpdatedByName { get; set; }
 
-        public DateTime? UpdatedByTime { get; set; }
+        public DateTime UpdatedByTime { get; set; }
 
-        public ObjectId? UpdatedByID { get; set; }
+        public ObjectId UpdatedByID { get; set; }
 
 
         public virtual void SetCreatedInFo(string actionUserId , string actionUserName )

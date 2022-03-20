@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Flutter.Backend.DAL.Implementations
 {
-    public class GenericMongoDB<T> : IResposibity<T>
+    public class GenericMongoDB<T> : IReposibity<T>
     {
         protected IMongoClient _dbClient;
         private readonly IMongoCollection<T> _mongoCollection;
@@ -34,9 +34,10 @@ namespace Flutter.Backend.DAL.Implementations
         }
 
 
-        public Task<IEnumerable<T>> FindByAsync(Expression<Func<T, bool>> specification)
+        public async Task<IEnumerable<T>> FindByAsync(Expression<Func<T, bool>> specification)
         {
-            throw new NotImplementedException();
+            var data = await _mongoCollection.FindAsync(specification);
+            return data.ToList();
         }
 
         public virtual async Task<T> Get(Expression<Func<T, bool>> specification)
@@ -51,9 +52,23 @@ namespace Flutter.Backend.DAL.Implementations
             return data.ToList();
         }
 
-        public void Update(T item)
+        public async void Update( T item , Expression<Func<T, bool>> specification)
         {
-            throw new NotImplementedException();
+            var properties = item.GetType().GetProperties();
+            UpdateDefinition<T> definition = null;
+            UpdateDefinitionBuilder<T> builder = new UpdateDefinitionBuilder<T>();
+            foreach (var property in properties)
+            {
+                if (definition == null)
+                {
+                    definition = builder.Set(property.Name, property.GetValue(item));
+                }
+                else
+                {
+                    definition = definition.Set(property.Name, property.GetValue(item));
+                }
+            }
+            _mongoCollection.UpdateOne(specification, definition);
         }
 
         public async Task<T> GetAsync(Expression<Func<T, bool>> specification)
