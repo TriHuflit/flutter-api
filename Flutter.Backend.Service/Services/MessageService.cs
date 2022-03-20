@@ -6,9 +6,9 @@ namespace Flutter.Backend.Service.Services
 {
     public class MessageService : IMessageService
     {
-        IMessageRespository _messageRespository;
+        IMessageRepository _messageRespository;
 
-        public MessageService(IMessageRespository messageRespository)
+        public MessageService(IMessageRepository messageRespository)
         {
             _messageRespository = messageRespository;
         }

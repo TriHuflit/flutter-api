@@ -3,7 +3,7 @@ using Flutter.Backend.DAL.Domains;
 
 namespace Flutter.Backend.DAL.Contracts
 {
-    public interface ICategoryRespository : IResposibity<Category>
+    public interface IMessageRepository : IReposibity<MessageRes>
     {
     }
 }

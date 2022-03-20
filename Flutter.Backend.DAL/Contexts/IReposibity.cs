@@ -1,20 +1,19 @@
-﻿using MongoDB.Bson;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace Flutter.Backend.DAL.Contexts
 {
-    public interface  IResposibity<T>
+    public interface  IReposibity<T>
     {
         void Add(T item);
 
-        void Update(T item);
+        void Update( T item , Expression<Func<T, bool>> specification);
 
         Task<IEnumerable<T>> GetAll();
 
-       Task<T> Get(Expression<Func<T, bool>> specification);
+        Task<T> Get(Expression<Func<T, bool>> specification);
 
         Task<T> GetAsync(Expression<Func<T, bool>> specification);
 

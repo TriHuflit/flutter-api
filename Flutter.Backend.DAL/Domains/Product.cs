@@ -29,7 +29,7 @@ namespace Flutter.Backend.DAL.Domains
         /// <summary>
         /// Crytal of product.
         /// </summary>     
-        public ObjectId CrytalId { get; set; }
+        public string Crytal { get; set; }
 
         /// <summary>
         /// Machine of product.
@@ -44,7 +44,7 @@ namespace Flutter.Backend.DAL.Domains
         /// <summary>
         /// Ablert  of product.
         /// </summary>     
-        public ObjectId AblertId { get; set; }
+        public string Ablert { get; set; }
 
         /// <summary>
         /// WaterProof.

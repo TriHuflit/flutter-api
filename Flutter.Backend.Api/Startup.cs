@@ -61,10 +61,12 @@ namespace Flutter.Backend.Api
                 options.SuppressModelStateInvalidFilter = true;
             });
             services.AddInterfaceServices();
-            services.AddTransient<IProductRespository, ProductRespository>();
-            services.AddTransient<ICategoryRespository, CaterogyRespository>();
-            services.AddTransient<IBrandRespository, BrandRespository>();
-            services.AddTransient<IMessageRespository, MessageResResponsitory>();          
+            services.AddTransient<IProductRepository, ProductRespository>();
+            services.AddTransient<ICategoryRepository, CaterogyRespository>();
+            services.AddTransient<IBrandRepository, BrandRespository>();
+            services.AddTransient<IWaterProofRepository, WaterProofRepository>();
+            services.AddTransient<IClassifyProductRepository, ClassifyProductRepository>();
+            services.AddTransient<IMessageRepository, MessageResResponsitory>();          
             services.AddAutoMapper(typeof(AutoMapperProfile).Assembly);
             services.AddSingleton<IMongoClient, MongoClient>(sp => new MongoClient(Configuration.GetConnectionString("UrlConnection")));
             services.Configure<CloundinarySetting>(Configuration.GetSection(nameof(CloundinarySetting)));

@@ -45,7 +45,7 @@ namespace Flutter.Backend.Service.Models.Requests
         /// Crytal of product.| Rules : MaxLenght 50
         /// </summary>     
         [Required]
-        public string CrytalId { get; set; }
+        public string Crytal { get; set; }
 
         /// <summary>
         /// Machine of product.| Rules : MaxLenght 50
@@ -63,7 +63,7 @@ namespace Flutter.Backend.Service.Models.Requests
         /// Ablert  of product.
         /// </summary>     
         [Required]
-        public string AblertId { get; set; }
+        public string Ablert { get; set; }
 
         /// <summary>
         /// WaterProof.

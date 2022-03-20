@@ -1,8 +1,8 @@
-﻿
+﻿using System.Collections.Generic;
 
 namespace Flutter.Backend.Service.Models.Dtos
 {
-    public class DtoProduct
+    public class DtoProduct : DtoAuditLogSystem
     {
         /// <summary>
         /// Id of product.
@@ -37,21 +37,28 @@ namespace Flutter.Backend.Service.Models.Dtos
         public decimal ToPrice { get; set; }
 
         /// <summary>
+        /// Feature of product
+        /// </summary>     
+        public List<string> Feature { get; set; }
+
+        /// <summary>
         /// Short  Description of product. | Rules : MaxLenght 50
         /// </summary>
-
         public string Description { get; set; }
 
         /// <summary>
         /// Thumbnail image of product.
         /// </summary>
-
         public string Thumbnail { get; set; }
+
+        /// <summary>
+        /// Machine of product.
+        /// </summary>     
+        public string Machine { get; set; }
 
         /// <summary>
         /// Active product.
         /// </summary>
-
-        public bool IsShow { get; set; }
+        public int? IsShow { get; set; }
     }
 }

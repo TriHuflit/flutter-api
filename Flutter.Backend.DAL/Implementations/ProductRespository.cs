@@ -4,7 +4,7 @@ using MongoDB.Driver;
 
 namespace Flutter.Backend.DAL.Implementations
 {
-    public class ProductRespository : GenericMongoDB<Product> , IProductRespository
+    public class ProductRespository : GenericMongoDB<Product> , IProductRepository
     {
         public ProductRespository(IMongoClient dbClient) : base(dbClient)
         {
