@@ -9,7 +9,7 @@ using MongoDB.Bson;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using static Flutter.Backend.Common.Contains.MessageResConstain;
+using static Flutter.Backend.Common.Constains.MessageResConstain;
 
 namespace Flutter.Backend.Service.Services
 {
