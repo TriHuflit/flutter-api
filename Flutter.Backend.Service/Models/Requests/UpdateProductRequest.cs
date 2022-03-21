@@ -2,7 +2,7 @@
 
 namespace Flutter.Backend.Service.Models.Requests
 {
-    public class UpdateRequestProduct : BaseRequestProduct
+    public class UpdateProductRequest : BaseProductRequest
     {
         /// <summary>
         /// Id of product.
