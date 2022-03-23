@@ -1,11 +1,9 @@
 ﻿using Flutter.Backend.Service.IServices;
 using Flutter.Backend.Service.Models.Requests;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.ComponentModel.DataAnnotations;
-using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Flutter.Backend.Api.Controllers
@@ -16,6 +14,7 @@ namespace Flutter.Backend.Api.Controllers
     /// <seealso cref="Microsoft.AspNetCore.Mvc.ControllerBase" />
     [Route("api/product")]
     [ApiController]
+    [Authorize]
     public class ProductController : ControllerBase
     {
         private readonly IProductServices _productService;
@@ -32,7 +31,6 @@ namespace Flutter.Backend.Api.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("create")]
-        [Authorize]
         public async Task<IActionResult> CreateProduct([Required] CreateProductRequest request)
         {
             try
@@ -64,7 +62,6 @@ namespace Flutter.Backend.Api.Controllers
         /// <returns></returns>
         [HttpPut]
         [Route("update")]
-        [Authorize]
         public async Task<IActionResult> UpdateProduct([Required] UpdateProductRequest request)
         {
             try
@@ -95,8 +92,7 @@ namespace Flutter.Backend.Api.Controllers
         /// <param name="productId">The product identifier.</param>
         /// <returns></returns>
         [HttpDelete]
-        [Route("delete/{productId}")]
-        [Authorize]
+        [Route("delete/{productId}")]       
         public async Task<IActionResult> DeleteProduct(string productId)
         {
             try
@@ -122,10 +118,10 @@ namespace Flutter.Backend.Api.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("search")]
+        [AllowAnonymous]
         public async Task<IActionResult> SearchProduct(SearchRequestProduct request)
         {
             var result = await _productService.SearchProductAsync(request);
-
             return Ok(result);
         }
 
@@ -135,7 +131,7 @@ namespace Flutter.Backend.Api.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("all")]
-        [Authorize]
+        [AllowAnonymous]
         public async Task<IActionResult> GetAllProducts([FromQuery] PaginationRequest request)
         {
             
@@ -161,6 +157,7 @@ namespace Flutter.Backend.Api.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("details/{productId}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetProduct(string productId)
         {
             try

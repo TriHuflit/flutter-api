@@ -24,8 +24,6 @@ namespace Flutter.Backend.Service.Services
         private readonly IConfiguration _config;
 
         private readonly IValidationService _validationService;
-        private readonly ICurrentUserService _currentUserService;
-
         public AuthendicateService(
             IAppUserRepository appUserRepository,
             IConfiguration config,
@@ -41,10 +39,10 @@ namespace Flutter.Backend.Service.Services
         {
             var result = new AppActionResultMessage<DtoAuthent>();
 
-            string anotherThing = HashPassWord(request.Password);
+            string hashPassword = HashPassWord(request.Password);
 
             var user = await _appUserRepository.GetAsync(u => u.UserName == request.UserName
-                && u.HashPassword == anotherThing);
+                && u.HashPassword == hashPassword);
 
             if (user == null && user.IsActive == AuthendicateConstain.DELETE)
             {
@@ -87,6 +85,11 @@ namespace Flutter.Backend.Service.Services
                 return await BuildError(result, ERR_MSG_PASSWORD_ISVALID_FORMART);
             }
 
+            if (request.Password != request.ComfirmPassWord)
+            {
+                return await BuildError(result, ERR_MSG_PASSWORD_ISVALID_FORMART);
+            }
+
             if (!_validationService.ValidatePhoneNumberFormat(request.Phone))
             {
                 return await BuildError(result, ERR_MSG_PHONE_ISVALID_FORMART);
@@ -102,18 +105,18 @@ namespace Flutter.Backend.Service.Services
                 return await BuildError(result, ERR_MSG_EMAIL_ISVALID_FORMART);
             }
 
+            // add more message
             if (request.Gender != AppUserGenderConstain.Female && request.Gender != AppUserGenderConstain.Male)
             {
                 return await BuildError(result, ERR_MSG_EMAIL_ISVALID_FORMART);
             }
 
-            string anotherThing = HashPassWord(request.Password);
-
+            string hashPassword = HashPassWord(request.Password);
             var newUser = new AppUser
             {
                 UserName = request.UserName,
                 FullName = request.FullName,
-                HashPassword = anotherThing,
+                HashPassword = hashPassword,
                 Email = request.Email,
                 Location = new Location
                 {
@@ -122,7 +125,7 @@ namespace Flutter.Backend.Service.Services
                     Ward = request.Ward,
                     Address = request.Address
                 },
-                IsEmailConfirmed = true,
+                IsEmailConfirmed = false,
                 IsActive = AuthendicateConstain.ACTIVE,
                 Birth = request.Birth,
                 Phone = request.Phone,
