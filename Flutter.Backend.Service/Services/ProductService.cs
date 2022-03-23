@@ -376,8 +376,8 @@ namespace Flutter.Backend.Service.Services
         public async Task<AppActionResultMessage<IEnumerable<DtoProduct>>> SearchProductAsync(SearchRequestProduct request)
         {
             var result = new AppActionResultMessage<IEnumerable<DtoProduct>>();
-            int pageIndex = request.PageIndex > 1 ? request.PageIndex : 1;
-            int pageSize = request.PageSize > 10 ? request.PageSize : 10;
+            int pageIndex = 1;
+            int pageSize = 10;
             IEnumerable<Product> products = new List<Product>();
             Category category;
             Brand brand;

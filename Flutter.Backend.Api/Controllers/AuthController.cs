@@ -21,8 +21,13 @@ namespace Flutter.Backend.Api.Controllers
             _authenticateService = authenticateService;
         }
 
+        /// <summary>
+        /// Registers the user.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <returns></returns>
         [HttpPost]
-        [Route("/register")]
+        [Route("register")]
         public async Task<IActionResult> RegisterUser(RegisterRequest request)
         {
             try
@@ -41,8 +46,13 @@ namespace Flutter.Backend.Api.Controllers
 
         }
 
+        /// <summary>
+        /// Logins the user.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <returns></returns>
         [HttpPost]
-        [Route("/login")]
+        [Route("login")]
         public async Task<IActionResult> LoginUser(AuthendicateRequest request)
         {
             try
@@ -62,8 +72,13 @@ namespace Flutter.Backend.Api.Controllers
 
         }
 
+        /// <summary>
+        /// Refreshes the token.
+        /// </summary>
+        /// <param name="refreshToken">The refresh token.</param>
+        /// <returns></returns>
         [HttpPost]
-        [Route("/refresh-token")]
+        [Route("refresh-token")]
         public async Task<IActionResult> RefreshToken(string refreshToken)
         {
             try
