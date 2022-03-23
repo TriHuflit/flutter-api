@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Flutter.Backend.Service.Models.Requests
 {
-    public class BaseRequestProduct
+    public class BaseProductRequest
     {
         /// <summary>
         /// Category of product

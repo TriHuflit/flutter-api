@@ -1,8 +1,11 @@
 ﻿using Flutter.Backend.Service.IServices;
 using Flutter.Backend.Service.Models.Requests;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Flutter.Backend.Api.Controllers
@@ -29,7 +32,8 @@ namespace Flutter.Backend.Api.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("create")]
-        public async Task<IActionResult> CreateProduct([Required] CreateRequestProduct request)
+        [Authorize]
+        public async Task<IActionResult> CreateProduct([Required] CreateProductRequest request)
         {
             try
             {
@@ -60,7 +64,8 @@ namespace Flutter.Backend.Api.Controllers
         /// <returns></returns>
         [HttpPut]
         [Route("update")]
-        public async Task<IActionResult> UpdateProduct(UpdateRequestProduct request)
+        [Authorize]
+        public async Task<IActionResult> UpdateProduct([Required] UpdateProductRequest request)
         {
             try
             {
@@ -91,6 +96,7 @@ namespace Flutter.Backend.Api.Controllers
         /// <returns></returns>
         [HttpDelete]
         [Route("delete/{productId}")]
+        [Authorize]
         public async Task<IActionResult> DeleteProduct(string productId)
         {
             try
@@ -129,8 +135,10 @@ namespace Flutter.Backend.Api.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("all")]
+        [Authorize]
         public async Task<IActionResult> GetAllProducts([FromQuery] PaginationRequest request)
         {
+            
             try
             {
                 var result = await _productService.GetAllProductAsync(request);

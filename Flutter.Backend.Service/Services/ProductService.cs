@@ -5,6 +5,7 @@ using Flutter.Backend.DAL.Domains;
 using Flutter.Backend.Service.IServices;
 using Flutter.Backend.Service.Models.Dtos;
 using Flutter.Backend.Service.Models.Requests;
+using Flutter.Backend.Service.Models.Responses;
 using MongoDB.Bson;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,6 +24,7 @@ namespace Flutter.Backend.Service.Services
         private readonly IMapper _mapper;
 
         private readonly IUploadImageService _uploadImageService;
+        private readonly ICurrentUserService _currentUserService;
 
         public ProductService(IProductRepository productRepository,
             IMapper mapper,
@@ -31,6 +33,7 @@ namespace Flutter.Backend.Service.Services
             IWaterProofRepository waterProofRepository,
             IClassifyProductRepository classifyProductRepository,
             IUploadImageService uploadImageService,
+            ICurrentUserService currentUserService,
             IMessageService messageService) : base(messageService)
         {
 
@@ -40,6 +43,7 @@ namespace Flutter.Backend.Service.Services
             _waterProofRepository = waterProofRepository;
             _classifyProductRepository = classifyProductRepository;
             _uploadImageService = uploadImageService;
+            _currentUserService = currentUserService;
             _mapper = mapper;
 
         }
@@ -49,7 +53,7 @@ namespace Flutter.Backend.Service.Services
         /// </summary>
         /// <param name="request">The request.</param>
         /// <returns></returns>
-        public async Task<AppActionResultMessage<string>> CreateProductAsync(CreateRequestProduct request)
+        public async Task<AppActionResultMessage<string>> CreateProductAsync(CreateProductRequest request)
         {
             var result = new AppActionResultMessage<string>();
 
@@ -87,7 +91,7 @@ namespace Flutter.Backend.Service.Services
             }
 
             newProduct.Thumbnail = validateImage.Data;
-            newProduct.SetCreatedInFo("6215d37df635e2f104e1839a", "administator@gmail.com");
+            newProduct.SetFullInfo(_currentUserService.UserId, _currentUserService.UserName);
 
             _productRepository.Add(newProduct);
 
@@ -106,7 +110,7 @@ namespace Flutter.Backend.Service.Services
                     IsShow = classifyProduct.IsShow,
                     Stock = classifyProduct.Stock,
                     ProductId = newProduct.Id,
-                    
+
                 };
 
                 if (string.IsNullOrEmpty(classifyProduct.Image))
@@ -120,7 +124,7 @@ namespace Flutter.Backend.Service.Services
                     return await BuildError(result, validateImageClassifyProduct.Message);
                 }
                 newClassifyProduct.Image = validateImageClassifyProduct.Data;
-                newClassifyProduct.SetFullInfo("6215d37df635e2f104e1839a", "administator@gmail.com");
+                newClassifyProduct.SetFullInfo(_currentUserService.UserId, _currentUserService.UserName);
 
                 _classifyProductRepository.Add(newClassifyProduct);
 
@@ -151,7 +155,7 @@ namespace Flutter.Backend.Service.Services
         /// <param name="request">The request.</param>
         /// <returns></returns>
         /// <exception cref="System.NotImplementedException"></exception>
-        public async Task<AppActionResultMessage<string>> UpdateProductAsync(UpdateRequestProduct request)
+        public async Task<AppActionResultMessage<string>> UpdateProductAsync(UpdateProductRequest request)
         {
             var result = new AppActionResultMessage<string>();
 
@@ -245,7 +249,7 @@ namespace Flutter.Backend.Service.Services
                 product.Thumbnail = validateImage.Data.ToString();
             }
 
-            product.SetUpdatedInFo("6215d37df635e2f104e1839a", "administator@gmail.com");
+            product.SetUpdatedInFo(_currentUserService.UserId, _currentUserService.UserName);
             _productRepository.Update(product, p => p.Id == product.Id);
 
             return await BuildResult(result, product.Id.ToString(), MSG_UPDATE_SUCCESSFULLY);
@@ -274,7 +278,7 @@ namespace Flutter.Backend.Service.Services
 
             product.IsShow = ProductConstain.DELETE;
 
-            product.SetFullInfo("6215d37df635e2f104e1839a", "administator@gmail.com");
+            product.SetUpdatedInFo(_currentUserService.UserId, _currentUserService.UserName);
             _productRepository.Update(product, p => p.Id == product.Id);
 
             return await BuildResult(result, MSG_DELETE_SUCCESSFULLY);
@@ -334,12 +338,12 @@ namespace Flutter.Backend.Service.Services
         /// Gets all products.
         /// </summary>
         /// <returns></returns>
-        public async Task<AppActionResultMessage<IEnumerable<DtoProduct>>> GetAllProductAsync(PaginationRequest request)
+        public async Task<AppActionResultMessage<SearchResultData>> GetAllProductAsync(PaginationRequest request)
         {
-            var result = new AppActionResultMessage<IEnumerable<DtoProduct>>();
+            var result = new AppActionResultMessage<SearchResultData>();
             int pageIndex = request.PageIndex > 1 ? request.PageIndex : 1;
             int pageSize = request.PageSize > 10 ? request.PageSize : 10;
-
+            
             var products = await _productRepository.GetAll();
             if (products == null)
             {
@@ -353,7 +357,14 @@ namespace Flutter.Backend.Service.Services
                         .ToList();
 
             var dtoProduct = _mapper.Map<IEnumerable<Product>, List<DtoProduct>>(products);
-            return await BuildResult(result, dtoProduct, MSG_FIND_SUCCESSFULLY);
+            var searchResultData = new SearchResultData
+            {
+                PageIndex = pageIndex,
+                PageSize = pageSize,
+                ListProduct = dtoProduct
+            };
+
+            return await BuildResult(result, searchResultData, MSG_FIND_SUCCESSFULLY);
         }
 
         /// <summary>
@@ -419,7 +430,7 @@ namespace Flutter.Backend.Service.Services
 
 
         #region private method
-        private async Task<AppActionResultMessage<ProductInfo>> ValidateProductAsync(BaseRequestProduct request)
+        private async Task<AppActionResultMessage<ProductInfo>> ValidateProductAsync(BaseProductRequest request)
         {
             var result = new AppActionResultMessage<ProductInfo>();
 
@@ -460,6 +471,9 @@ namespace Flutter.Backend.Service.Services
 
             return result.BuildResult(productInfo);
         }
+
+      
+
         #endregion private method
 
         #region private class method

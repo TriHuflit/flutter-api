@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Flutter.Backend.Service.Models.Requests
 {
-    public class CreateRequestProduct : BaseRequestProduct
+    public class CreateProductRequest : BaseProductRequest
     {
         /// <summary>
         /// Gets or sets the classify products.

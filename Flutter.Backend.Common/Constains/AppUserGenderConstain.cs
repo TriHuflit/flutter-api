@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Flutter.Backend.Common.Constains
 {
-    public static class ImageFormatConstant
+    public static class AppUserGenderConstain
     {
-        public const string JPEG = "jpeg";
-        public const string PNG = "png";
+        public const string Female = "Nữ";
+        public const string Male = "Nam";
     }
 }
