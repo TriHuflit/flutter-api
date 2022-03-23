@@ -1,6 +1,7 @@
 ﻿using Flutter.Backend.DAL.Domains;
 using Flutter.Backend.Service.Models.Dtos;
 using Flutter.Backend.Service.Models.Requests;
+using Flutter.Backend.Service.Models.Responses;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -16,7 +17,7 @@ namespace Flutter.Backend.Service.IServices
 
         Task<AppActionResultMessage<IEnumerable<DtoProduct>>> SearchProductAsync(SearchRequestProduct request);
 
-        Task<AppActionResultMessage<IEnumerable<DtoProduct>>> GetAllProductAsync(PaginationRequest request);
+        Task<AppActionResultMessage<SearchResultData>> GetAllProductAsync(PaginationRequest request);
 
         Task<AppActionResultMessage<DtoProductDetail>> GetProductAsync(string productId);
     }

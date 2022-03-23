@@ -23,7 +23,7 @@ namespace Flutter.Backend.DAL.Domains
         /// <summary>
         ///Address.
         /// </summary>
-        public string Address { get; set; }
+        public Location Location { get; set; }
 
         /// <summary>
         /// Email.
@@ -33,7 +33,7 @@ namespace Flutter.Backend.DAL.Domains
         /// <summary>
         /// Gender.
         /// </summary>
-        public bool Gender { get; set; }
+        public string Gender { get; set; }
 
         /// <summary>
         /// Phone.

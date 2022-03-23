@@ -1,29 +1,32 @@
-﻿using Flutter.Backend.DAL.Domains;
-using Flutter.Backend.Service.IServices;
-using System.Threading.Tasks;
-using CloudinaryDotNet;
+﻿using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
-using static Flutter.Backend.Common.Contains.MessageResConstain;
+using Flutter.Backend.Common.Constains;
+using Flutter.Backend.DAL.Domains;
+using Flutter.Backend.Service.IServices;
 using Flutter.Backend.Service.Settings;
-using System.IO;
-using System;
-using Flutter.Backend.Common.Contains;
 using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Formats;
+using SixLabors.ImageSharp.Processing;
+using System;
+using System.IO;
+using System.Threading.Tasks;
+using static Flutter.Backend.Common.Constains.MessageResConstain;
 
 namespace Flutter.Backend.Service.Services
 {
-    public class UploadImageService : GenericErrorTextService , IUploadImageService
+    public class UploadImageService : GenericErrorTextService, IUploadImageService
     {
         private Cloudinary _account;
 
-        public UploadImageService(ICloundinarySetting  cloundinarySetting, 
+        public UploadImageService(ICloundinarySetting cloundinarySetting,
             IMessageService messageService) : base(messageService)
         {
-            var myAccount = new Account { ApiKey = cloundinarySetting.ApiKey ,
-                ApiSecret = cloundinarySetting.ApiSecret , Cloud  = cloundinarySetting.CloudName};
+            var myAccount = new Account
+            {
+                ApiKey = cloundinarySetting.ApiKey,
+                ApiSecret = cloundinarySetting.ApiSecret,
+                Cloud = cloundinarySetting.CloudName
+            };
 
             _account = new Cloudinary(myAccount);
 
@@ -49,14 +52,14 @@ namespace Flutter.Backend.Service.Services
             };
 
             var uploadResult = await _account.UploadLargeAsync(uploadParams);
-            
-            if(uploadResult == null)
+
+            if (uploadResult == null)
             {
-                return await BuildError(result,ERR_MSG_EMPTY_DATA);
+                return await BuildError(result, ERR_MSG_EMPTY_DATA);
             }
 
 
-            return await BuildResult(result, uploadResult.Url.ToString() ,MSG_SAVE_SUCCESSFULLY);
+            return await BuildResult(result, uploadResult.Url.ToString(), MSG_SAVE_SUCCESSFULLY);
         }
 
         private async Task<AppActionResultMessage<string>> isValidUploadImage(string image)
@@ -81,7 +84,7 @@ namespace Flutter.Backend.Service.Services
             }
 
             var imgIcon = BytesToImage(imageData, out IImageFormat format);
-             if (imgIcon == null)
+            if (imgIcon == null)
             {
                 return await BuildError(result, ERR_MSG_IMAGE_INVALID_WITH_BYTE_TYPE);
             }
@@ -92,7 +95,7 @@ namespace Flutter.Backend.Service.Services
                 return await BuildError(result, ERR_MSG_INVALID_IMAGE_DATA);
             }
 
-            return await BuildResult(result, MSG_SAVE_SUCCESSFULLY); 
+            return await BuildResult(result, MSG_SAVE_SUCCESSFULLY);
         }
 
         private double ConvertSizeToMB(int dataSizeInBytes)
@@ -100,7 +103,7 @@ namespace Flutter.Backend.Service.Services
             return (double)dataSizeInBytes / 1048576.0;
         }
 
-        private Image BytesToImage(byte[] imgBytes , out IImageFormat format)
+        private Image BytesToImage(byte[] imgBytes, out IImageFormat format)
         {
             Stream outputStream = new MemoryStream();
 
@@ -108,8 +111,8 @@ namespace Flutter.Backend.Service.Services
             {
                 image.Mutate(c => c.Grayscale());
                 image.Save(outputStream, format);
-                
-                
+
+
                 return image;
             }
         }

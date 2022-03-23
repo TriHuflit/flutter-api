@@ -6,13 +6,14 @@ namespace Flutter.Backend.Service.Services
 {
     public class ValidationService : IValidationService
     {
-        public bool ValidatePasswordFormat(string password, int minLength = 8, bool withSpecialCharacter = true)
+        public bool ValidatePasswordFormat(string password, int minLength = 8, int maxLenght = 16, bool withSpecialCharacter = true)
         {
             Regex regex = new Regex("[0-9]+");
             Regex regex2 = new Regex(".{" + minLength + ",}");
-            Regex regex3 = new Regex("[A-Z]+");
-            Regex regex4 = new Regex("[a-z]+");
-            bool flag = regex.IsMatch(password) && regex2.IsMatch(password) && regex3.IsMatch(password) && regex4.IsMatch(password);
+            Regex regex3 = new Regex(".{" + maxLenght + ",}");
+            Regex regex4 = new Regex("[A-Z]+");
+            Regex regex5 = new Regex("[a-z]+");
+            bool flag = regex.IsMatch(password) && (regex2.IsMatch(password) || regex3.IsMatch(password)) && regex4.IsMatch(password) && regex5.IsMatch(password);
             if (flag && withSpecialCharacter)
             {
                 flag = password.Any((char ch) => !char.IsLetterOrDigit(ch));
