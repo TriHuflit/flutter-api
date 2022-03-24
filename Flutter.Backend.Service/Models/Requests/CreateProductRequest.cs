@@ -10,7 +10,7 @@ namespace Flutter.Backend.Service.Models.Requests
         /// Gets or sets the classify products.
         /// </summary>
         [Required]
-        public List<CreateClassifyProductRequest> classifyProducts { get; set; }
+        public List<CreateClassifyProductRequest> ClassifyProducts { get; set; }
       
     }
 }

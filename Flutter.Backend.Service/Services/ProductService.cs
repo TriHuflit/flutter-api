@@ -95,7 +95,7 @@ namespace Flutter.Backend.Service.Services
 
             _productRepository.Add(newProduct);
 
-            foreach (var classifyProduct in request.classifyProducts)
+            foreach (var classifyProduct in request.ClassifyProducts)
             {
                 if (string.IsNullOrEmpty(classifyProduct.Name))
                 {
@@ -233,10 +233,8 @@ namespace Flutter.Backend.Service.Services
                 product.IsShow = request.IsShow;
             }
 
-            if (request.Guarantee.HasValue)
-            {
-                product.Guarantee = request.Guarantee;
-            }
+           
+           
 
             if (!string.IsNullOrEmpty(request.Thumbnail) && request.Thumbnail != product.Thumbnail)
             {
@@ -248,7 +246,7 @@ namespace Flutter.Backend.Service.Services
 
                 product.Thumbnail = validateImage.Data.ToString();
             }
-
+            product.Guarantee = request.Guarantee;
             product.SetUpdatedInFo(_currentUserService.UserId, _currentUserService.UserName);
             _productRepository.Update(product, p => p.Id == product.Id);
 

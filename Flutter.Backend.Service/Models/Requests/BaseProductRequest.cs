@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Flutter.Backend.Service.Models.Requests
 {
@@ -32,7 +28,6 @@ namespace Flutter.Backend.Service.Models.Requests
         /// Short  Description of product. | Rules : MaxLenght 500
         /// </summary>
         [Required]
-        [MaxLength(500)]
         public string Description { get; set; }
 
         /// <summary>
@@ -56,8 +51,7 @@ namespace Flutter.Backend.Service.Models.Requests
         /// <summary>
         /// Guarantee of product.| Rules : MaxLenght 50
         /// </summary>     
-        [Required]
-        public DateTime? Guarantee { get; set; }
+        public int Guarantee { get; set; }
 
         /// <summary>
         /// Ablert  of product.
