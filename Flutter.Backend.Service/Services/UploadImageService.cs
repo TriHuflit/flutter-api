@@ -9,6 +9,7 @@ using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Processing;
 using System;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using static Flutter.Backend.Common.Constains.MessageResConstain;
 
@@ -48,7 +49,7 @@ namespace Flutter.Backend.Service.Services
 
             var uploadParams = new ImageUploadParams()
             {
-                File = new FileDescription(Base64ToImage(image))
+                File = new FileDescription(image)
             };
 
             var uploadResult = await _account.UploadLargeAsync(uploadParams);
@@ -65,19 +66,21 @@ namespace Flutter.Backend.Service.Services
         private async Task<AppActionResultMessage<string>> isValidUploadImage(string image)
         {
             var result = new AppActionResultMessage<string>();
-            var imagebase64 = IsBase64String(image);
+            var imagebase64 = IsBase64(image);
             if (!imagebase64)
             {
                 return await BuildError(result, ERR_MSG_INVALID_BASE64_STRING, nameof(image));
             }
 
-            var imageData = Convert.FromBase64String(image);
+            Match match = DataImage.DataUriPattern.Match(image);
+            string base64Data = match.Groups["data"].Value;
+            var imageData = Convert.FromBase64String(base64Data);
             if (imageData == null)
             {
                 return await BuildError(result, ERR_MSG_INVALID_BASE64_STRING, nameof(image));
             }
 
-            var imageOversize = ConvertSizeToMB(imageData.Length) > 5;
+            var imageOversize = ConvertSizeToMB(image.Length) > 5;
             if (imageOversize)
             {
                 return await BuildError(result, ERR_MSG_UPLOAD_FILE_SIZE_OVER_MAXIMUM);
@@ -117,15 +120,45 @@ namespace Flutter.Backend.Service.Services
             }
         }
 
-        private string Base64ToImage(string image)
+        public static bool IsBase64(string base64String)
         {
-            return "data:image/jpeg;base64," + image;
+            DataImage image = DataImage.TryParse(base64String);
+            if (image == null) return false;
+
+            return true;
         }
 
-        private static bool IsBase64String(string base64)
+        #region private Class
+        public sealed class DataImage
         {
-            Span<byte> buffer = new Span<byte>(new byte[base64.Length]);
-            return Convert.TryFromBase64String(base64, buffer, out int bytesParsed);
+            public static readonly Regex DataUriPattern = new Regex(@"^data\:(?<type>image\/(png|tiff|jpg|gif));base64,(?<data>[A-Z0-9\+\/\=]+)$", RegexOptions.Compiled | RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase);
+
+            private DataImage()
+            {
+            }
+
+            public static DataImage TryParse(string dataUri)
+            {
+                if (string.IsNullOrWhiteSpace(dataUri)) return null;
+
+                Match match = DataUriPattern.Match(dataUri);
+                if (!match.Success) return null;
+
+                string base64Data = match.Groups["data"].Value;
+
+                try
+                {
+                    byte[] rawData = Convert.FromBase64String(base64Data);
+                    return rawData.Length == 0 ? null : new DataImage();
+                }
+                catch (FormatException)
+                {
+                    return null;
+                }
+            }
         }
+
+        #endregion private Class
+
     }
 }
