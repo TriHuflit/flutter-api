@@ -233,9 +233,6 @@ namespace Flutter.Backend.Service.Services
                 product.IsShow = request.IsShow;
             }
 
-           
-           
-
             if (!string.IsNullOrEmpty(request.Thumbnail) && request.Thumbnail != product.Thumbnail)
             {
                 var validateImage = await _uploadImageService.UploadImage(request.Thumbnail);
@@ -268,7 +265,7 @@ namespace Flutter.Backend.Service.Services
                 return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(productId));
             }
 
-            var product = await _productRepository.Get(p => p.Id == objProductId);
+            var product = await _productRepository.Get(p => p.Id == objProductId && p.IsShow == ProductConstain.DELETE);
             if (product == null)
             {
                 return await BuildError(result, ERR_MSG_EMPTY_DATA, nameof(product));
@@ -297,7 +294,7 @@ namespace Flutter.Backend.Service.Services
                 return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request));
             }
 
-            var product = await _productRepository.Get(p => p.Id == objProductId);
+            var product = await _productRepository.Get(p => p.Id == objProductId && p.IsShow != ProductConstain.DELETE);
             if (product == null)
             {
                 return await BuildResult(result, ERR_MSG_PRODUCT_NOT_FOUND, nameof(product));
@@ -305,7 +302,7 @@ namespace Flutter.Backend.Service.Services
 
             var dtoproduct = _mapper.Map<Product, DtoProductDetail>(product);
 
-            var classifyProducts = await _classifyProductRepository.FindByAsync(c => c.ProductId == product.Id);
+            var classifyProducts = await _classifyProductRepository.FindByAsync(c => c.ProductId == product.Id && c.IsShow != ProductConstain.DELETE);
 
             if (classifyProducts != null)
             {
@@ -341,8 +338,8 @@ namespace Flutter.Backend.Service.Services
             var result = new AppActionResultMessage<SearchResultData>();
             int pageIndex = request.PageIndex > 1 ? request.PageIndex : 1;
             int pageSize = request.PageSize > 10 ? request.PageSize : 10;
-            
-            var products = await _productRepository.GetAll();
+
+            var products = await _productRepository.FindByAsync(p => p.IsShow != ProductConstain.DELETE);
             if (products == null)
             {
                 return await BuildResult(result, ERR_MSG_PRODUCTS_NOT_FOUND);
@@ -470,7 +467,7 @@ namespace Flutter.Backend.Service.Services
             return result.BuildResult(productInfo);
         }
 
-      
+
 
         #endregion private method
 
