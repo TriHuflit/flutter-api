@@ -2,6 +2,7 @@ using Flutter.Backend.DAL.Contracts;
 using Flutter.Backend.DAL.Implementations;
 using Flutter.Backend.Service.Models.Mappers;
 using Flutter.Backend.Service.Settings;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -9,12 +10,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
 using System.Collections.Generic;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.AspNetCore.Http;
 
 namespace Flutter.Backend.Api
 {
@@ -104,10 +103,12 @@ namespace Flutter.Backend.Api
                 options.SuppressModelStateInvalidFilter = true;
             });
             services.AddInterfaceServices();
+            services.Configure<MailSettings>(Configuration.GetSection("MailSettings"));
             services.AddTransient<IProductRepository, ProductRespository>();
             services.AddTransient<ICategoryRepository, CaterogyRespository>();
             services.AddTransient<IBrandRepository, BrandRespository>();
             services.AddTransient<IWaterProofRepository, WaterProofRepository>();
+            services.AddTransient<ITemplateSendMailRepository, TemplateSendMailRepository>();
             services.AddTransient<IClassifyProductRepository, ClassifyProductRepository>();
             services.AddTransient<IMessageRepository, MessageResResponsitory>();
             services.AddTransient<IAppUserRepository, AppUserRepository>();

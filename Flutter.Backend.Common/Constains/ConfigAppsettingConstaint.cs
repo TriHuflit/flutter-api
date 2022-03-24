@@ -11,5 +11,6 @@
         public const string AvatarFemale = "AvatarUser:Female";
 
         public const string AvatarMale = "AvatarUser:Male";
+
     }
 }

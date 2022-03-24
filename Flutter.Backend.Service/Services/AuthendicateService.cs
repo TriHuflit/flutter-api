@@ -21,18 +21,25 @@ namespace Flutter.Backend.Service.Services
     public class AuthendicateService : GenericErrorTextService, IAuthenticateService
     {
         private readonly IAppUserRepository _appUserRepository;
+        private readonly ITemplateSendMailRepository _templateSendMailRepository;
         private readonly IConfiguration _config;
 
         private readonly IValidationService _validationService;
+        private readonly ISendMailService _sendMailService;
+
         public AuthendicateService(
             IAppUserRepository appUserRepository,
             IConfiguration config,
             IValidationService validationService,
+            ISendMailService sendMailService,
+            ITemplateSendMailRepository templateSendMailRepository,
             IMessageService messageService) : base(messageService)
         {
             _appUserRepository = appUserRepository;
             _config = config;
             _validationService = validationService;
+            _sendMailService = sendMailService;
+            _templateSendMailRepository = templateSendMailRepository;
         }
 
         public async Task<AppActionResultMessage<DtoAuthent>> AuthendicateAsync(AuthendicateRequest request)
@@ -145,8 +152,16 @@ namespace Flutter.Backend.Service.Services
             _appUserRepository.Add(newUser);
             newUser.SetFullInfo(newUser.Id.ToString(), newUser.UserName);
             _appUserRepository.Update(newUser, u => u.Id == newUser.Id);
+            var template = await _templateSendMailRepository.GetAsync(t => t.Key == "TEMPLATE_EMAIL_REGISTER_ACCOUNT");
+            var requestSendMail = new MailRequest
+            {
+                Body = template.TemplateHTML,
+                Subject = "Đăng Ký Tài Khoản Cho Ứng Dụng HTC",
+                ToEmail = request.Email
+            };
+            var sendMailResult = _sendMailService.SendMailRegisterAsync(requestSendMail);
 
-            return await BuildResult(result, MSG_SAVE_SUCCESSFULLY);
+            return await BuildResult(result,newUser.Id.ToString() ,MSG_SAVE_SUCCESSFULLY);
         }
 
         public Task<AppActionResultMessage<DtoRefreshToken>> RefreshTokenAsync(string refreshToken)
@@ -198,26 +213,21 @@ namespace Flutter.Backend.Service.Services
                 request.GetResponse();
             Stream resStream = response.GetResponseStream();
             StreamReader v = new(resStream);
-            bool e = true;
-            while (e)
+            string[] line = v.ReadToEnd().Split(new char[] { '\r' });
+            for (int i = 0; i < line.Length; i++)
             {
-                string line = v.ReadLine().ToLower();
-                if (line == null)
-                {
-                    e = false;
-                }
-
-                if (line == register.UserName.ToLower())
+                line[i] = line[i].ToLower();
+                if (line[i] == register.UserName.ToLower())
                 {
                     return await BuildError(result, ERR_MSG_NAME_INCORRECT, nameof(register.UserName));
                 }
 
-                if (line == register.Password.ToLower())
+                if (line[i] == register.Password.ToLower())
                 {
                     return await BuildError(result, ERR_MSG_NAME_INCORRECT, nameof(register.Password));
                 }
 
-                if (line == register.FullName.ToLower())
+                if (line[i] == register.FullName.ToLower())
                 {
                     return await BuildError(result, ERR_MSG_NAME_INCORRECT, nameof(register.FullName));
                 }
