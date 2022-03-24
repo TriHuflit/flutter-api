@@ -18,6 +18,7 @@
         public const string ERR_MSG_IMAGE_INVALID_WITH_BYTE_TYPE = "ERR_MSG_IMAGE_INVALID_WITH_BYTE_TYPE";
         public const string ERR_MSG_DATA_NOT_FOUND = "ERR_MSG_DATA_NOT_FOUND";
         public const string ERR_MSG_GENDER_INVALID = "ERR_MSG_GENDER_INVALID";
+        public const string ERR_MSG_SEND_MAIL_FAILED = "ERR_MSG_SEND_MAIL_FAILED";
 
         public const string ERR_MSG_USERNAME_PASSWORD_INCORRECT = "ERR_MSG_USERNAME_PASSWORD_INCORRECT";
         public const string ERR_MSG_PASSWORD_ISVALID_FORMART = "ERR_MSG_DATA_NOT_FOUND";
@@ -32,5 +33,6 @@
         public const string MSG_UPDATE_SUCCESSFULLY = "MSG_UPDATE_SUCCESSFULLY";
         public const string MSG_DELETE_SUCCESSFULLY = "MSG_DELETE_SUCCESSFULLY";
         public const string MSG_FIND_SUCCESSFULLY = "MSG_FIND_SUCCESSFULLY";
+        public const string MSG_SEND_MAIL_SUCCESSFULLY = "MSG_SEND_MAIL_SUCCESSFULLY";
     }
 }
