@@ -11,6 +11,8 @@ namespace Flutter.Backend.Service.IServices
 
         Task<AppActionResultMessage<string>> RegisterAsync(RegisterRequest request);
 
+        Task<AppActionResultMessage<string>> ComfirmEmailAsync(string UserId);
+
         Task<AppActionResultMessage<DtoRefreshToken>> RefreshTokenAsync(string refreshToken);
     }
 }

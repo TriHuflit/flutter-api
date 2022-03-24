@@ -46,6 +46,26 @@ namespace Flutter.Backend.Api.Controllers
 
         }
 
+        [HttpPost]
+        [Route("comfirm-email/{userId}")]
+        public async Task<IActionResult> ComfirmAccountByEmail(string userId)
+        {
+            try
+            {
+                var result = await _authenticateService.ComfirmEmailAsync(userId);
+                if (result.IsSuccess)
+                {
+                    return Ok(result);
+                }
+                return BadRequest(result);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+
+        }
+
         /// <summary>
         /// Logins the user.
         /// </summary>
