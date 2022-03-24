@@ -39,7 +39,7 @@ namespace Flutter.Backend.DAL.Domains
         /// <summary>
         /// Guarantee of product
         /// </summary>     
-        public DateTime? Guarantee { get; set; }
+        public int Guarantee { get; set; }
 
         /// <summary>
         /// Ablert  of product.
