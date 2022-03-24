@@ -6,6 +6,7 @@ using Flutter.Backend.Service.Models.Dtos;
 using Flutter.Backend.Service.Models.Requests;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using MongoDB.Bson;
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.IO;
@@ -97,6 +98,12 @@ namespace Flutter.Backend.Service.Services
                 return await BuildError(result, ERR_MSG_PASSWORD_ISVALID_FORMART);
             }
 
+            var user = await _appUserRepository.GetAsync(u => u.UserName == request.UserName);
+            if (user != null)
+            {
+                return await BuildError(result, ERR_MSG_USERNAME_IS_EXIST, nameof(request.UserName));
+            }
+
             if (!_validationService.ValidatePhoneNumberFormat(request.Phone))
             {
                 return await BuildError(result, ERR_MSG_PHONE_ISVALID_FORMART);
@@ -152,21 +159,46 @@ namespace Flutter.Backend.Service.Services
             _appUserRepository.Add(newUser);
             newUser.SetFullInfo(newUser.Id.ToString(), newUser.UserName);
             _appUserRepository.Update(newUser, u => u.Id == newUser.Id);
-            var template = await _templateSendMailRepository.GetAsync(t => t.Key == "TEMPLATE_EMAIL_REGISTER_ACCOUNT");
+            var template = await _templateSendMailRepository.GetAsync(t => t.Key == SendMailConstain.TemplateEmailRegister);
+            var urlComfirmEmail = String.Format(SendMailConstain.EmailComfirmUrl, newUser.Id.ToString());
             var requestSendMail = new MailRequest
             {
-                Body = template.TemplateHTML,
-                Subject = "Đăng Ký Tài Khoản Cho Ứng Dụng HTC",
+                Body = String.Format(template.TemplateHTML, urlComfirmEmail),
+                Subject = SendMailConstain.SubjectRegister,
                 ToEmail = request.Email
             };
             var sendMailResult = _sendMailService.SendMailRegisterAsync(requestSendMail);
 
-            return await BuildResult(result,newUser.Id.ToString() ,MSG_SAVE_SUCCESSFULLY);
+            return await BuildResult(result, newUser.Id.ToString(), MSG_SAVE_SUCCESSFULLY);
         }
 
         public Task<AppActionResultMessage<DtoRefreshToken>> RefreshTokenAsync(string refreshToken)
         {
             throw new NotImplementedException();
+        }
+
+
+        public async Task<AppActionResultMessage<string>> ComfirmEmailAsync(string UserId)
+        {
+            var result = new AppActionResultMessage<string>();
+
+            if (!ObjectId.TryParse(UserId, out ObjectId objUserId))
+            {
+                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(UserId));
+            }
+
+            var userResult = await _appUserRepository.GetAsync(u => u.Id == objUserId);
+            if (userResult == null)
+            {
+                return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, nameof(UserId));
+            }
+
+            userResult.IsEmailConfirmed = true;
+            userResult.SetUpdatedInFo(UserId, userResult.UserName);
+
+            _appUserRepository.Update(userResult, u => u.Id == userResult.Id);
+
+            return await BuildResult(result, MSG_UPDATE_SUCCESSFULLY);
         }
 
         #region
@@ -279,6 +311,8 @@ namespace Flutter.Backend.Service.Services
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+
+
 
 
         #endregion
