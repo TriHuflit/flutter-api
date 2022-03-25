@@ -6,7 +6,11 @@ namespace Flutter.Backend.Service.Models.Dtos
     {
         public string AccessToken { get; set; }
 
-        public DateTime Expires { get; set; }
+        public DateTime ExpiresAccess { get; set; }
+
+        public string RefreshToken { get; set; }
+
+        public DateTime ExpiresRefresh { get; set; }
 
     }
 }

@@ -53,7 +53,7 @@ namespace Flutter.Backend.DAL.Domains
         /// <summary>
         /// Role.
         /// </summary>
-        public ObjectId Role { get; set; }
+        public ObjectId RoleId { get; set; }
 
         /// <summary>
         /// RefreshToken.

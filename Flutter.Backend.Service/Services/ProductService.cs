@@ -285,13 +285,13 @@ namespace Flutter.Backend.Service.Services
         /// <param name="request">The request.</param>
         /// <returns></returns>
         /// <exception cref="System.NotImplementedException"></exception>
-        public async Task<AppActionResultMessage<DtoProductDetail>> GetProductAsync(string request)
+        public async Task<AppActionResultMessage<DtoProductDetail>> GetProductAsync(string productId)
         {
             var result = new AppActionResultMessage<DtoProductDetail>();
 
-            if (!ObjectId.TryParse(request, out ObjectId objProductId))
+            if (!ObjectId.TryParse(productId, out ObjectId objProductId))
             {
-                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request));
+                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(productId));
             }
 
             var product = await _productRepository.Get(p => p.Id == objProductId && p.IsShow != ProductConstain.DELETE);
@@ -351,12 +351,29 @@ namespace Flutter.Backend.Service.Services
                         .Take(pageSize)
                         .ToList();
 
-            var dtoProduct = _mapper.Map<IEnumerable<Product>, List<DtoProduct>>(products);
+            var dtoProducts = _mapper.Map<IEnumerable<Product>, List<DtoProduct>>(products);
+
+            foreach (var dtoProduct in dtoProducts)
+            {
+                var category = await _categoryRepository.GetAsync(c => c.Id == ObjectId.Parse(dtoProduct.CategoryID) && c.IsShow != CategoryConstain.DELETE);
+                if (category != null)
+                {
+                    dtoProduct.CategoryName = category.Name;
+                }
+
+                var brand = await _brandRepository.GetAsync(b => b.Id == ObjectId.Parse(dtoProduct.BrandID) && b.IsShow != BrandConstain.DELETE);
+                if (brand != null)
+                {
+                    dtoProduct.BrandName = brand.Name;
+                }
+
+            }
+
             var searchResultData = new SearchResultData
             {
                 PageIndex = pageIndex,
                 PageSize = pageSize,
-                ListProduct = dtoProduct
+                ListProduct = dtoProducts
             };
 
             return await BuildResult(result, searchResultData, MSG_FIND_SUCCESSFULLY);
@@ -371,8 +388,8 @@ namespace Flutter.Backend.Service.Services
         public async Task<AppActionResultMessage<IEnumerable<DtoProduct>>> SearchProductAsync(SearchRequestProduct request)
         {
             var result = new AppActionResultMessage<IEnumerable<DtoProduct>>();
-            int pageIndex = 1;
-            int pageSize = 10;
+            int pageIndex = request.PageIndex > 1 ? request.PageIndex : 1;
+            int pageSize = request.PageSize > 10 ? request.PageSize : 10;
             IEnumerable<Product> products = new List<Product>();
             Category category;
             Brand brand;
@@ -423,6 +440,103 @@ namespace Flutter.Backend.Service.Services
             return await BuildResult(result, dtoProduct, MSG_FIND_SUCCESSFULLY);
         }
 
+        /// <summary>
+        /// Gets all product mobile asynchronous.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <returns></returns>
+        public async Task<AppActionResultMessage<SearchResultData>> GetAllProductMobileAsync(PaginationRequest request)
+        {
+            var result = new AppActionResultMessage<SearchResultData>();
+            int pageIndex = request.PageIndex > 1 ? request.PageIndex : 1;
+            int pageSize = request.PageSize > 10 ? request.PageSize : 10;
+
+            var products = await _productRepository.FindByAsync(p => p.IsShow == ProductConstain.ACTIVE);
+            if (products == null)
+            {
+                return await BuildResult(result, ERR_MSG_PRODUCTS_NOT_FOUND);
+            }
+
+            // Pagination for Product
+            products = products.OrderBy(p => p.Name)
+                        .Skip((pageIndex - 1) * pageSize)
+                        .Take(pageSize)
+                        .ToList();
+
+            var dtoProducts = _mapper.Map<IEnumerable<Product>, List<DtoProduct>>(products);
+
+            foreach (var dtoProduct in dtoProducts)
+            {
+                var category = await _categoryRepository.GetAsync(c => c.Id == ObjectId.Parse(dtoProduct.CategoryID) && c.IsShow != CategoryConstain.DELETE);
+                if (category != null)
+                {
+                    dtoProduct.CategoryName = category.Name;
+                }
+
+                var brand = await _brandRepository.GetAsync(b => b.Id == ObjectId.Parse(dtoProduct.BrandID) && b.IsShow != BrandConstain.DELETE);
+                if( brand != null)
+                {
+                    dtoProduct.BrandName = brand.Name;
+                }
+            }
+
+            var searchResultData = new SearchResultData
+            {
+                PageIndex = pageIndex,
+                PageSize = pageSize,
+                ListProduct = dtoProducts
+            };
+
+            return await BuildResult(result, searchResultData, MSG_FIND_SUCCESSFULLY);
+        }
+
+        /// <summary>
+        /// Gets the product mobile asynchronous.
+        /// </summary>
+        /// <param name="productId">The product identifier.</param>
+        /// <returns></returns>
+        public async Task<AppActionResultMessage<DtoProductDetail>> GetProductMobileAsync(string productId)
+        {
+            var result = new AppActionResultMessage<DtoProductDetail>();
+
+            if (!ObjectId.TryParse(productId, out ObjectId objProductId))
+            {
+                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(productId));
+            }
+
+            var product = await _productRepository.Get(p => p.Id == objProductId && p.IsShow == ProductConstain.ACTIVE);
+            if (product == null)
+            {
+                return await BuildResult(result, ERR_MSG_PRODUCT_NOT_FOUND, nameof(product));
+            }
+
+            var dtoproduct = _mapper.Map<Product, DtoProductDetail>(product);
+
+            var classifyProducts = await _classifyProductRepository.FindByAsync(c => c.ProductId == product.Id && c.IsShow == ProductConstain.ACTIVE);
+
+            if (classifyProducts != null)
+            {
+                var dtoClassifyProduct = _mapper.Map<IEnumerable<ClassifyProduct>, IEnumerable<DtoClassifyProduct>>(classifyProducts);
+                dtoproduct.ClassifyProducts = dtoClassifyProduct;
+            }
+
+            var category = await _categoryRepository.Get(c => c.Id == product.CategoryId);
+            if (category == null)
+                dtoproduct.CategoryName = ProductDetailConstain.CategoryName;
+            else dtoproduct.CategoryName = category.Name;
+
+            var brand = await _brandRepository.Get(b => b.Id == product.BrandId);
+            if (brand == null)
+                dtoproduct.BrandName = ProductDetailConstain.BrandName;
+            else dtoproduct.BrandName = brand.Name;
+
+            var waterProof = await _waterProofRepository.Get(w => w.Id == product.WaterProofId);
+            if (waterProof == null)
+                dtoproduct.WaterProofName = ProductDetailConstain.WaterProofName;
+            else dtoproduct.WaterProofName = waterProof.Name;
+
+            return await BuildResult(result, dtoproduct, MSG_FIND_SUCCESSFULLY);
+        }
 
         #region private method
         private async Task<AppActionResultMessage<ProductInfo>> ValidateProductAsync(BaseProductRequest request)
@@ -466,6 +580,7 @@ namespace Flutter.Backend.Service.Services
 
             return result.BuildResult(productInfo);
         }
+
 
 
 

@@ -1,6 +1,6 @@
 ﻿namespace Flutter.Backend.Service.Models.Requests
 {
-    public class SearchRequestProduct
+    public class SearchRequestProduct : PaginationRequest
     {
 
 
