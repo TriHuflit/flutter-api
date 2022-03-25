@@ -11,5 +11,7 @@
         bool ValidateVnPhoneNumberFormat(string phoneNumber, string pattern = "^(0|\\+84)(\\d{3})(\\d{3})(\\d{3,5})$$");
 
         bool IsMatchRegularExpression(string input, string pattern);
+
+        bool ValidateUserName(string userName);
     }
 }

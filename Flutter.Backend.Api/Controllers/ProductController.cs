@@ -1,5 +1,7 @@
-﻿using Flutter.Backend.Service.IServices;
+﻿using Flutter.Backend.Common.Constains;
+using Flutter.Backend.Service.IServices;
 using Flutter.Backend.Service.Models.Requests;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -14,7 +16,7 @@ namespace Flutter.Backend.Api.Controllers
     /// <seealso cref="Microsoft.AspNetCore.Mvc.ControllerBase" />
     [Route("api/product")]
     [ApiController]
-    [Authorize]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = RoleConstain.MANAGER)]
     public class ProductController : ControllerBase
     {
         private readonly IProductServices _productService;
@@ -131,7 +133,6 @@ namespace Flutter.Backend.Api.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("all")]
-        [AllowAnonymous]
         public async Task<IActionResult> GetAllProducts([FromQuery] PaginationRequest request)
         {
             
@@ -157,8 +158,58 @@ namespace Flutter.Backend.Api.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("details/{productId}")]
-        [AllowAnonymous]
         public async Task<IActionResult> GetProduct(string productId)
+        {
+            try
+            {
+                var result = await _productService.GetProductAsync(productId);
+                if (!result.IsSuccess)
+                {
+                    return NotFound(result);
+                }
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+        }
+
+        /// <summary>
+        /// Gets all products for mobile.
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("mobile/all")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetAllProductsMobile([FromQuery] PaginationRequest request)
+        {
+
+            try
+            {
+                var result = await _productService.GetAllProductAsync(request);
+                if (!result.IsSuccess)
+                {
+                    return NotFound(result);
+                }
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Gets the product for mobile.
+        /// </summary>
+        /// <param name="productId">The product identifier.</param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("details/mobile/{productId}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetProductMobile(string productId)
         {
             try
             {

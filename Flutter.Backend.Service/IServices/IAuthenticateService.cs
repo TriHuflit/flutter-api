@@ -7,12 +7,14 @@ namespace Flutter.Backend.Service.IServices
 {
     public interface IAuthenticateService
     {
-        Task<AppActionResultMessage<DtoAuthent>> AuthendicateAsync(AuthendicateRequest request);
+        Task<AppActionResultMessage<DtoAuthent>> AuthendicateUserAsync(AuthendicateRequest request);
+
+        Task<AppActionResultMessage<DtoAuthent>> AuthendicateAdminAsync(AuthendicateRequest request);
 
         Task<AppActionResultMessage<string>> RegisterAsync(RegisterRequest request);
 
         Task<AppActionResultMessage<string>> ComfirmEmailAsync(string UserId);
 
-        Task<AppActionResultMessage<DtoRefreshToken>> RefreshTokenAsync(string refreshToken);
+        Task<AppActionResultMessage<DtoAuthent>> RefreshTokenAsync(string refreshToken);
     }
 }

@@ -32,6 +32,16 @@ namespace Flutter.Backend.Service.Services
             return IsMatchRegularExpression(phoneNumber, pattern);
         }
 
+        public bool ValidateUserName(string userName)
+        {
+            string[] splitUserName = userName.Split(' ');
+            if(splitUserName.Length > 1)
+            {
+                return false;
+            }
+            return true;
+        }
+
         public bool ValidateVnPhoneNumberFormat(string phoneNumber, string pattern = "^(0|\\+84)(\\d{3})(\\d{3})(\\d{3,5})$$")
         {
             return IsMatchRegularExpression(phoneNumber, pattern);

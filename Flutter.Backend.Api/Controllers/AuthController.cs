@@ -67,7 +67,7 @@ namespace Flutter.Backend.Api.Controllers
         }
 
         /// <summary>
-        /// Logins the user.
+        /// Logins the user for mobile.
         /// </summary>
         /// <param name="request">The request.</param>
         /// <returns></returns>
@@ -77,7 +77,33 @@ namespace Flutter.Backend.Api.Controllers
         {
             try
             {
-                var result = await _authenticateService.AuthendicateAsync(request);
+                var result = await _authenticateService.AuthendicateUserAsync(request);
+                if (result.IsSuccess)
+                {
+                    return Ok(result);
+                }
+                return BadRequest(result);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+
+
+        }
+
+        /// <summary>
+        /// Logins the admin.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("system-login")]
+        public async Task<IActionResult> LoginAdmin(AuthendicateRequest request)
+        {
+            try
+            {
+                var result = await _authenticateService.AuthendicateAdminAsync(request);
                 if (result.IsSuccess)
                 {
                     return Ok(result);

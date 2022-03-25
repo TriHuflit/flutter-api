@@ -23,6 +23,7 @@ namespace Flutter.Backend.Service.Services
     {
         private readonly IAppUserRepository _appUserRepository;
         private readonly ITemplateSendMailRepository _templateSendMailRepository;
+        private readonly IRoleRepository _roleRepository;
         private readonly IConfiguration _config;
 
         private readonly IValidationService _validationService;
@@ -33,17 +34,22 @@ namespace Flutter.Backend.Service.Services
             IConfiguration config,
             IValidationService validationService,
             ISendMailService sendMailService,
+            IRoleRepository roleRepository,
             ITemplateSendMailRepository templateSendMailRepository,
             IMessageService messageService) : base(messageService)
         {
             _appUserRepository = appUserRepository;
-            _config = config;
+            _templateSendMailRepository = templateSendMailRepository;
+            _roleRepository = roleRepository;
+
             _validationService = validationService;
             _sendMailService = sendMailService;
-            _templateSendMailRepository = templateSendMailRepository;
+
+            _config = config;
+
         }
 
-        public async Task<AppActionResultMessage<DtoAuthent>> AuthendicateAsync(AuthendicateRequest request)
+        public async Task<AppActionResultMessage<DtoAuthent>> AuthendicateUserAsync(AuthendicateRequest request)
         {
             var result = new AppActionResultMessage<DtoAuthent>();
 
@@ -54,23 +60,79 @@ namespace Flutter.Backend.Service.Services
 
             if (user == null && user.IsActive == AuthendicateConstain.DELETE)
             {
-                return await BuildResult(result, ERR_MSG_USERNAME_PASSWORD_INCORRECT);
+                return await BuildError(result, ERR_MSG_USERNAME_PASSWORD_INCORRECT);
             }
 
             if (!user.IsEmailConfirmed)
             {
-                return await BuildResult(result, ERR_MSG_EMAIL_IS_NOT_CONFIRM);
+                return await BuildError(result, ERR_MSG_EMAIL_IS_NOT_CONFIRM);
             }
 
             if (user.IsActive == AuthendicateConstain.INACTIVE)
             {
-                return await BuildResult(result, ERR_MSG_ACCOUNT_INACTIVE);
+                return await BuildError(result, ERR_MSG_ACCOUNT_INACTIVE);
             }
 
-            var token = GenerateJwtToken(user.Id.ToString(), user.UserName);
+            var role = await _roleRepository.GetAsync(r => r.Id == user.RoleId);
 
-            var refreshToken = GenerateRefresh(user.Id.ToString(), user.UserName);
-            user.RefreshToken = refreshToken;
+            if (role.Name != RoleConstain.USER)
+            {
+                return await BuildError(result, ERR_MSG_401_UNAUTHORIZED, user.UserName);
+            }
+
+
+            var token = GenerateJwtToken(user.Id.ToString(), user.UserName, role.Name);
+
+            var refreshToken = GenerateRefresh(user.Id.ToString(), user.UserName, role.Name);
+
+            token.ExpiresRefresh = refreshToken.ExpiresRefresh;
+            token.RefreshToken = refreshToken.RefreshToken;
+            user.RefreshToken = refreshToken.RefreshToken;
+            user.SetUpdatedInFo(user.Id.ToString(), user.UserName);
+            _appUserRepository.Update(user, u => u.Id == user.Id);
+
+            return await BuildResult(result, token, MSG_LOGIN_SUCCESSFULLY);
+        }
+
+        public async Task<AppActionResultMessage<DtoAuthent>> AuthendicateAdminAsync(AuthendicateRequest request)
+        {
+            var result = new AppActionResultMessage<DtoAuthent>();
+
+            string hashPassword = HashPassWord(request.Password);
+
+            var user = await _appUserRepository.GetAsync(u => u.UserName == request.UserName
+                && u.HashPassword == hashPassword);
+
+            if (user == null && user.IsActive == AuthendicateConstain.DELETE)
+            {
+                return await BuildError(result, ERR_MSG_USERNAME_PASSWORD_INCORRECT);
+            }
+
+            if (!user.IsEmailConfirmed)
+            {
+                return await BuildError(result, ERR_MSG_EMAIL_IS_NOT_CONFIRM);
+            }
+
+            if (user.IsActive == AuthendicateConstain.INACTIVE)
+            {
+                return await BuildError(result, ERR_MSG_ACCOUNT_INACTIVE);
+            }
+
+            var role = await _roleRepository.GetAsync(r => r.Id == user.RoleId);
+
+            if (role.Name == RoleConstain.USER)
+            {
+                return await BuildError(result, ERR_MSG_401_UNAUTHORIZED, user.UserName);
+            }
+
+
+            var token = GenerateJwtToken(user.Id.ToString(), user.UserName, role.Name);
+
+            var refreshToken = GenerateRefresh(user.Id.ToString(), user.UserName, role.Name);
+
+            token.ExpiresRefresh = refreshToken.ExpiresRefresh;
+            token.RefreshToken = refreshToken.RefreshToken;
+            user.RefreshToken = refreshToken.RefreshToken;
             user.SetUpdatedInFo(user.Id.ToString(), user.UserName);
             _appUserRepository.Update(user, u => u.Id == user.Id);
 
@@ -81,6 +143,11 @@ namespace Flutter.Backend.Service.Services
         {
 
             var result = new AppActionResultMessage<string>();
+
+            if (!_validationService.ValidateUserName(request.UserName))
+            {
+                return await BuildError(result, ERR_MSG_USERNAME_IS_VALID, nameof(request.UserName));
+            }
 
             var trackDataResult = await ReadFile(request);
             if (!trackDataResult.IsSuccess)
@@ -172,9 +239,38 @@ namespace Flutter.Backend.Service.Services
             return await BuildResult(result, newUser.Id.ToString(), MSG_SAVE_SUCCESSFULLY);
         }
 
-        public Task<AppActionResultMessage<DtoRefreshToken>> RefreshTokenAsync(string refreshToken)
+        public async Task<AppActionResultMessage<DtoAuthent>> RefreshTokenAsync(string refreshToken)
         {
-            throw new NotImplementedException();
+            var result = new AppActionResultMessage<DtoAuthent>();
+
+            if (!IsValidateToken(refreshToken))
+            {
+                return await BuildError(result, ERR_MSG_REFRESH_TOKEN_IS_VALID, nameof(refreshToken));
+            }
+
+            var user = await _appUserRepository.GetAsync(u => u.RefreshToken == refreshToken && u.IsActive == AuthendicateConstain.ACTIVE);
+
+            if (user == null)
+            {
+                return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, nameof(user));
+            }
+
+            var role = await _roleRepository.GetAsync(r => r.Id == user.RoleId);
+            var token = GenerateJwtToken(user.Id.ToString(), user.UserName, role.Name);
+            var refresh = GenerateRefresh(user.Id.ToString(), user.UserName, role.Name);
+            user.RefreshToken = refresh.RefreshToken;
+            user.SetUpdatedInFo(user.Id.ToString(), user.UserName);
+            _appUserRepository.Update(user, u => u.Id == user.Id);
+
+            var dtoRefreshToken = new DtoAuthent
+            {
+                AccessToken = token.AccessToken,
+                ExpiresAccess = token.ExpiresAccess,
+                RefreshToken = refresh.RefreshToken,
+                ExpiresRefresh = refresh.ExpiresRefresh,
+            };
+
+            return await BuildResult(result, dtoRefreshToken, MSG_SAVE_SUCCESSFULLY);
         }
 
 
@@ -249,31 +345,32 @@ namespace Flutter.Backend.Service.Services
             for (int i = 0; i < line.Length; i++)
             {
                 line[i] = line[i].ToLower();
-                if (line[i] == register.UserName.ToLower())
+                if (line[i].Contains(register.UserName.ToLower()))
                 {
-                    return await BuildError(result, ERR_MSG_NAME_INCORRECT, nameof(register.UserName));
+                    return await BuildError(result, ERR_MSG_USERNAME_IS_VALID, nameof(register.UserName));
                 }
 
-                if (line[i] == register.Password.ToLower())
+                if (line[i].Contains(register.Password.ToLower()))
                 {
-                    return await BuildError(result, ERR_MSG_NAME_INCORRECT, nameof(register.Password));
+                    return await BuildError(result, ERR_MSG_USERNAME_IS_VALID, nameof(register.Password));
                 }
 
-                if (line[i] == register.FullName.ToLower())
+                if (line[i].Contains(register.FullName.ToLower()))
                 {
-                    return await BuildError(result, ERR_MSG_NAME_INCORRECT, nameof(register.FullName));
+                    return await BuildError(result, ERR_MSG_USERNAME_IS_VALID, nameof(register.FullName));
                 }
             }
 
             return await BuildResult(result, MSG_FIND_SUCCESSFULLY);
         }
 
-        private DtoAuthent GenerateJwtToken(string UserId, string UserName)
+        private DtoAuthent GenerateJwtToken(string UserId, string UserName, string Role)
         {
             var claims = new[]
             {
                new Claim(ClaimTypes.NameIdentifier, UserId),
                new Claim(ClaimTypes.Name, UserName),
+               new Claim(ClaimTypes.Role,Role)
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config[ConfigAppsettingConstaint.TokenKey]));
@@ -282,22 +379,23 @@ namespace Flutter.Backend.Service.Services
             var token = new JwtSecurityToken(_config[ConfigAppsettingConstaint.TokenIssuer],
                 _config[ConfigAppsettingConstaint.TokenIssuer],
                 claims,
-                expires: DateTime.Now.AddHours(1),
+                expires: DateTime.Now.AddMinutes(30),
                 signingCredentials: creds);
 
             var dtoAppUser = new DtoAuthent();
             dtoAppUser.AccessToken = new JwtSecurityTokenHandler().WriteToken(token);
-            dtoAppUser.Expires = DateTime.Now.AddHours(1);
+            dtoAppUser.ExpiresAccess = DateTime.Now.AddHours(1);
 
             return dtoAppUser;
         }
 
-        private string GenerateRefresh(string UserId, string UserName)
+        private DtoAuthent GenerateRefresh(string UserId, string UserName, string Role)
         {
             var claims = new[]
             {
                new Claim(ClaimTypes.NameIdentifier, UserId),
                new Claim(ClaimTypes.Name, UserName),
+               new Claim(ClaimTypes.Role,Role),
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config[ConfigAppsettingConstaint.TokenKey]));
@@ -309,7 +407,26 @@ namespace Flutter.Backend.Service.Services
                 expires: DateTime.Now.AddDays(7),
                 signingCredentials: creds);
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            var dtoAppUser = new DtoAuthent();
+            dtoAppUser.RefreshToken = new JwtSecurityTokenHandler().WriteToken(token);
+            dtoAppUser.ExpiresRefresh = token.ValidTo;
+
+            return dtoAppUser;
+        }
+
+
+        private bool IsValidateToken(string token)
+        {
+            if (string.IsNullOrEmpty(token)) return false;
+
+            var jwtToken = new JwtSecurityToken(token);
+
+            if (jwtToken == null) return false;
+
+
+            if (jwtToken.ValidTo.ToLocalTime() < DateTime.Now) return false;
+
+            return true;
         }
 
 
