@@ -41,14 +41,16 @@ namespace Flutter.Backend.Service.Services
             _appUserRepository = appUserRepository;
             _templateSendMailRepository = templateSendMailRepository;
             _roleRepository = roleRepository;
-
             _validationService = validationService;
             _sendMailService = sendMailService;
-
             _config = config;
-
         }
 
+        /// <summary>
+        /// Authendicates the user asynchronous.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <returns></returns>
         public async Task<AppActionResultMessage<DtoAuthent>> AuthendicateUserAsync(AuthendicateRequest request)
         {
             var result = new AppActionResultMessage<DtoAuthent>();
@@ -94,6 +96,11 @@ namespace Flutter.Backend.Service.Services
             return await BuildResult(result, token, MSG_LOGIN_SUCCESSFULLY);
         }
 
+        /// <summary>
+        /// Authendicates the admin asynchronous.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <returns></returns>
         public async Task<AppActionResultMessage<DtoAuthent>> AuthendicateAdminAsync(AuthendicateRequest request)
         {
             var result = new AppActionResultMessage<DtoAuthent>();
@@ -139,11 +146,17 @@ namespace Flutter.Backend.Service.Services
             return await BuildResult(result, token, MSG_LOGIN_SUCCESSFULLY);
         }
 
+        /// <summary>
+        /// Registers the asynchronous.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <returns></returns>
         public async Task<AppActionResultMessage<string>> RegisterAsync(RegisterRequest request)
         {
 
             var result = new AppActionResultMessage<string>();
 
+            //validation username
             if (!_validationService.ValidateUserName(request.UserName))
             {
                 return await BuildError(result, ERR_MSG_USERNAME_IS_VALID, nameof(request.UserName));
@@ -155,6 +168,7 @@ namespace Flutter.Backend.Service.Services
                 return await BuildError(result, trackDataResult.Message);
             }
 
+            //validation password
             if (!_validationService.ValidatePasswordFormat(request.Password))
             {
                 return await BuildError(result, ERR_MSG_PASSWORD_ISVALID_FORMART);
@@ -165,12 +179,7 @@ namespace Flutter.Backend.Service.Services
                 return await BuildError(result, ERR_MSG_PASSWORD_ISVALID_FORMART);
             }
 
-            var user = await _appUserRepository.GetAsync(u => u.UserName == request.UserName);
-            if (user != null)
-            {
-                return await BuildError(result, ERR_MSG_USERNAME_IS_EXIST, nameof(request.UserName));
-            }
-
+            //validation phone
             if (!_validationService.ValidatePhoneNumberFormat(request.Phone))
             {
                 return await BuildError(result, ERR_MSG_PHONE_ISVALID_FORMART);
@@ -181,17 +190,36 @@ namespace Flutter.Backend.Service.Services
                 return await BuildError(result, ERR_MSG_PHONE_ISVALID_FORMART_VN);
             }
 
+            //validation email
             if (!_validationService.ValidateEmailFormat(request.Email))
             {
                 return await BuildError(result, ERR_MSG_EMAIL_ISVALID_FORMART);
             }
 
-            // add more message
-            if (request.Gender != AppUserGenderConstain.Female && request.Gender != AppUserGenderConstain.Male)
+            var user = await _appUserRepository.GetAsync(u => u.UserName == request.UserName
+            && u.IsActive == AuthendicateConstain.ACTIVE);
+
+            if (user != null)
             {
-                return await BuildError(result, ERR_MSG_EMAIL_ISVALID_FORMART);
+                return await BuildError(result, ERR_MSG_USERNAME_IS_EXIST, request.UserName);
             }
 
+            if (user.Email == request.Email)
+            {
+                return await BuildError(result, ERR_MSG_EMAIL_IS_EXIST, request.Email);
+            }
+
+            if (user.Phone == request.Phone)
+            {
+                return await BuildError(result, ERR_MSG_PHONE_IS_EXIST, request.Phone);
+            }
+
+            if (request.Gender != AppUserGenderConstain.Female && request.Gender != AppUserGenderConstain.Male)
+            {
+                return await BuildError(result, ERR_MSG_GENDER_INVALID, request.Gender);
+            }
+
+            // create new user
             string hashPassword = HashPassWord(request.Password);
             var newUser = new AppUser
             {
@@ -223,6 +251,7 @@ namespace Flutter.Backend.Service.Services
                 newUser.Avatar = _config[ConfigAppsettingConstaint.AvatarMale];
             }
 
+            //send email comfirm account
             _appUserRepository.Add(newUser);
             newUser.SetFullInfo(newUser.Id.ToString(), newUser.UserName);
             _appUserRepository.Update(newUser, u => u.Id == newUser.Id);
@@ -239,6 +268,11 @@ namespace Flutter.Backend.Service.Services
             return await BuildResult(result, newUser.Id.ToString(), MSG_SAVE_SUCCESSFULLY);
         }
 
+        /// <summary>
+        /// Refreshes the token asynchronous.
+        /// </summary>
+        /// <param name="refreshToken">The refresh token.</param>
+        /// <returns></returns>
         public async Task<AppActionResultMessage<DtoAuthent>> RefreshTokenAsync(string refreshToken)
         {
             var result = new AppActionResultMessage<DtoAuthent>();
@@ -274,6 +308,11 @@ namespace Flutter.Backend.Service.Services
         }
 
 
+        /// <summary>
+        /// Comfirms the email asynchronous.
+        /// </summary>
+        /// <param name="UserId">The user identifier.</param>
+        /// <returns></returns>
         public async Task<AppActionResultMessage<string>> ComfirmEmailAsync(string UserId)
         {
             var result = new AppActionResultMessage<string>();
@@ -297,7 +336,7 @@ namespace Flutter.Backend.Service.Services
             return await BuildResult(result, MSG_UPDATE_SUCCESSFULLY);
         }
 
-        #region
+        #region Private method
         private byte[] RSAEncrypt(byte[] plaintext, string destKey)
         {
             byte[] encryptedData;
@@ -429,9 +468,6 @@ namespace Flutter.Backend.Service.Services
             return true;
         }
 
-
-
-
-        #endregion
+        #endregion Private method
     }
 }

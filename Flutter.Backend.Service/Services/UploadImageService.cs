@@ -80,7 +80,7 @@ namespace Flutter.Backend.Service.Services
                 return await BuildError(result, ERR_MSG_INVALID_BASE64_STRING, nameof(image));
             }
 
-            var imageOversize = ConvertSizeToMB(image.Length) > 5;
+            var imageOversize = ConvertSizeToMB(image.Length) > 3;
             if (imageOversize)
             {
                 return await BuildError(result, ERR_MSG_UPLOAD_FILE_SIZE_OVER_MAXIMUM);
@@ -103,7 +103,7 @@ namespace Flutter.Backend.Service.Services
 
         private double ConvertSizeToMB(int dataSizeInBytes)
         {
-            return (double)dataSizeInBytes / 1048576.0;
+            return (double)dataSizeInBytes / ImageFormatConstant.MB_SIZE;
         }
 
         private Image BytesToImage(byte[] imgBytes, out IImageFormat format)
