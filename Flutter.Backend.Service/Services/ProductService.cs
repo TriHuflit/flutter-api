@@ -164,7 +164,7 @@ namespace Flutter.Backend.Service.Services
                 return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.Id));
             }
 
-            var product = await _productRepository.Get(p => p.Id == objProductId);
+            var product = await _productRepository.Get(p => p.Id == objProductId && p.IsShow != ProductConstain.DELETE);
             if (product == null)
             {
                 return await BuildError(result, ERR_MSG_PRODUCT_NOT_FOUND, nameof(product));
@@ -265,7 +265,7 @@ namespace Flutter.Backend.Service.Services
                 return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(productId));
             }
 
-            var product = await _productRepository.Get(p => p.Id == objProductId && p.IsShow == ProductConstain.DELETE);
+            var product = await _productRepository.Get(p => p.Id == objProductId && p.IsShow != ProductConstain.DELETE);
             if (product == null)
             {
                 return await BuildError(result, ERR_MSG_EMPTY_DATA, nameof(product));
@@ -276,7 +276,7 @@ namespace Flutter.Backend.Service.Services
             product.SetUpdatedInFo(_currentUserService.UserId, _currentUserService.UserName);
             _productRepository.Update(product, p => p.Id == product.Id);
 
-            return await BuildResult(result, MSG_DELETE_SUCCESSFULLY);
+            return await BuildResult(result, productId, MSG_DELETE_SUCCESSFULLY);
         }
 
         /// <summary>
@@ -474,7 +474,7 @@ namespace Flutter.Backend.Service.Services
                 }
 
                 var brand = await _brandRepository.GetAsync(b => b.Id == ObjectId.Parse(dtoProduct.BrandID) && b.IsShow != BrandConstain.DELETE);
-                if( brand != null)
+                if (brand != null)
                 {
                     dtoProduct.BrandName = brand.Name;
                 }

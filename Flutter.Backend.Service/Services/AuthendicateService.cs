@@ -58,9 +58,9 @@ namespace Flutter.Backend.Service.Services
             string hashPassword = HashPassWord(request.Password);
 
             var user = await _appUserRepository.GetAsync(u => u.UserName == request.UserName
-                && u.HashPassword == hashPassword);
+                && u.HashPassword == hashPassword && u.IsActive != AuthendicateConstain.DELETE);
 
-            if (user == null && user.IsActive == AuthendicateConstain.DELETE)
+            if (user == null)
             {
                 return await BuildError(result, ERR_MSG_USERNAME_PASSWORD_INCORRECT);
             }
