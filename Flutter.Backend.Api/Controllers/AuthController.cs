@@ -125,7 +125,7 @@ namespace Flutter.Backend.Api.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("refresh-token")]
-        public async Task<IActionResult> RefreshToken(string refreshToken)
+        public async Task<IActionResult> RefreshToken([FromBody] string refreshToken)
         {
             try
             {
