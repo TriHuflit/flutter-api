@@ -273,9 +273,9 @@ namespace Flutter.Backend.Service.Services
         /// </summary>
         /// <param name="refreshToken">The refresh token.</param>
         /// <returns></returns>
-        public async Task<AppActionResultMessage<DtoAuthent>> RefreshTokenAsync(string refreshToken)
+        public async Task<AppActionResultMessage<DtoRefreshToken>> RefreshTokenAsync(string refreshToken)
         {
-            var result = new AppActionResultMessage<DtoAuthent>();
+            var result = new AppActionResultMessage<DtoRefreshToken>();
 
             if (!IsValidateToken(refreshToken))
             {
@@ -291,17 +291,11 @@ namespace Flutter.Backend.Service.Services
 
             var role = await _roleRepository.GetAsync(r => r.Id == user.RoleId);
             var token = GenerateJwtToken(user.Id.ToString(), user.UserName, role.Name);
-            var refresh = GenerateRefresh(user.Id.ToString(), user.UserName, role.Name);
-            user.RefreshToken = refresh.RefreshToken;
-            user.SetUpdatedInFo(user.Id.ToString(), user.UserName);
-            _appUserRepository.Update(user, u => u.Id == user.Id);
 
-            var dtoRefreshToken = new DtoAuthent
+            var dtoRefreshToken = new DtoRefreshToken
             {
                 AccessToken = token.AccessToken,
                 ExpiresAccess = token.ExpiresAccess,
-                RefreshToken = refresh.RefreshToken,
-                ExpiresRefresh = refresh.ExpiresRefresh,
             };
 
             return await BuildResult(result, dtoRefreshToken, MSG_SAVE_SUCCESSFULLY);
