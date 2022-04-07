@@ -2,6 +2,7 @@
 using Flutter.Backend.Service.Models.Requests;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 
 namespace Flutter.Backend.Api.Controllers
@@ -117,7 +118,7 @@ namespace Flutter.Backend.Api.Controllers
 
 
         }
-
+            
         /// <summary>
         /// Refreshes the token.
         /// </summary>
@@ -125,11 +126,11 @@ namespace Flutter.Backend.Api.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("refresh-token")]
-        public async Task<IActionResult> RefreshToken([FromBody] string refreshToken)
+        public async Task<IActionResult> RefreshToken(RefreshTokenRequest request)
         {
             try
             {
-                var result = await _authenticateService.RefreshTokenAsync(refreshToken);
+                var result = await _authenticateService.RefreshTokenAsync(request.RefreshToken);
                 if (result.IsSuccess)
                 {
                     return Ok(result);
