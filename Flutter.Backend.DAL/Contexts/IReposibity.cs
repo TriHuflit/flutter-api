@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 
 namespace Flutter.Backend.DAL.Contexts
 {
-    public interface  IReposibity<T>
+    public interface IReposibity<T>
     {
         void Add(T item);
 
-        void Update( T item , Expression<Func<T, bool>> specification);
+        void Update(T item, Expression<Func<T, bool>> specification);
 
         Task<IEnumerable<T>> GetAll();
 
