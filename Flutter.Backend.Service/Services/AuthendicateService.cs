@@ -412,12 +412,12 @@ namespace Flutter.Backend.Service.Services
             var token = new JwtSecurityToken(_config[ConfigAppsettingConstaint.TokenIssuer],
                 _config[ConfigAppsettingConstaint.TokenIssuer],
                 claims,
-                expires: DateTime.Now.AddMinutes(5),
+                expires: DateTime.UtcNow.AddMinutes(5),
                 signingCredentials: creds);
 
             var dtoAppUser = new DtoAuthent();
             dtoAppUser.AccessToken = new JwtSecurityTokenHandler().WriteToken(token);
-            dtoAppUser.ExpiresAccess = DateTime.Now.AddHours(1);
+            dtoAppUser.ExpiresAccess = DateTime.UtcNow.AddHours(1);
 
             return dtoAppUser;
         }
@@ -437,7 +437,7 @@ namespace Flutter.Backend.Service.Services
             var token = new JwtSecurityToken(_config[ConfigAppsettingConstaint.TokenIssuer],
                 _config[ConfigAppsettingConstaint.TokenIssuer],
                 claims,
-                expires: DateTime.Now.AddDays(7),
+                expires: DateTime.UtcNow.AddDays(7),
                 signingCredentials: creds);
 
             var dtoAppUser = new DtoAuthent();
@@ -457,7 +457,7 @@ namespace Flutter.Backend.Service.Services
             if (jwtToken == null) return false;
 
 
-            if (jwtToken.ValidTo.ToLocalTime() < DateTime.Now) return false;
+            if (jwtToken.ValidTo.ToLocalTime() < DateTime.UtcNow) return false;
 
             return true;
         }
