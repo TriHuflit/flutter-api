@@ -68,6 +68,11 @@ namespace Flutter.Backend.Service.Models.Dtos
         public string Machine { get; set; }
 
         /// <summary>
+        /// MadeIn of product.| Rules : MaxLenght 50
+        /// </summary>     
+        public string MadeIn { get; set; }
+
+        /// <summary>
         /// Name of product | Rules : MaxLenght 50
         /// </summary>      
         public string Name { get; set; }
