@@ -73,6 +73,7 @@ namespace Flutter.Backend.Service.Services
                 WaterProofId = productInfo.WaterProofId,
                 Machine = request.Machine,
                 Feature = request.Feature,
+                MadeIn = request.MadeIn,
                 Name = request.Name,
                 Description = request.Description,
                 Guarantee = request.Guarantee,

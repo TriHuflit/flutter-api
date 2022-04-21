@@ -19,22 +19,11 @@ namespace Flutter.Backend.Service.Models.Dtos
 
         public string BrandID { get; set; }
         public string BrandName { get; set; }
+
         /// <summary>
-        /// Name of product | Rules : MaxLenght 50
-        /// </summary>      
+        /// Name of product.| Rules : MaxLenght 50
+        /// </summary>     
         public string Name { get; set; }
-
-        /// <summary>
-        /// Price at least of product.
-        /// </summary>
-
-        public decimal FromPrice { get; set; }
-
-        /// <summary>
-        /// Price at most of product.
-        /// </summary>
-
-        public decimal ToPrice { get; set; }
 
         /// <summary>
         /// Feature of product
@@ -42,19 +31,57 @@ namespace Flutter.Backend.Service.Models.Dtos
         public List<string> Feature { get; set; }
 
         /// <summary>
-        /// Short  Description of product. | Rules : MaxLenght 50
-        /// </summary>
-        public string Description { get; set; }
-
-        /// <summary>
-        /// Thumbnail image of product.
-        /// </summary>
-        public string Thumbnail { get; set; }
+        /// Crytal of product.
+        /// </summary>     
+        public string Crytal { get; set; }
 
         /// <summary>
         /// Machine of product.
         /// </summary>     
         public string Machine { get; set; }
+
+        /// <summary>
+        /// Guarantee of product
+        /// </summary>     
+        public int Guarantee { get; set; }
+
+        /// <summary>
+        /// Ablert  of product.
+        /// </summary>     
+        public string Ablert { get; set; }
+
+        /// <summary>
+        /// WaterProof.
+        /// </summary>     
+        public string WaterProofId { get; set; }
+        public string WaterProofName { get; set; }
+
+        /// <summary>
+        /// MadeIn of product.| Rules : MaxLenght 50
+        /// </summary>     
+        public string MadeIn { get; set; }
+
+        /// <summary>
+        /// Price at least of product.
+        /// </summary>
+        public decimal FromPrice { get; set; }
+
+        /// <summary>
+        /// Price at most of product.
+        /// </summary>    
+        public decimal ToPrice { get; set; }
+
+        /// <summary>
+        /// Short  Description of product. | Rules : MaxLenght 50
+        /// </summary>
+
+        public string Description { get; set; }
+
+        /// <summary>
+        /// Thumbnail image of product.
+        /// </summary>
+
+        public string Thumbnail { get; set; }
 
         /// <summary>
         /// Active product.
