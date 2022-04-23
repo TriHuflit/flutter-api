@@ -14,15 +14,13 @@ namespace Flutter.Backend.Service.Services
 {
     public class SendMailService : GenericErrorTextService, ISendMailService
     {
-        private readonly MailSettings _mailSettings;
-        
+        private readonly IMailSettings _mailSettings;
 
         public SendMailService(
-            IOptions<MailSettings> mailSettings,
+            IMailSettings mailSettings,
             IMessageService messageService) : base(messageService)
         {
-
-            _mailSettings = mailSettings.Value;
+            _mailSettings = mailSettings;
         }
 
         public async Task<AppActionResultMessage<string>> SendMailRegisterAsync(MailRequest request)

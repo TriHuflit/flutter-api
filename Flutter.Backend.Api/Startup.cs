@@ -1,3 +1,4 @@
+using Flutter.Backend.Common.Constains;
 using Flutter.Backend.DAL.Contracts;
 using Flutter.Backend.DAL.Implementations;
 using Flutter.Backend.Service.Models.Mappers;
@@ -102,8 +103,11 @@ namespace Flutter.Backend.Api
             {
                 options.SuppressModelStateInvalidFilter = true;
             });
+
+            //register service and respository
             services.AddInterfaceServices();
-            services.Configure<MailSettings>(Configuration.GetSection("MailSettings"));
+
+           
             services.AddTransient<IProductRepository, ProductRespository>();
             services.AddTransient<ICategoryRepository, CaterogyRespository>();
             services.AddTransient<IBrandRepository, BrandRespository>();
@@ -113,12 +117,25 @@ namespace Flutter.Backend.Api
             services.AddTransient<IRoleRepository, RoleRespository>();
             services.AddTransient<IMessageRepository, MessageResResponsitory>();
             services.AddTransient<IAppUserRepository, AppUserRepository>();
+
+            // database,cloud,redis,and email
             services.AddHttpContextAccessor();
             services.AddAutoMapper(typeof(AutoMapperProfile).Assembly);
             services.AddSingleton<IMongoClient, MongoClient>(sp => new MongoClient(Configuration.GetConnectionString("UrlConnection")));
+            services.AddDistributedRedisCache(options =>
+            {
+                options.Configuration = Configuration[ConfigAppsettingConstaint.RedisUrl];
+                options.InstanceName = Configuration[ConfigAppsettingConstaint.InstanceName];
+            });
             services.Configure<CloundinarySetting>(Configuration.GetSection(nameof(CloundinarySetting)));
+            services.Configure<MailSettings>(Configuration.GetSection(nameof(MailSettings)));
+
+
             services.AddSingleton<ICloundinarySetting>(sp =>
                sp.GetRequiredService<IOptions<CloundinarySetting>>().Value);
+            services.AddSingleton<IMailSettings>(sp =>
+              sp.GetRequiredService<IOptions<MailSettings>>().Value);
+
 
         }
 
