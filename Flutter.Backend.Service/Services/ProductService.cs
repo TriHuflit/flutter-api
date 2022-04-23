@@ -6,7 +6,9 @@ using Flutter.Backend.Service.IServices;
 using Flutter.Backend.Service.Models.Dtos;
 using Flutter.Backend.Service.Models.Requests;
 using Flutter.Backend.Service.Models.Responses;
+using Microsoft.Extensions.Caching.Distributed;
 using MongoDB.Bson;
+using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -21,6 +23,8 @@ namespace Flutter.Backend.Service.Services
         private readonly ICategoryRepository _categoryRepository;
         private readonly IBrandRepository _brandRepository;
         private readonly IWaterProofRepository _waterProofRepository;
+
+        private readonly IDistributedCache _cacheRedis;
         private readonly IMapper _mapper;
 
         private readonly IUploadImageService _uploadImageService;
@@ -34,6 +38,7 @@ namespace Flutter.Backend.Service.Services
             IClassifyProductRepository classifyProductRepository,
             IUploadImageService uploadImageService,
             ICurrentUserService currentUserService,
+            IDistributedCache cacheRedis,
             IMessageService messageService) : base(messageService)
         {
 
@@ -45,6 +50,7 @@ namespace Flutter.Backend.Service.Services
             _uploadImageService = uploadImageService;
             _currentUserService = currentUserService;
             _mapper = mapper;
+            _cacheRedis = cacheRedis;
 
         }
 
@@ -340,19 +346,26 @@ namespace Flutter.Backend.Service.Services
             int pageIndex = request.PageIndex > 1 ? request.PageIndex : 1;
             int pageSize = request.PageSize > 10 ? request.PageSize : 10;
 
-            var products = await _productRepository.FindByAsync(p => p.IsShow != ProductConstain.DELETE);
-            if (products == null)
+            IEnumerable<Product> products;
+            var dtoProducts = new List<DtoProduct>();
+
+            if (string.IsNullOrEmpty(_cacheRedis.GetString(RedisConstain.ALL_PRODUCTS)))
             {
-                return await BuildResult(result, ERR_MSG_PRODUCTS_NOT_FOUND);
+                products = await _productRepository.FindByAsync(p => p.IsShow == ProductConstain.ACTIVE);
+                // Pagination for Product
+                products = products.OrderBy(p => p.Name)
+                            .Skip((pageIndex - 1) * pageSize)
+                            .Take(pageSize)
+                            .ToList();
+                string productsJson = JsonConvert.SerializeObject(products);
+                _cacheRedis.SetString(RedisConstain.ALL_PRODUCTS, productsJson);
+                dtoProducts = _mapper.Map<IEnumerable<Product>, List<DtoProduct>>(products);
             }
-
-            // Pagination for Product
-            products = products.OrderBy(p => p.Name)
-                        .Skip((pageIndex - 1) * pageSize)
-                        .Take(pageSize)
-                        .ToList();
-
-            var dtoProducts = _mapper.Map<IEnumerable<Product>, List<DtoProduct>>(products);
+            else
+            {
+                var productsFromCache = _cacheRedis.GetString(RedisConstain.ALL_PRODUCTS);
+                dtoProducts = JsonConvert.DeserializeObject<List<DtoProduct>>(productsFromCache);
+            }
 
             foreach (var dtoProduct in dtoProducts)
             {
@@ -450,22 +463,28 @@ namespace Flutter.Backend.Service.Services
         {
             var result = new AppActionResultMessage<SearchResultData>();
             int pageIndex = request.PageIndex > 1 ? request.PageIndex : 1;
-            int pageSize = request.PageSize > 10 ? request.PageSize : 10;
+            int pageSize = request.PageSize > 10 ? request.PageSize : 10;  
+            IEnumerable<Product> products;
+            var dtoProducts = new List<DtoProduct>();
 
-            var products = await _productRepository.FindByAsync(p => p.IsShow == ProductConstain.ACTIVE);
-            if (products == null)
+            if (string.IsNullOrEmpty(_cacheRedis.GetString(RedisConstain.ALL_PRODUCTS_MOBILE)))
             {
-                return await BuildResult(result, ERR_MSG_PRODUCTS_NOT_FOUND);
+                products = await _productRepository.FindByAsync(p => p.IsShow == ProductConstain.ACTIVE);
+                // Pagination for Product
+                products = products.OrderBy(p => p.Name)
+                            .Skip((pageIndex - 1) * pageSize)
+                            .Take(pageSize)
+                            .ToList();
+                string productsJson = JsonConvert.SerializeObject(products);
+                _cacheRedis.SetString(RedisConstain.ALL_PRODUCTS_MOBILE, productsJson);
+                dtoProducts = _mapper.Map<IEnumerable<Product>, List<DtoProduct>>(products);
             }
-
-            // Pagination for Product
-            products = products.OrderBy(p => p.Name)
-                        .Skip((pageIndex - 1) * pageSize)
-                        .Take(pageSize)
-                        .ToList();
-
-            var dtoProducts = _mapper.Map<IEnumerable<Product>, List<DtoProduct>>(products);
-
+            else
+            {
+                var productsFromCache = _cacheRedis.GetString(RedisConstain.ALL_PRODUCTS_MOBILE);
+                dtoProducts = JsonConvert.DeserializeObject<List<DtoProduct>>(productsFromCache);
+            }
+               
             foreach (var dtoProduct in dtoProducts)
             {
                 var category = await _categoryRepository.GetAsync(c => c.Id == ObjectId.Parse(dtoProduct.CategoryID) && c.IsShow != CategoryConstain.DELETE);

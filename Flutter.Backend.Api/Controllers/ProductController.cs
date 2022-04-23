@@ -188,7 +188,7 @@ namespace Flutter.Backend.Api.Controllers
 
             try
             {
-                var result = await _productService.GetAllProductAsync(request);
+                var result = await _productService.GetAllProductMobileAsync(request);
                 if (!result.IsSuccess)
                 {
                     return NotFound(result);
