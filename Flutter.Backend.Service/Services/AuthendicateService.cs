@@ -197,19 +197,23 @@ namespace Flutter.Backend.Service.Services
             }
 
             var user = await _appUserRepository.GetAsync(u => u.UserName == request.UserName
-            && u.IsActive == AuthendicateConstain.ACTIVE);
+            && u.IsActive != AuthendicateConstain.DELETE);
 
             if (user != null)
             {
                 return await BuildError(result, ERR_MSG_USERNAME_IS_EXIST, request.UserName);
             }
 
-            if (user.Email == request.Email)
+            user = await _appUserRepository.GetAsync(u => u.Email == request.Email
+            && u.IsActive != AuthendicateConstain.DELETE);
+            if (user != null)
             {
                 return await BuildError(result, ERR_MSG_EMAIL_IS_EXIST, request.Email);
             }
 
-            if (user.Phone == request.Phone)
+            user = await _appUserRepository.GetAsync(u => u.Phone == request.Phone &&
+            u.IsActive != AuthendicateConstain.DELETE);
+            if (user != null)
             {
                 return await BuildError(result, ERR_MSG_PHONE_IS_EXIST, request.Phone);
             }
@@ -263,7 +267,12 @@ namespace Flutter.Backend.Service.Services
                 Subject = SendMailConstain.SubjectRegister,
                 ToEmail = request.Email
             };
-            var sendMailResult = _sendMailService.SendMailRegisterAsync(requestSendMail);
+
+            var sendMailResult = await _sendMailService.SendMailRegisterAsync(requestSendMail);
+            if (!sendMailResult.IsSuccess)
+            {
+                return await BuildError(result,ERR_MSG_EMAIL_IS_NOT_CONFIRM);
+            }
 
             return await BuildResult(result, newUser.Id.ToString(), MSG_SAVE_SUCCESSFULLY);
         }

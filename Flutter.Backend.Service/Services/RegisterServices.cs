@@ -1,5 +1,5 @@
 ﻿using Flutter.Backend.Service.IServices;
-using Flutter.Backend.DAL.Contracts;
+using Flutter.Backend.Common.Enums;
 using System.Linq;
 using System.Reflection;
 
@@ -9,6 +9,7 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static void AddInterfaceServices(this IServiceCollection @this)
         {
+            
             // Register Interface Service
             var interfaceType = typeof(IProductServices);
             var assembly = interfaceType.Assembly;
@@ -16,7 +17,9 @@ namespace Microsoft.Extensions.DependencyInjection
 
             var interfaceServices = definedTypes
                 .Where(t => t.GetTypeInfo().IsInterface)
-                .Where(t => t.GetTypeInfo().Name != "ICloundinarySetting");
+                .Where(t => t.GetTypeInfo().Name != SettingsEnum.ICloundinarySetting 
+                || t.GetTypeInfo().Name != SettingsEnum.IMailSetting 
+                || t.GetTypeInfo().Name != SettingsEnum.IRedisSettings);
 
             foreach (var interfaceService in interfaceServices)
             {
