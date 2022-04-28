@@ -24,7 +24,6 @@ namespace Flutter.Backend.Service.Services
         private readonly IBrandRepository _brandRepository;
         private readonly IWaterProofRepository _waterProofRepository;
 
-        private readonly IDistributedCache _cacheRedis;
         private readonly IMapper _mapper;
 
         private readonly IUploadImageService _uploadImageService;
@@ -38,7 +37,6 @@ namespace Flutter.Backend.Service.Services
             IClassifyProductRepository classifyProductRepository,
             IUploadImageService uploadImageService,
             ICurrentUserService currentUserService,
-            IDistributedCache cacheRedis,
             IMessageService messageService) : base(messageService)
         {
 
@@ -50,7 +48,6 @@ namespace Flutter.Backend.Service.Services
             _uploadImageService = uploadImageService;
             _currentUserService = currentUserService;
             _mapper = mapper;
-            _cacheRedis = cacheRedis;
 
         }
 
@@ -348,24 +345,13 @@ namespace Flutter.Backend.Service.Services
 
             IEnumerable<Product> products;
             var dtoProducts = new List<DtoProduct>();
-
-            if (string.IsNullOrEmpty(_cacheRedis.GetString(RedisConstain.ALL_PRODUCTS)))
-            {
-                products = await _productRepository.FindByAsync(p => p.IsShow == ProductConstain.ACTIVE);
-                // Pagination for Product
-                products = products.OrderBy(p => p.Name)
-                            .Skip((pageIndex - 1) * pageSize)
-                            .Take(pageSize)
-                            .ToList();
-                string productsJson = JsonConvert.SerializeObject(products);
-                _cacheRedis.SetString(RedisConstain.ALL_PRODUCTS, productsJson);
-                dtoProducts = _mapper.Map<IEnumerable<Product>, List<DtoProduct>>(products);
-            }
-            else
-            {
-                var productsFromCache = _cacheRedis.GetString(RedisConstain.ALL_PRODUCTS);
-                dtoProducts = JsonConvert.DeserializeObject<List<DtoProduct>>(productsFromCache);
-            }
+            products = await _productRepository.FindByAsync(p => p.IsShow != ProductConstain.DELETE);
+            // Pagination for Product
+            products = products.OrderBy(p => p.Name)
+                        .Skip((pageIndex - 1) * pageSize)
+                        .Take(pageSize)
+                        .ToList();
+            dtoProducts = _mapper.Map<IEnumerable<Product>, List<DtoProduct>>(products);
 
             foreach (var dtoProduct in dtoProducts)
             {
@@ -467,24 +453,14 @@ namespace Flutter.Backend.Service.Services
             IEnumerable<Product> products;
             var dtoProducts = new List<DtoProduct>();
 
-            if (string.IsNullOrEmpty(_cacheRedis.GetString(RedisConstain.ALL_PRODUCTS_MOBILE)))
-            {
-                products = await _productRepository.FindByAsync(p => p.IsShow == ProductConstain.ACTIVE);
-                // Pagination for Product
-                products = products.OrderBy(p => p.Name)
-                            .Skip((pageIndex - 1) * pageSize)
-                            .Take(pageSize)
-                            .ToList();
-                string productsJson = JsonConvert.SerializeObject(products);
-                _cacheRedis.SetString(RedisConstain.ALL_PRODUCTS_MOBILE, productsJson);
-                dtoProducts = _mapper.Map<IEnumerable<Product>, List<DtoProduct>>(products);
-            }
-            else
-            {
-                var productsFromCache = _cacheRedis.GetString(RedisConstain.ALL_PRODUCTS_MOBILE);
-                dtoProducts = JsonConvert.DeserializeObject<List<DtoProduct>>(productsFromCache);
-            }
-               
+            products = await _productRepository.FindByAsync(p => p.IsShow == ProductConstain.ACTIVE);
+            // Pagination for Product
+            products = products.OrderBy(p => p.Name)
+                        .Skip((pageIndex - 1) * pageSize)
+                        .Take(pageSize)
+                        .ToList();
+            dtoProducts = _mapper.Map<IEnumerable<Product>, List<DtoProduct>>(products);
+
             foreach (var dtoProduct in dtoProducts)
             {
                 var category = await _categoryRepository.GetAsync(c => c.Id == ObjectId.Parse(dtoProduct.CategoryID) && c.IsShow != CategoryConstain.DELETE);

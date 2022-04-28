@@ -122,11 +122,6 @@ namespace Flutter.Backend.Api
             services.AddHttpContextAccessor();
             services.AddAutoMapper(typeof(AutoMapperProfile).Assembly);
             services.AddSingleton<IMongoClient, MongoClient>(sp => new MongoClient(Configuration.GetConnectionString("UrlConnection")));
-            services.AddDistributedRedisCache(options =>
-            {
-                options.Configuration = Configuration[ConfigAppsettingConstaint.RedisUrl];
-                options.InstanceName = Configuration[ConfigAppsettingConstaint.InstanceName];
-            });
             services.Configure<CloundinarySetting>(Configuration.GetSection(nameof(CloundinarySetting)));
             services.Configure<MailSettings>(Configuration.GetSection(nameof(MailSettings)));
 
