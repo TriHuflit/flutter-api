@@ -412,7 +412,7 @@ namespace Flutter.Backend.Service.Services
             var token = new JwtSecurityToken(_config[ConfigAppsettingConstaint.TokenIssuer],
                 _config[ConfigAppsettingConstaint.TokenIssuer],
                 claims,
-                expires: DateTime.UtcNow.AddMinutes(5),
+                expires: DateTime.UtcNow.AddHours(1),
                 signingCredentials: creds);
 
             var dtoAppUser = new DtoAuthent();
