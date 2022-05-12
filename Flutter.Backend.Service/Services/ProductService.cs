@@ -6,9 +6,7 @@ using Flutter.Backend.Service.IServices;
 using Flutter.Backend.Service.Models.Dtos;
 using Flutter.Backend.Service.Models.Requests;
 using Flutter.Backend.Service.Models.Responses;
-using Microsoft.Extensions.Caching.Distributed;
 using MongoDB.Bson;
-using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -22,7 +20,6 @@ namespace Flutter.Backend.Service.Services
         private readonly IClassifyProductRepository _classifyProductRepository;
         private readonly ICategoryRepository _categoryRepository;
         private readonly IBrandRepository _brandRepository;
-        private readonly IWaterProofRepository _waterProofRepository;
 
         private readonly IMapper _mapper;
 
@@ -33,7 +30,6 @@ namespace Flutter.Backend.Service.Services
             IMapper mapper,
             ICategoryRepository categoryRepository,
             IBrandRepository brandRepository,
-            IWaterProofRepository waterProofRepository,
             IClassifyProductRepository classifyProductRepository,
             IUploadImageService uploadImageService,
             ICurrentUserService currentUserService,
@@ -43,7 +39,6 @@ namespace Flutter.Backend.Service.Services
             _productRepository = productRepository;
             _categoryRepository = categoryRepository;
             _brandRepository = brandRepository;
-            _waterProofRepository = waterProofRepository;
             _classifyProductRepository = classifyProductRepository;
             _uploadImageService = uploadImageService;
             _currentUserService = currentUserService;
@@ -73,7 +68,7 @@ namespace Flutter.Backend.Service.Services
                 BrandId = productInfo.BrandId,
                 Crytal = request.Crytal,
                 Ablert = request.Ablert,
-                WaterProofId = productInfo.WaterProofId,
+                WaterProof = request.WaterProof,
                 Machine = request.Machine,
                 Feature = request.Feature,
                 MadeIn = request.MadeIn,
@@ -202,9 +197,9 @@ namespace Flutter.Backend.Service.Services
                 product.Ablert = request.Ablert;
             }
 
-            if (!string.IsNullOrEmpty(request.WaterProofId))
+            if (!string.IsNullOrEmpty(request.WaterProof))
             {
-                product.WaterProofId = productInfo.WaterProofId;
+                product.WaterProof = request.WaterProof;
             }
 
             if (!string.IsNullOrEmpty(request.Name))
@@ -324,10 +319,6 @@ namespace Flutter.Backend.Service.Services
                 dtoproduct.BrandName = ProductDetailConstain.BrandName;
             else dtoproduct.BrandName = brand.Name;
 
-            var waterProof = await _waterProofRepository.Get(w => w.Id == product.WaterProofId);
-            if (waterProof == null)
-                dtoproduct.WaterProofName = ProductDetailConstain.WaterProofName;
-            else dtoproduct.WaterProofName = waterProof.Name;
 
             return await BuildResult(result, dtoproduct, MSG_FIND_SUCCESSFULLY);
 
@@ -526,10 +517,6 @@ namespace Flutter.Backend.Service.Services
                 dtoproduct.BrandName = ProductDetailConstain.BrandName;
             else dtoproduct.BrandName = brand.Name;
 
-            var waterProof = await _waterProofRepository.Get(w => w.Id == product.WaterProofId);
-            if (waterProof == null)
-                dtoproduct.WaterProofName = ProductDetailConstain.WaterProofName;
-            else dtoproduct.WaterProofName = waterProof.Name;
 
             return await BuildResult(result, dtoproduct, MSG_FIND_SUCCESSFULLY);
         }
@@ -549,11 +536,6 @@ namespace Flutter.Backend.Service.Services
                 return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.BrandId));
             }
 
-            if (!ObjectId.TryParse(request.WaterProofId, out ObjectId objWaterProofId))
-            {
-                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.WaterProofId));
-            }
-
 
             var brand = await _brandRepository.FindByAsync(x => x.Id == objBrandId);
             if (brand == null)
@@ -571,7 +553,6 @@ namespace Flutter.Backend.Service.Services
             {
                 CategoryId = objCategoryId,
                 BrandId = objBrandId,
-                WaterProofId = objWaterProofId
             };
 
             return result.BuildResult(productInfo);
@@ -589,7 +570,6 @@ namespace Flutter.Backend.Service.Services
 
             public ObjectId BrandId { get; set; }
 
-            public ObjectId WaterProofId { get; set; }
         }
         #endregion private class method
     }

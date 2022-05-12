@@ -17,12 +17,17 @@ namespace Flutter.Backend.Service.Models.Mappers
             CreateMap<Product, DtoProductDetail>(MemberList.Destination)
                .ForMember(l => l.Id, opt => opt.MapFrom(x => x.Id.ToString()))
                .ForMember(l => l.CategoryID, opt => opt.MapFrom(x => x.CategoryId.ToString()))
-               .ForMember(l => l.WaterProofId, opt => opt.MapFrom(x => x.WaterProofId.ToString()))
                .ForMember(l => l.BrandID, opt => opt.MapFrom(x => x.BrandId.ToString()));
 
             CreateMap<ClassifyProduct, DtoClassifyProduct>(MemberList.Destination)
                .ForMember(l => l.ClassifyProductId, opt => opt.MapFrom(x => x.Id.ToString()))
                .ForMember(l => l.ProductId, opt => opt.MapFrom(x => x.ProductId.ToString()));
+
+            CreateMap<Category, DtoCategory>(MemberList.Destination)
+                .ForMember(l => l.Id, opt => opt.MapFrom(x => x.Id.ToString()));
+
+            CreateMap<Brand, DtoBrand>(MemberList.Destination)
+                .ForMember(l => l.Id, opt => opt.MapFrom(x => x.Id.ToString()));
         }
     }
 }

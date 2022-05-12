@@ -29,7 +29,7 @@ namespace Flutter.Backend.Api.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("register")]
-        public async Task<IActionResult> RegisterUser(RegisterRequest request)
+        public async Task<IActionResult> RegisterUserAsync(RegisterRequest request)
         {
             try
             {
@@ -49,7 +49,7 @@ namespace Flutter.Backend.Api.Controllers
 
         [HttpPost]
         [Route("comfirm-email/{userId}")]
-        public async Task<IActionResult> ComfirmAccountByEmail(string userId)
+        public async Task<IActionResult> ComfirmAccountByEmailAsync(string userId)
         {
             try
             {
@@ -74,7 +74,7 @@ namespace Flutter.Backend.Api.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("login")]
-        public async Task<IActionResult> LoginUser(AuthendicateRequest request)
+        public async Task<IActionResult> LoginUserAsync(AuthendicateRequest request)
         {
             try
             {
@@ -100,7 +100,7 @@ namespace Flutter.Backend.Api.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("system-login")]
-        public async Task<IActionResult> LoginAdmin(AuthendicateRequest request)
+        public async Task<IActionResult> LoginAdminAsync(AuthendicateRequest request)
         {
             try
             {
@@ -126,11 +126,49 @@ namespace Flutter.Backend.Api.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("refresh-token")]
-        public async Task<IActionResult> RefreshToken(RefreshTokenRequest request)
+        public async Task<IActionResult> RefreshTokenAsync(RefreshTokenRequest request)
         {
             try
             {
                 var result = await _authenticateService.RefreshTokenAsync(request.RefreshToken);
+                if (result.IsSuccess)
+                {
+                    return Ok(result);
+                }
+                return BadRequest(result);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpPost]
+        [Route("send-email/reset-password")]
+        public async Task<IActionResult> SendEmailResetPassAsync(SendEmailResetPassRequest request)
+        {
+            try
+            {
+                var result = await _authenticateService.SendEmailResetPassAsync(request);
+                if (result.IsSuccess)
+                {
+                    return Ok(result);
+                }
+                return BadRequest(result);
+            }
+            catch(Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpPost]
+        [Route("comfirm-reset-password")]
+        public async Task<IActionResult> ResetPasswordAsync(ResetPasswordRequest request)
+        {
+            try
+            {
+                var result = await _authenticateService.ResetPasswordAsync(request);
                 if (result.IsSuccess)
                 {
                     return Ok(result);
