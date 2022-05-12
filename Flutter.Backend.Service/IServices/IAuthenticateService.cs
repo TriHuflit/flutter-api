@@ -16,5 +16,10 @@ namespace Flutter.Backend.Service.IServices
         Task<AppActionResultMessage<string>> ComfirmEmailAsync(string UserId);
 
         Task<AppActionResultMessage<DtoRefreshToken>> RefreshTokenAsync(string refreshToken);
+
+        Task<AppActionResultMessage<string>> SendEmailResetPassAsync(SendEmailResetPassRequest request);
+
+        Task<AppActionResultMessage<string>> ResetPasswordAsync(ResetPasswordRequest request);
+
     }
 }

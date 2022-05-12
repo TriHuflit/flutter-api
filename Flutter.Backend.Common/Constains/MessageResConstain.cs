@@ -23,12 +23,15 @@
         public const string ERR_MSG_401_UNAUTHORIZED = "ERR_MSG_401_UNAUTHORIZED";
         public const string ERR_MSG_USERNAME_PASSWORD_INCORRECT = "ERR_MSG_USERNAME_PASSWORD_INCORRECT";
         public const string ERR_MSG_USERNAME_IS_EXIST = "ERR_MSG_USERNAME_IS_EXIST";
+        public const string ERR_MSG_USERNAME_IS_NOT_FOUND = "ERR_MSG_USERNAME_IS_NOT_FOUND";
         public const string ERR_MSG_PHONE_IS_EXIST = "ERR_MSG_PHONE_IS_EXIST";
         public const string ERR_MSG_EMAIL_IS_EXIST = "ERR_MSG_EMAIL_IS_EXIST";
         public const string ERR_MSG_PASSWORD_ISVALID_FORMART = "ERR_MSG_DATA_NOT_FOUND";
         public const string ERR_MSG_USERNAME_IS_VALID = "ERR_MSG_USERNAME_IS_VALID";
         public const string ERR_MSG_EMAIL_IS_NOT_CONFIRM = "ERR_MSG_EMAIL_IS_NOT_CONFIRM";
         public const string ERR_MSG_ACCOUNT_INACTIVE = "ERR_MSG_ACCOUNT_INACTIVE";
+        public const string ERR_MSG_TEMPLATE_EMAIL_NOT_FOUND = "ERR_MSG_TEMPLATE_EMAIL_NOT_FOUND";
+        public const string ERR_MSG_EMAIL_NOT_FOUND = "ERR_MSG_EMAIL_NOT_FOUND";
         /// <summary>
         /// Message response result
         /// </summary>

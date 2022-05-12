@@ -49,7 +49,7 @@ namespace Flutter.Backend.DAL.Domains
         /// <summary>
         /// WaterProof.
         /// </summary>     
-        public ObjectId WaterProofId { get; set; }
+        public string WaterProof { get; set; }
 
         /// <summary>
         /// MadeIn of product.| Rules : MaxLenght 50

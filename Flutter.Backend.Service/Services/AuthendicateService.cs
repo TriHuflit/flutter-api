@@ -271,7 +271,7 @@ namespace Flutter.Backend.Service.Services
             var sendMailResult = await _sendMailService.SendMailRegisterAsync(requestSendMail);
             if (!sendMailResult.IsSuccess)
             {
-                return await BuildError(result,ERR_MSG_EMAIL_IS_NOT_CONFIRM);
+                return await BuildError(result, ERR_MSG_EMAIL_IS_NOT_CONFIRM);
             }
 
             return await BuildResult(result, newUser.Id.ToString(), MSG_SAVE_SUCCESSFULLY);
@@ -338,6 +338,83 @@ namespace Flutter.Backend.Service.Services
 
             return await BuildResult(result, MSG_UPDATE_SUCCESSFULLY);
         }
+
+        public async Task<AppActionResultMessage<string>> SendEmailResetPassAsync(SendEmailResetPassRequest request)
+        {
+            var result = new AppActionResultMessage<string>();
+
+            if (!_validationService.ValidateEmailFormat(request.Email))
+            {
+                return await BuildError(result, ERR_MSG_EMAIL_ISVALID_FORMART, nameof(request.Email));
+            }
+
+            var email = await _appUserRepository.GetAsync(u => u.Email == request.Email);
+            if(email == null)
+            {
+                return await BuildError(result, ERR_MSG_EMAIL_NOT_FOUND);
+            }
+
+            var template = await _templateSendMailRepository.GetAsync(t => t.Key == SendMailConstain.TemplateEmailResetPassword);
+            if (template == null)
+            {
+                return await BuildError(result, ERR_MSG_TEMPLATE_EMAIL_NOT_FOUND);
+            }
+
+            var urlComfirmEmail = String.Format(SendMailConstain.EmailResetPasswordUrl);
+            var requestSendMail = new MailRequest
+            {
+                Body = String.Format(template.TemplateHTML, urlComfirmEmail),
+                Subject = SendMailConstain.SubjectResetPassword,
+                ToEmail = request.Email
+            };
+
+            var sendMailResult = await _sendMailService.SendMailRegisterAsync(requestSendMail);
+            if (!sendMailResult.IsSuccess)
+            {
+                return await BuildError(result, ERR_MSG_EMAIL_IS_NOT_CONFIRM);
+            }
+
+            return await BuildResult(result, MSG_SEND_MAIL_SUCCESSFULLY);
+        }
+
+        public async Task<AppActionResultMessage<string>> ResetPasswordAsync(ResetPasswordRequest request)
+        {
+            var result = new AppActionResultMessage<string>();
+
+
+            //validation password
+            if (!_validationService.ValidatePasswordFormat(request.NewPassword))
+            {
+                return await BuildError(result, ERR_MSG_PASSWORD_ISVALID_FORMART);
+            }
+
+
+            //validation email
+            if (!_validationService.ValidateEmailFormat(request.Email))
+            {
+                return await BuildError(result, ERR_MSG_EMAIL_ISVALID_FORMART);
+            }
+
+            var user = await _appUserRepository.GetAsync(x => x.UserName == request.UserName && x.IsActive == AuthendicateConstain.ACTIVE);
+            if (user == null)
+            {
+                return await BuildError(result, ERR_MSG_USERNAME_IS_NOT_FOUND);
+            }
+
+            if (!user.IsEmailConfirmed)
+            {
+                return await BuildError(result, ERR_MSG_EMAIL_IS_NOT_CONFIRM, nameof(request.Email));
+            }
+
+            user.HashPassword = HashPassWord(request.NewPassword);
+            user.SetUpdatedInFo(user.Id.ToString(), user.UserName);
+            _appUserRepository.Update(user, u => u.Id == user.Id);
+
+
+            return await BuildResult(result, MSG_SAVE_SUCCESSFULLY);
+        }
+
+
 
         #region Private method
         private byte[] RSAEncrypt(byte[] plaintext, string destKey)
@@ -470,6 +547,8 @@ namespace Flutter.Backend.Service.Services
 
             return true;
         }
+
+
 
         #endregion Private method
     }

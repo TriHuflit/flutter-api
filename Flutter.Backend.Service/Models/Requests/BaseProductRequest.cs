@@ -63,7 +63,7 @@ namespace Flutter.Backend.Service.Models.Requests
         /// WaterProof.
         /// </summary>     
         [Required]
-        public string WaterProofId { get; set; }
+        public string WaterProof { get; set; }
 
         /// <summary>
         /// MadeIn of product.| Rules : MaxLenght 50
