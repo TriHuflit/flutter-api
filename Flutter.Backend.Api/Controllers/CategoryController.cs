@@ -77,7 +77,7 @@ namespace Flutter.Backend.Api.Controllers
         /// <param name="CategoryId"></param>
         /// <returns></returns>
         [HttpDelete]
-        [Route("detele/{CategoryId}")]
+        [Route("delete/{CategoryId}")]
         public async Task<IActionResult> DeleteCategoryAsync(string CategoryId)
         {
             var result = await _categoryService.DeleteCategoriesAsync(CategoryId);
