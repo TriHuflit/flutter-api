@@ -100,7 +100,7 @@ namespace Flutter.Backend.Service.Services
         {
             var result = new AppActionResultMessage<IEnumerable<DtoCategory>>();
 
-            var category = await _categoryRepository.GetAll();
+            var category = await _categoryRepository.FindByAsync(c=>c.IsShow != IsShowConstain.DELETE);
 
             var dtoCategories = _mapper.Map<IEnumerable<Category>, List<DtoCategory>>(category);
 
