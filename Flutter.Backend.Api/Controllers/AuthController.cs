@@ -1,5 +1,6 @@
 ﻿using Flutter.Backend.Service.IServices;
 using Flutter.Backend.Service.Models.Requests;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.ComponentModel.DataAnnotations;
@@ -126,6 +127,7 @@ namespace Flutter.Backend.Api.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("refresh-token")]
+        [Authorize]
         public async Task<IActionResult> RefreshTokenAsync(RefreshTokenRequest request)
         {
             try

@@ -28,6 +28,7 @@ namespace Flutter.Backend.Service.Services
 
         private readonly IValidationService _validationService;
         private readonly ISendMailService _sendMailService;
+        private readonly ICurrentUserService _currentUserService;
 
         public AuthendicateService(
             IAppUserRepository appUserRepository,
@@ -36,7 +37,8 @@ namespace Flutter.Backend.Service.Services
             ISendMailService sendMailService,
             IRoleRepository roleRepository,
             ITemplateSendMailRepository templateSendMailRepository,
-            IMessageService messageService) : base(messageService)
+            IMessageService messageService,
+            ICurrentUserService currentUserService) : base(messageService)
         {
             _appUserRepository = appUserRepository;
             _templateSendMailRepository = templateSendMailRepository;
@@ -44,6 +46,7 @@ namespace Flutter.Backend.Service.Services
             _validationService = validationService;
             _sendMailService = sendMailService;
             _config = config;
+            _currentUserService = currentUserService;
         }
 
         /// <summary>
@@ -291,7 +294,7 @@ namespace Flutter.Backend.Service.Services
                 return await BuildError(result, ERR_MSG_REFRESH_TOKEN_IS_VALID, nameof(refreshToken));
             }
 
-            var user = await _appUserRepository.GetAsync(u => u.RefreshToken == refreshToken && u.IsActive == AuthendicateConstain.ACTIVE);
+            var user = await _appUserRepository.GetAsync(u => u.Id == ObjectId.Parse(_currentUserService.UserId) && u.IsActive == AuthendicateConstain.ACTIVE);
 
             if (user == null)
             {
@@ -498,8 +501,10 @@ namespace Flutter.Backend.Service.Services
             var token = new JwtSecurityToken(_config[ConfigAppsettingConstaint.TokenIssuer],
                 _config[ConfigAppsettingConstaint.TokenIssuer],
                 claims,
-                expires: DateTime.UtcNow.AddHours(1),
+                expires: DateTime.UtcNow.AddSeconds(15),
                 signingCredentials: creds);
+
+            var claimIdentites = new ClaimsIdentity(claims);
 
             var dtoAppUser = new DtoAuthent();
             dtoAppUser.AccessToken = new JwtSecurityTokenHandler().WriteToken(token);

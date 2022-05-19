@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using Flutter.Backend.Common.Constains;
 using Flutter.Backend.DAL.Contracts;
 using Flutter.Backend.DAL.Domains;
 using Flutter.Backend.Service.IServices;
 using Flutter.Backend.Service.Models.Dtos;
+using Flutter.Backend.Service.Models.Requests;
 using MongoDB.Bson;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -13,17 +15,66 @@ namespace Flutter.Backend.Service.Services
     public class BrandService : GenericErrorTextService, IBrandService
     {
         private readonly IBrandRepository _brandRepository;
-        private readonly IMapper _mapper;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IUploadImageService _uploadImageService;
+
+        private readonly IMapper _mapper;
 
         public BrandService(IBrandRepository brandRepository,
             IMapper mapper,
             ICurrentUserService currentUserService,
+            IUploadImageService uploadImageService,
             IMessageService messageService) : base(messageService)
         {
             _brandRepository = brandRepository;
-            _mapper = mapper;
             _currentUserService = currentUserService;
+            _uploadImageService = uploadImageService;
+            _mapper = mapper;
+        }
+
+        public async Task<AppActionResultMessage<string>> CreateBrandAsync(BaseBrandRequest request)
+        {
+            var result = new AppActionResultMessage<string>();
+
+            var brand = new Brand
+            {
+                Name = request.Name,
+                IsShow = request.IsShow,
+            };
+
+            var validateImage = await _uploadImageService.UploadImage(request.ImageBrand);
+            if (!validateImage.IsSuccess)
+            {
+                return await BuildError(result, validateImage.Message);
+            }
+
+            brand.ImageBrand = validateImage.Data;
+            brand.SetFullInfo(_currentUserService.UserId, _currentUserService.UserName);
+            _brandRepository.Add(brand);
+
+            return await BuildResult(result, brand.Id.ToString(), MSG_SAVE_SUCCESSFULLY);
+        }
+
+        public async Task<AppActionResultMessage<string>> DeleteBrandAsync(string CategoryId)
+        {
+            var result = new AppActionResultMessage<string>();
+
+            if (!ObjectId.TryParse(CategoryId, out ObjectId objCategoryId))
+            {
+                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(CategoryId));
+            }
+
+            var brand = await _brandRepository.GetAsync(c => c.Id == objCategoryId && c.IsShow != IsShowConstain.DELETE);
+            if (brand == null)
+            {
+                return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, nameof(CategoryId));
+            }
+
+            brand.IsShow = IsShowConstain.DELETE;
+            brand.SetUpdatedInFo(_currentUserService.UserId, _currentUserService.UserName);
+            _brandRepository.Update(brand, c => c.Id == objCategoryId);
+
+            return await BuildResult(result, CategoryId, MSG_DELETE_SUCCESSFULLY);
         }
 
         public async Task<AppActionResultMessage<IEnumerable<DtoBrand>>> GetAllBrandByIdCategoryAsync(string CategoryId)
@@ -42,5 +93,54 @@ namespace Flutter.Backend.Service.Services
             return await BuildResult(result,dtoBrand, MSG_FIND_SUCCESSFULLY);
             
         }
+
+        public async Task<AppActionResultMessage<string>> UpdateBrandsAsync(UpdateBrandRequest request)
+        {
+            var result = new AppActionResultMessage<string>();
+
+            if (!ObjectId.TryParse(request.Id, out ObjectId objCategoryId))
+            {
+                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.Id));
+            }
+
+            var brand = await _brandRepository.GetAsync(c => c.Id == objCategoryId && c.IsShow != IsShowConstain.DELETE);
+            if (brand == null)
+            {
+                return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, nameof(request.Id));
+            }
+
+            if (!string.IsNullOrEmpty(request.Name))
+            {
+                brand.Name = request.Name;
+            }
+
+            if (IsValidateStatusCategory(request.IsShow))
+            {
+                brand.IsShow = request.IsShow;
+            }
+
+            if (!string.IsNullOrEmpty(request.ImageBrand) && brand.ImageBrand != request.ImageBrand)
+            {
+                var validateImage = await _uploadImageService.UploadImage(request.ImageBrand);
+                if (!validateImage.IsSuccess)
+                {
+                    return await BuildError(result, validateImage.Message);
+                }
+                brand.ImageBrand = validateImage.Data;
+            }
+
+            brand.SetUpdatedInFo(_currentUserService.UserId, _currentUserService.UserName);
+            _brandRepository.Update(brand, u => u.Id == objCategoryId);
+
+            return await BuildResult(result, request.Id, MSG_UPDATE_SUCCESSFULLY);
+        }
+
+
+        #region private method
+        private bool IsValidateStatusCategory(int isShow)
+        {
+            return isShow == IsShowConstain.ACTIVE || isShow == IsShowConstain.INACTIVE;
+        }
+        #endregion private method
     }
 }

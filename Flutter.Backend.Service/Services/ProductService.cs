@@ -77,11 +77,7 @@ namespace Flutter.Backend.Service.Services
                 Guarantee = request.Guarantee,
                 IsShow = request.IsShow,
             };
-
-            if (string.IsNullOrEmpty(request.Thumbnail))
-            {
-                return await BuildError(result, ERR_MSG_EMPTY_DATA, nameof(request.Thumbnail));
-            }
+          
             var validateImage = await _uploadImageService.UploadImage(request.Thumbnail);
 
             if (!validateImage.IsSuccess)
@@ -163,7 +159,7 @@ namespace Flutter.Backend.Service.Services
                 return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.Id));
             }
 
-            var product = await _productRepository.Get(p => p.Id == objProductId && p.IsShow != ProductConstain.DELETE);
+            var product = await _productRepository.Get(p => p.Id == objProductId && p.IsShow != IsShowConstain.DELETE);
             if (product == null)
             {
                 return await BuildError(result, ERR_MSG_PRODUCT_NOT_FOUND, nameof(product));
@@ -227,7 +223,7 @@ namespace Flutter.Backend.Service.Services
                 product.MadeIn = request.MadeIn;
             }
 
-            if (request.IsShow.HasValue)
+            if (IsValidateStatusProduct(request.IsShow))
             {
                 product.IsShow = request.IsShow;
             }
@@ -264,13 +260,13 @@ namespace Flutter.Backend.Service.Services
                 return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(productId));
             }
 
-            var product = await _productRepository.Get(p => p.Id == objProductId && p.IsShow != ProductConstain.DELETE);
+            var product = await _productRepository.Get(p => p.Id == objProductId && p.IsShow != IsShowConstain.DELETE);
             if (product == null)
             {
                 return await BuildError(result, ERR_MSG_EMPTY_DATA, nameof(product));
             }
 
-            product.IsShow = ProductConstain.DELETE;
+            product.IsShow = IsShowConstain.DELETE;
 
             product.SetUpdatedInFo(_currentUserService.UserId, _currentUserService.UserName);
             _productRepository.Update(product, p => p.Id == product.Id);
@@ -293,7 +289,7 @@ namespace Flutter.Backend.Service.Services
                 return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(productId));
             }
 
-            var product = await _productRepository.Get(p => p.Id == objProductId && p.IsShow != ProductConstain.DELETE);
+            var product = await _productRepository.Get(p => p.Id == objProductId && p.IsShow != IsShowConstain.DELETE);
             if (product == null)
             {
                 return await BuildResult(result, ERR_MSG_PRODUCT_NOT_FOUND, nameof(product));
@@ -301,7 +297,7 @@ namespace Flutter.Backend.Service.Services
 
             var dtoproduct = _mapper.Map<Product, DtoProductDetail>(product);
 
-            var classifyProducts = await _classifyProductRepository.FindByAsync(c => c.ProductId == product.Id && c.IsShow != ProductConstain.DELETE);
+            var classifyProducts = await _classifyProductRepository.FindByAsync(c => c.ProductId == product.Id && c.IsShow != IsShowConstain.DELETE);
 
             if (classifyProducts != null)
             {
@@ -336,7 +332,7 @@ namespace Flutter.Backend.Service.Services
 
             IEnumerable<Product> products;
             var dtoProducts = new List<DtoProduct>();
-            products = await _productRepository.FindByAsync(p => p.IsShow != ProductConstain.DELETE);
+            products = await _productRepository.FindByAsync(p => p.IsShow != IsShowConstain.DELETE);
             // Pagination for Product
             products = products.OrderBy(p => p.Name)
                         .Skip((pageIndex - 1) * pageSize)
@@ -346,13 +342,13 @@ namespace Flutter.Backend.Service.Services
 
             foreach (var dtoProduct in dtoProducts)
             {
-                var category = await _categoryRepository.GetAsync(c => c.Id == ObjectId.Parse(dtoProduct.CategoryID) && c.IsShow != CategoryConstain.DELETE);
+                var category = await _categoryRepository.GetAsync(c => c.Id == ObjectId.Parse(dtoProduct.CategoryId) && c.IsShow != IsShowConstain.DELETE);
                 if (category != null)
                 {
                     dtoProduct.CategoryName = category.Name;
                 }
 
-                var brand = await _brandRepository.GetAsync(b => b.Id == ObjectId.Parse(dtoProduct.BrandID) && b.IsShow != BrandConstain.DELETE);
+                var brand = await _brandRepository.GetAsync(b => b.Id == ObjectId.Parse(dtoProduct.BrandId) && b.IsShow != IsShowConstain.DELETE);
                 if (brand != null)
                 {
                     dtoProduct.BrandName = brand.Name;
@@ -395,12 +391,12 @@ namespace Flutter.Backend.Service.Services
             if (!string.IsNullOrEmpty(request.KeySearch))
             {
                 products = await _productRepository.FindByAsync(p => p.Name.ToLower().Contains(request.KeySearch.ToLower())
-                && p.IsShow != ProductConstain.DELETE);
+                && p.IsShow != IsShowConstain.DELETE);
             }
 
             if (!string.IsNullOrEmpty(request.CategorySearch))
             {
-                category = await _categoryRepository.GetAsync(c => c.Name.ToLower().Contains(request.CategorySearch.ToLower()) && c.IsShow != ProductConstain.DELETE);
+                category = await _categoryRepository.GetAsync(c => c.Name.ToLower().Contains(request.CategorySearch.ToLower()) && c.IsShow != IsShowConstain.DELETE);
                 if (category != null)
                 {
                     products = await _productRepository.FindByAsync(p => p.CategoryId == category.Id);
@@ -410,7 +406,7 @@ namespace Flutter.Backend.Service.Services
 
             if (!string.IsNullOrEmpty(request.BrandSearch))
             {
-                brand = await _brandRepository.GetAsync(b => b.Name.ToLower().Contains(request.BrandSearch.ToLower()) && b.IsShow != ProductConstain.DELETE);
+                brand = await _brandRepository.GetAsync(b => b.Name.ToLower().Contains(request.BrandSearch.ToLower()) && b.IsShow != IsShowConstain.DELETE);
                 if (brand != null)
                 {
                     products = await _productRepository.FindByAsync(p => p.BrandId == brand.Id);
@@ -444,7 +440,7 @@ namespace Flutter.Backend.Service.Services
             IEnumerable<Product> products;
             var dtoProducts = new List<DtoProduct>();
 
-            products = await _productRepository.FindByAsync(p => p.IsShow == ProductConstain.ACTIVE);
+            products = await _productRepository.FindByAsync(p => p.IsShow == IsShowConstain.ACTIVE);
             // Pagination for Product
             products = products.OrderBy(p => p.Name)
                         .Skip((pageIndex - 1) * pageSize)
@@ -454,13 +450,13 @@ namespace Flutter.Backend.Service.Services
 
             foreach (var dtoProduct in dtoProducts)
             {
-                var category = await _categoryRepository.GetAsync(c => c.Id == ObjectId.Parse(dtoProduct.CategoryID) && c.IsShow != CategoryConstain.DELETE);
+                var category = await _categoryRepository.GetAsync(c => c.Id == ObjectId.Parse(dtoProduct.CategoryId) && c.IsShow != IsShowConstain.DELETE);
                 if (category != null)
                 {
                     dtoProduct.CategoryName = category.Name;
                 }
 
-                var brand = await _brandRepository.GetAsync(b => b.Id == ObjectId.Parse(dtoProduct.BrandID) && b.IsShow != BrandConstain.DELETE);
+                var brand = await _brandRepository.GetAsync(b => b.Id == ObjectId.Parse(dtoProduct.BrandId) && b.IsShow != IsShowConstain.DELETE);
                 if (brand != null)
                 {
                     dtoProduct.BrandName = brand.Name;
@@ -491,7 +487,7 @@ namespace Flutter.Backend.Service.Services
                 return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(productId));
             }
 
-            var product = await _productRepository.Get(p => p.Id == objProductId && p.IsShow == ProductConstain.ACTIVE);
+            var product = await _productRepository.Get(p => p.Id == objProductId && p.IsShow == IsShowConstain.ACTIVE);
             if (product == null)
             {
                 return await BuildResult(result, ERR_MSG_PRODUCT_NOT_FOUND, nameof(product));
@@ -499,7 +495,7 @@ namespace Flutter.Backend.Service.Services
 
             var dtoproduct = _mapper.Map<Product, DtoProductDetail>(product);
 
-            var classifyProducts = await _classifyProductRepository.FindByAsync(c => c.ProductId == product.Id && c.IsShow == ProductConstain.ACTIVE);
+            var classifyProducts = await _classifyProductRepository.FindByAsync(c => c.ProductId == product.Id && c.IsShow == IsShowConstain.ACTIVE);
 
             if (classifyProducts != null)
             {
@@ -558,7 +554,10 @@ namespace Flutter.Backend.Service.Services
             return result.BuildResult(productInfo);
         }
 
-
+        private bool IsValidateStatusProduct(int isShow)
+        {
+            return isShow == IsShowConstain.ACTIVE || isShow == IsShowConstain.INACTIVE;
+        }
 
 
         #endregion private method

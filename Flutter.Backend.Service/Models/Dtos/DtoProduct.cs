@@ -11,13 +11,13 @@ namespace Flutter.Backend.Service.Models.Dtos
         /// <summary>
         /// Category of product
         /// </summary>
-        public string CategoryID { get; set; }
+        public string CategoryId { get; set; }
         public string CategoryName { get; set; }
         /// <summary>
         /// Brand of product.
         /// </summary>
 
-        public string BrandID { get; set; }
+        public string BrandId { get; set; }
         public string BrandName { get; set; }
         /// <summary>
         /// Name of product | Rules : MaxLenght 50

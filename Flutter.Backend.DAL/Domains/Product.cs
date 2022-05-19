@@ -81,6 +81,6 @@ namespace Flutter.Backend.DAL.Domains
         /// <summary>
         /// Active product.
         /// </summary>
-        public int? IsShow { get; set; }
+        public int IsShow { get; set; }
     }
 }
