@@ -90,7 +90,6 @@ namespace Flutter.Backend.Service.Models.Dtos
         /// <summary>
         /// WaterProof.
         /// </summary>     
-        public string WaterProofId { get; set; }
-        public string WaterProofName { get; set; }
+        public string WaterProof{ get; set; }
     }
 }
