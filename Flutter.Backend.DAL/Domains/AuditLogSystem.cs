@@ -21,7 +21,7 @@ namespace Flutter.Backend.DAL.Domains
         public ObjectId UpdatedByID { get; set; }
 
 
-        public virtual void SetCreatedInFo(string actionUserId , string actionUserName )
+        public virtual void SetCreatedInFor(string actionUserId , string actionUserName )
         {
             CreatedByName = actionUserName;
             if(ObjectId.TryParse(actionUserId, out ObjectId Userid))
@@ -31,7 +31,7 @@ namespace Flutter.Backend.DAL.Domains
             CreatedByTime = DateTime.Now;
         }
 
-        public virtual void SetUpdatedInFo(string actionUserId , string actionUserName)
+        public virtual void SetUpdatedInFor(string actionUserId , string actionUserName)
         {
             UpdatedByName = actionUserName;
             if (ObjectId.TryParse(actionUserId, out ObjectId Userid))
@@ -41,10 +41,10 @@ namespace Flutter.Backend.DAL.Domains
             UpdatedByTime = DateTime.Now;
         }
 
-        public virtual void SetFullInfo(string actionUserId, string actionUserName)
+        public virtual void SetFullInfor(string actionUserId, string actionUserName)
         {
-            SetCreatedInFo(actionUserId, actionUserName);
-            SetUpdatedInFo(actionUserId , actionUserName);
+            SetCreatedInFor(actionUserId, actionUserName);
+            SetUpdatedInFor(actionUserId , actionUserName);
         }
 
     }

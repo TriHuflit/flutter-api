@@ -18,13 +18,13 @@ namespace Flutter.Backend.Service.Models.Dtos
         /// <summary>
         /// Brand of product.
         /// </summary>
-        public string BrandID { get; set; }
+        public string BrandId { get; set; }
         public string BrandName { get; set; }
 
         /// <summary>
         /// Category of product
         /// </summary>
-        public string CategoryID { get; set; }
+        public string CategoryId { get; set; }
         public string CategoryName { get; set; }
 
         /// <summary>
@@ -55,7 +55,7 @@ namespace Flutter.Backend.Service.Models.Dtos
         /// <summary>
         /// Guarantee of product
         /// </summary>     
-        public DateTime Guarantee { get; set; }
+        public int Guarantee { get; set; }
 
         /// <summary>
         /// Active product.

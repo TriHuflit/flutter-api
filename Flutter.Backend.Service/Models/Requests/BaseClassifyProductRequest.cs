@@ -1,47 +1,44 @@
-﻿namespace Flutter.Backend.Service.Models.Dtos
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Flutter.Backend.Service.Models.Requests
 {
-    public class DtoClassifyProduct : DtoAuditLogSystem
+    public class BaseClassifyProductRequest
     {
-
-
-        /// <summary>
-        /// Gets or sets the product identifier.
-        /// </summary>
-        public string Id { get; set; }
-
-        /// <summary>
-        /// Gets or sets the product identifier.
-        /// </summary>
-        public string ProductId { get; set; }
 
         /// <summary>
         /// Image
         /// </summary>
+        [Required]
         public string Image { get; set; }
 
         /// <summary>
         /// Name
         /// </summary>
+        [Required]
         public string Name { get; set; }
 
         /// <summary>
         /// OriginalPrice
         /// </summary>
+        [Required]
         public decimal OriginalPrice { get; set; }
 
         /// <summary>
         /// PromotionPrice
         /// </summary>
+        [Required]
         public decimal PromotionPrice { get; set; }
 
         /// <summary>
         /// Stock
         /// </summary>
+        [Required]
         public int Stock { get; set; }
 
         /// <summary>
         /// IsShow
         /// </summary>
-        public int? IsShow { get; set; }
+        [Required]
+        public int IsShow { get; set; }
     }
 }

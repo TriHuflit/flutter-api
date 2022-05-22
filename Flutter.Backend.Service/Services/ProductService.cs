@@ -77,7 +77,7 @@ namespace Flutter.Backend.Service.Services
                 Guarantee = request.Guarantee,
                 IsShow = request.IsShow,
             };
-          
+
             var validateImage = await _uploadImageService.UploadImage(request.Thumbnail);
 
             if (!validateImage.IsSuccess)
@@ -86,7 +86,7 @@ namespace Flutter.Backend.Service.Services
             }
 
             newProduct.Thumbnail = validateImage.Data;
-            newProduct.SetFullInfo(_currentUserService.UserId, _currentUserService.UserName);
+            newProduct.SetFullInfor(_currentUserService.UserId, _currentUserService.UserName);
 
             _productRepository.Add(newProduct);
 
@@ -119,7 +119,7 @@ namespace Flutter.Backend.Service.Services
                     return await BuildError(result, validateImageClassifyProduct.Message);
                 }
                 newClassifyProduct.Image = validateImageClassifyProduct.Data;
-                newClassifyProduct.SetFullInfo(_currentUserService.UserId, _currentUserService.UserName);
+                newClassifyProduct.SetFullInfor(_currentUserService.UserId, _currentUserService.UserName);
 
                 _classifyProductRepository.Add(newClassifyProduct);
 
@@ -154,6 +154,7 @@ namespace Flutter.Backend.Service.Services
         {
             var result = new AppActionResultMessage<string>();
 
+            // Update Product
             if (!ObjectId.TryParse(request.Id, out ObjectId objProductId))
             {
                 return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.Id));
@@ -238,10 +239,143 @@ namespace Flutter.Backend.Service.Services
 
                 product.Thumbnail = validateImage.Data.ToString();
             }
-            product.Guarantee = request.Guarantee;
-            product.SetUpdatedInFo(_currentUserService.UserId, _currentUserService.UserName);
-            _productRepository.Update(product, p => p.Id == product.Id);
 
+            product.Guarantee = request.Guarantee;
+            var classifyProducts = await _classifyProductRepository.FindByAsync(c => c.ProductId == objProductId
+                    && c.IsShow != IsShowConstain.DELETE);
+            foreach (var item in classifyProducts)
+            {
+                item.SetUpdatedInFor(_currentUserService.UserId, _currentUserService.UserName);
+                item.IsShow = IsShowConstain.DELETE;
+                _classifyProductRepository.Update(item, i => i.Id == item.Id);
+            }
+
+
+            // Update or Create new classifyProduct
+            foreach (var classifyProduct in request.ClassifyProducts)
+            {
+                bool isDelele = true;
+                if (classifyProduct.Id != null)
+                {
+                    if (!ObjectId.TryParse(classifyProduct.Id, out ObjectId objClassPro))
+                    {
+                        return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(classifyProduct.Id));
+                    }
+
+                    foreach (var item in classifyProducts)
+                    {
+                        if (item.Id == objClassPro)
+                        {
+                            item.SetUpdatedInFor(_currentUserService.UserId, _currentUserService.UserName);
+                            item.IsShow = classifyProduct.IsShow;
+                            _classifyProductRepository.Update(item, i => i.Id == objClassPro);
+                        }
+                    }
+                    var oldClassifyProduct = await _classifyProductRepository.GetAsync(o => o.Id == objClassPro
+                      && o.ProductId == objProductId && o.IsShow != IsShowConstain.DELETE);
+
+                    if (oldClassifyProduct == null)
+                    {
+                        return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, nameof(oldClassifyProduct));
+                    }
+
+                    if (!string.IsNullOrEmpty(classifyProduct.Name))
+                    {
+                        oldClassifyProduct.Name = classifyProduct.Name;
+                    }
+
+                    if (!string.IsNullOrEmpty(classifyProduct.Image) && classifyProduct.Image != oldClassifyProduct.Image)
+                    {
+                        var validateImage = await _uploadImageService.UploadImage(classifyProduct.Image);
+                        if (!validateImage.IsSuccess)
+                        {
+                            return await BuildError(result, validateImage.Message);
+                        }
+
+                        oldClassifyProduct.Image = validateImage.Data.ToString();
+                    }
+
+                    if (!IsValidateStatusProduct(classifyProduct.IsShow))
+                    {
+                        return await BuildError(result, "Trạng thái loại sản phẩm không hợp lệ");
+                    }
+
+                    oldClassifyProduct.IsShow = classifyProduct.IsShow;
+                    oldClassifyProduct.OriginalPrice = classifyProduct.OriginalPrice;
+                    oldClassifyProduct.PromotionPrice = classifyProduct.PromotionPrice;
+                    oldClassifyProduct.Stock = classifyProduct.Stock;
+                    oldClassifyProduct.SetUpdatedInFor(_currentUserService.UserId, _currentUserService.UserName);
+                    _classifyProductRepository.Update(oldClassifyProduct, o => o.Id == oldClassifyProduct.Id);
+
+                    if (product.FromPrice == 0 && product.ToPrice == 0)
+                    {
+                        product.FromPrice = oldClassifyProduct.OriginalPrice;
+                        product.ToPrice = 0;
+                    }
+
+                    if (product.FromPrice > oldClassifyProduct.OriginalPrice)
+                    {
+                        product.FromPrice = oldClassifyProduct.OriginalPrice;
+                    }
+
+                    if (product.ToPrice < oldClassifyProduct.OriginalPrice)
+                    {
+                        product.ToPrice = oldClassifyProduct.OriginalPrice;
+                    }
+
+                }
+                else
+                {
+                    //classifyProduct Create new
+                    if (string.IsNullOrEmpty(classifyProduct.Name))
+                    {
+                        return await BuildError(result, ERR_MSG_EMPTY_DATA, nameof(classifyProduct.Name));
+                    }
+
+                    var newClassifyProduct = new ClassifyProduct
+                    {
+                        Name = classifyProduct.Name,
+                        OriginalPrice = classifyProduct.OriginalPrice,
+                        PromotionPrice = classifyProduct.PromotionPrice,
+                        IsShow = classifyProduct.IsShow,
+                        Stock = classifyProduct.Stock,
+                        ProductId = objProductId,
+
+                    };
+
+                    if (string.IsNullOrEmpty(classifyProduct.Image))
+                    {
+                        return await BuildError(result, ERR_MSG_EMPTY_DATA, nameof(classifyProduct.Image));
+                    }
+
+                    var validateImageClassifyProduct = await _uploadImageService.UploadImage(classifyProduct.Image);
+                    if (!validateImageClassifyProduct.IsSuccess)
+                    {
+                        return await BuildError(result, validateImageClassifyProduct.Message);
+                    }
+                    newClassifyProduct.Image = validateImageClassifyProduct.Data;
+                    newClassifyProduct.SetFullInfor(_currentUserService.UserId, _currentUserService.UserName);
+                    _classifyProductRepository.Add(newClassifyProduct);
+
+                    if (product.FromPrice == 0 && product.ToPrice == 0)
+                    {
+                        product.FromPrice = newClassifyProduct.OriginalPrice;
+                        product.ToPrice = 0;
+                    }
+
+                    if (product.FromPrice > newClassifyProduct.OriginalPrice)
+                    {
+                        product.FromPrice = newClassifyProduct.OriginalPrice;
+                    }
+
+                    if (product.ToPrice < newClassifyProduct.OriginalPrice)
+                    {
+                        product.ToPrice = newClassifyProduct.OriginalPrice;
+                    }
+                }
+            }
+            product.SetUpdatedInFor(_currentUserService.UserId, _currentUserService.UserName);
+            _productRepository.Update(product, p => p.Id == product.Id);
             return await BuildResult(result, product.Id.ToString(), MSG_UPDATE_SUCCESSFULLY);
         }
 
@@ -268,8 +402,16 @@ namespace Flutter.Backend.Service.Services
 
             product.IsShow = IsShowConstain.DELETE;
 
-            product.SetUpdatedInFo(_currentUserService.UserId, _currentUserService.UserName);
+            product.SetUpdatedInFor(_currentUserService.UserId, _currentUserService.UserName);
             _productRepository.Update(product, p => p.Id == product.Id);
+
+            var listClassifyProduct = await _classifyProductRepository.FindByAsync(c => c.ProductId == product.Id && c.IsShow != IsShowConstain.DELETE);
+            foreach (var item in listClassifyProduct)
+            {
+                item.IsShow = IsShowConstain.DELETE;
+                item.SetUpdatedInFor(_currentUserService.UserId, _currentUserService.UserName);
+                _classifyProductRepository.Update(item,c=>c.Id == item.Id);
+            }
 
             return await BuildResult(result, productId, MSG_DELETE_SUCCESSFULLY);
         }
@@ -436,7 +578,7 @@ namespace Flutter.Backend.Service.Services
         {
             var result = new AppActionResultMessage<SearchResultData>();
             int pageIndex = request.PageIndex > 1 ? request.PageIndex : 1;
-            int pageSize = request.PageSize > 10 ? request.PageSize : 10;  
+            int pageSize = request.PageSize > 10 ? request.PageSize : 10;
             IEnumerable<Product> products;
             var dtoProducts = new List<DtoProduct>();
 

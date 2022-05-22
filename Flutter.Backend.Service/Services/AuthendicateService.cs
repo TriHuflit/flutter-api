@@ -93,7 +93,7 @@ namespace Flutter.Backend.Service.Services
             token.ExpiresRefresh = refreshToken.ExpiresRefresh;
             token.RefreshToken = refreshToken.RefreshToken;
             user.RefreshToken = refreshToken.RefreshToken;
-            user.SetUpdatedInFo(user.Id.ToString(), user.UserName);
+            user.SetUpdatedInFor(user.Id.ToString(), user.UserName);
             _appUserRepository.Update(user, u => u.Id == user.Id);
 
             return await BuildResult(result, token, MSG_LOGIN_SUCCESSFULLY);
@@ -143,7 +143,7 @@ namespace Flutter.Backend.Service.Services
             token.ExpiresRefresh = refreshToken.ExpiresRefresh;
             token.RefreshToken = refreshToken.RefreshToken;
             user.RefreshToken = refreshToken.RefreshToken;
-            user.SetUpdatedInFo(user.Id.ToString(), user.UserName);
+            user.SetUpdatedInFor(user.Id.ToString(), user.UserName);
             _appUserRepository.Update(user, u => u.Id == user.Id);
 
             return await BuildResult(result, token, MSG_LOGIN_SUCCESSFULLY);
@@ -260,7 +260,7 @@ namespace Flutter.Backend.Service.Services
 
             //send email comfirm account
             _appUserRepository.Add(newUser);
-            newUser.SetFullInfo(newUser.Id.ToString(), newUser.UserName);
+            newUser.SetFullInfor(newUser.Id.ToString(), newUser.UserName);
             _appUserRepository.Update(newUser, u => u.Id == newUser.Id);
             var template = await _templateSendMailRepository.GetAsync(t => t.Key == SendMailConstain.TemplateEmailRegister);
             var urlComfirmEmail = String.Format(SendMailConstain.EmailComfirmUrl, newUser.Id.ToString());
@@ -335,7 +335,7 @@ namespace Flutter.Backend.Service.Services
             }
 
             userResult.IsEmailConfirmed = true;
-            userResult.SetUpdatedInFo(UserId, userResult.UserName);
+            userResult.SetUpdatedInFor(UserId, userResult.UserName);
 
             _appUserRepository.Update(userResult, u => u.Id == userResult.Id);
 
@@ -410,7 +410,7 @@ namespace Flutter.Backend.Service.Services
             }
 
             user.HashPassword = HashPassWord(request.NewPassword);
-            user.SetUpdatedInFo(user.Id.ToString(), user.UserName);
+            user.SetUpdatedInFor(user.Id.ToString(), user.UserName);
             _appUserRepository.Update(user, u => u.Id == user.Id);
 
 

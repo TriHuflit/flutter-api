@@ -49,7 +49,7 @@ namespace Flutter.Backend.Service.Services
             }
 
             brand.ImageBrand = validateImage.Data;
-            brand.SetFullInfo(_currentUserService.UserId, _currentUserService.UserName);
+            brand.SetFullInfor(_currentUserService.UserId, _currentUserService.UserName);
             _brandRepository.Add(brand);
 
             return await BuildResult(result, brand.Id.ToString(), MSG_SAVE_SUCCESSFULLY);
@@ -71,7 +71,7 @@ namespace Flutter.Backend.Service.Services
             }
 
             brand.IsShow = IsShowConstain.DELETE;
-            brand.SetUpdatedInFo(_currentUserService.UserId, _currentUserService.UserName);
+            brand.SetUpdatedInFor(_currentUserService.UserId, _currentUserService.UserName);
             _brandRepository.Update(brand, c => c.Id == objCategoryId);
 
             return await BuildResult(result, CategoryId, MSG_DELETE_SUCCESSFULLY);
@@ -129,7 +129,7 @@ namespace Flutter.Backend.Service.Services
                 brand.ImageBrand = validateImage.Data;
             }
 
-            brand.SetUpdatedInFo(_currentUserService.UserId, _currentUserService.UserName);
+            brand.SetUpdatedInFor(_currentUserService.UserId, _currentUserService.UserName);
             _brandRepository.Update(brand, u => u.Id == objCategoryId);
 
             return await BuildResult(result, request.Id, MSG_UPDATE_SUCCESSFULLY);

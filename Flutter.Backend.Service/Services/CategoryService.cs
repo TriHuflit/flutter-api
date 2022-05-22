@@ -58,7 +58,7 @@ namespace Flutter.Backend.Service.Services
             }
 
             category.ImageCategory = validateImage.Data;
-            category.SetFullInfo(_currentUserService.UserId, _currentUserService.UserName);
+            category.SetFullInfor(_currentUserService.UserId, _currentUserService.UserName);
             _categoryRepository.Add(category);
 
             return await BuildResult(result, category.Id.ToString(), MSG_SAVE_SUCCESSFULLY);
@@ -86,7 +86,7 @@ namespace Flutter.Backend.Service.Services
             }
 
             category.IsShow = IsShowConstain.DELETE;
-            category.SetUpdatedInFo(_currentUserService.UserId, _currentUserService.UserName);
+            category.SetUpdatedInFor(_currentUserService.UserId, _currentUserService.UserName);
             _categoryRepository.Update(category, c => c.Id == objCategoryId);
 
             return await BuildResult(result, CategoryId, MSG_DELETE_SUCCESSFULLY);
@@ -149,7 +149,7 @@ namespace Flutter.Backend.Service.Services
                 category.ImageCategory = validateImage.Data;
             }
 
-            category.SetUpdatedInFo(_currentUserService.UserId, _currentUserService.UserName);
+            category.SetUpdatedInFor(_currentUserService.UserId, _currentUserService.UserName);
             _categoryRepository.Update(category, u => u.Id == objCategoryId);
 
             return await BuildResult(result, request.Id, MSG_UPDATE_SUCCESSFULLY);

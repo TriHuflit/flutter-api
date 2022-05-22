@@ -1,5 +1,4 @@
-﻿using Flutter.Backend.DAL.Domains;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Flutter.Backend.Service.Models.Requests
@@ -11,6 +10,6 @@ namespace Flutter.Backend.Service.Models.Requests
         /// </summary>
         [Required]
         public List<CreateClassifyProductRequest> ClassifyProducts { get; set; }
-      
+
     }
 }

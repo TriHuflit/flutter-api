@@ -52,7 +52,7 @@ namespace Flutter.Backend.DAL.Implementations
             return data.ToList();
         }
 
-        public async void Update( T item , Expression<Func<T, bool>> specification)
+        public void Update( T item , Expression<Func<T, bool>> specification)
         {
             var properties = item.GetType().GetProperties();
             UpdateDefinition<T> definition = null;
@@ -69,6 +69,31 @@ namespace Flutter.Backend.DAL.Implementations
                 }
             }
             _mongoCollection.UpdateOne(specification, definition);
+        }
+
+        public virtual async Task<long> UpdateMany(IEnumerable<T> items)
+        {
+            var properties = typeof(T).GetProperties();
+            var updates = new List<WriteModel<T>>();
+            var filterBuilder = Builders<T>.Filter;
+            
+            foreach(var item in items)
+            {
+                foreach (var property in properties)
+                {
+                    var filter = filterBuilder.Eq(property.Name, property.GetValue(item));
+                    updates.Add(new ReplaceOneModel<T>(filter, item));
+                    break;
+                }
+            }
+
+            BulkWriteResult result = await _mongoCollection.BulkWriteAsync(updates);
+            return result.ModifiedCount;
+        }
+
+        public void DeleteAll(Expression<Func<T, bool>> specification)
+        {
+            _mongoCollection.DeleteMany(specification);
         }
 
         public async Task<T> GetAsync(Expression<Func<T, bool>> specification)

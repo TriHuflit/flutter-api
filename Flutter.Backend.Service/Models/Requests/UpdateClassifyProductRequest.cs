@@ -2,9 +2,8 @@
 
 namespace Flutter.Backend.Service.Models.Requests
 {
-    public class CreateClassifyProductRequest : BaseClassifyProductRequest
+    public class UpdateClassifyProductRequest : BaseClassifyProductRequest
     {
-
-
+        public string Id { get; set; }
     }
 }
