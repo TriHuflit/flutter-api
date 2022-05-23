@@ -434,7 +434,7 @@ namespace Flutter.Backend.Service.Services
             var product = await _productRepository.Get(p => p.Id == objProductId && p.IsShow != IsShowConstain.DELETE);
             if (product == null)
             {
-                return await BuildResult(result, ERR_MSG_PRODUCT_NOT_FOUND, nameof(product));
+                return await BuildError(result, ERR_MSG_PRODUCT_NOT_FOUND, nameof(product));
             }
 
             var dtoproduct = _mapper.Map<Product, DtoProductDetail>(product);

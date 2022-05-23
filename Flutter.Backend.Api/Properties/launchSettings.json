@@ -22,7 +22,7 @@
       "dotnetRunMessages": "true",
       "launchBrowser": true,
       "launchUrl": "swagger",
-      "applicationUrl": "https://htcwatch-api.herokuapp.com;http://localhost:5000",
+      "applicationUrl": "https://localhost:5001;https://htcwatch-api.herokuapp.com",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
