@@ -36,9 +36,15 @@ namespace Flutter.Backend.Service.Services
         {
             var result = new AppActionResultMessage<string>();
 
+            if(!ObjectId.TryParse(request.CategoryId,out ObjectId objCategory))
+            {
+                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.CategoryId));
+            }
+
             var brand = new Brand
             {
                 Name = request.Name,
+                CategoryId = objCategory,
                 IsShow = request.IsShow,
             };
 
@@ -55,43 +61,54 @@ namespace Flutter.Backend.Service.Services
             return await BuildResult(result, brand.Id.ToString(), MSG_SAVE_SUCCESSFULLY);
         }
 
-        public async Task<AppActionResultMessage<string>> DeleteBrandAsync(string CategoryId)
+        public async Task<AppActionResultMessage<string>> DeleteBrandAsync(string BrandId)
         {
             var result = new AppActionResultMessage<string>();
 
-            if (!ObjectId.TryParse(CategoryId, out ObjectId objCategoryId))
+            if (!ObjectId.TryParse(BrandId, out ObjectId objBrandId))
             {
-                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(CategoryId));
+                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(BrandId));
             }
 
-            var brand = await _brandRepository.GetAsync(c => c.Id == objCategoryId && c.IsShow != IsShowConstain.DELETE);
+            var brand = await _brandRepository.GetAsync(c => c.Id == objBrandId && c.IsShow != IsShowConstain.DELETE);
             if (brand == null)
             {
-                return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, nameof(CategoryId));
+                return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, nameof(BrandId));
             }
 
             brand.IsShow = IsShowConstain.DELETE;
             brand.SetUpdatedInFor(_currentUserService.UserId, _currentUserService.UserName);
-            _brandRepository.Update(brand, c => c.Id == objCategoryId);
+            _brandRepository.Update(brand, c => c.Id == objBrandId);
 
-            return await BuildResult(result, CategoryId, MSG_DELETE_SUCCESSFULLY);
+            return await BuildResult(result, BrandId, MSG_DELETE_SUCCESSFULLY);
+        }
+
+        public async Task<AppActionResultMessage<IEnumerable<DtoBrand>>> GetAllBrandAsync()
+        {
+            var result = new AppActionResultMessage<IEnumerable<DtoBrand>>();
+
+            var brand = await _brandRepository.FindByAsync(_ => true);
+
+            var dtoBrand = _mapper.Map<IEnumerable<Brand>, IEnumerable<DtoBrand>>(brand);
+
+            return await BuildResult(result, dtoBrand, MSG_FIND_SUCCESSFULLY);
         }
 
         public async Task<AppActionResultMessage<IEnumerable<DtoBrand>>> GetAllBrandByIdCategoryAsync(string CategoryId)
         {
             var result = new AppActionResultMessage<IEnumerable<DtoBrand>>();
 
-            if(!ObjectId.TryParse(CategoryId,out ObjectId ObjCategoryId))
+            if (!ObjectId.TryParse(CategoryId, out ObjectId ObjCategoryId))
             {
                 return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(CategoryId));
             }
 
-            var brand = await _brandRepository.FindByAsync(b=>b.CategoryId == ObjCategoryId);
+            var brand = await _brandRepository.FindByAsync(b => b.CategoryId == ObjCategoryId && b.IsShow != IsShowConstain.DELETE);
 
             var dtoBrand = _mapper.Map<IEnumerable<Brand>, IEnumerable<DtoBrand>>(brand);
 
-            return await BuildResult(result,dtoBrand, MSG_FIND_SUCCESSFULLY);
-            
+            return await BuildResult(result, dtoBrand, MSG_FIND_SUCCESSFULLY);
+
         }
 
         public async Task<AppActionResultMessage<string>> UpdateBrandsAsync(UpdateBrandRequest request)
@@ -133,6 +150,22 @@ namespace Flutter.Backend.Service.Services
             _brandRepository.Update(brand, u => u.Id == objCategoryId);
 
             return await BuildResult(result, request.Id, MSG_UPDATE_SUCCESSFULLY);
+        }
+
+        public async Task<AppActionResultMessage<DtoBrand>> GetDetailBrandByIdCategoryAsync(string CategoryId)
+        {
+            var result = new AppActionResultMessage<DtoBrand>();
+
+            if (!ObjectId.TryParse(CategoryId, out ObjectId ObjCategoryId))
+            {
+                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(CategoryId));
+            }
+
+            var brand = await _brandRepository.GetAsync(b => b.CategoryId == ObjCategoryId);
+
+            var dtoBrand = _mapper.Map<Brand,DtoBrand>(brand);
+
+            return await BuildResult(result, dtoBrand, MSG_FIND_SUCCESSFULLY);
         }
 
 

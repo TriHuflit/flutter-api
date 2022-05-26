@@ -108,6 +108,26 @@ namespace Flutter.Backend.Service.Services
             return await BuildResult(result, dtoCategories, MSG_FIND_SUCCESSFULLY);
         }
 
+        public async Task<AppActionResultMessage<DtoCategory>> GetDetailCategoryAsync(string CategoryId)
+        {
+            var result = new AppActionResultMessage<DtoCategory>();
+
+            if(!ObjectId.TryParse(CategoryId,out ObjectId objCategory))
+            {
+                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(CategoryId));
+            }
+
+            var category = await _categoryRepository.GetAsync(c =>c.Id == objCategory  && c.IsShow != IsShowConstain.DELETE);
+            if(category == null)
+            {
+                return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, nameof(category));
+            }
+            var dtoCategory = _mapper.Map<Category, DtoCategory>(category);
+
+
+            return await BuildResult(result, dtoCategory, MSG_FIND_SUCCESSFULLY);
+        }
+
         /// <summary>
         /// 
         /// </summary>

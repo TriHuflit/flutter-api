@@ -8,6 +8,9 @@ namespace Flutter.Backend.Service.Models.Requests
         public string Name { get; set; }
 
         [Required]
+        public string CategoryId { get; set; }    
+
+        [Required]
         public string ImageBrand { get; set; }
 
         [Required]

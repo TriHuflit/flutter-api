@@ -17,6 +17,13 @@ namespace Flutter.Backend.Service.IServices
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="CategoryId"></param>
+        /// <returns></returns>
+        Task<AppActionResultMessage<DtoCategory>> GetDetailCategoryAsync(string CategoryId);
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
         Task<AppActionResultMessage<string>> CreateCategoriesAsync(BaseCategoryRequest request);
@@ -34,5 +41,6 @@ namespace Flutter.Backend.Service.IServices
         /// <param name="CategoryId"></param>
         /// <returns></returns>
         Task<AppActionResultMessage<string>> DeleteCategoriesAsync(string CategoryId);
+
     }
 }

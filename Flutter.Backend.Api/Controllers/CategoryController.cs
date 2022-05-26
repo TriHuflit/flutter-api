@@ -36,7 +36,19 @@ namespace Flutter.Backend.Api.Controllers
             }
             return BadRequest(result);
         }
-        
+
+        [HttpGet]
+        [Route("details/{CategoryId}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetDetailsCategoryAsync(string CategoryId)
+        {
+            var result = await _categoryService.GetDetailCategoryAsync(CategoryId);
+            if (result.IsSuccess)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result);
+        }
         /// <summary>
         /// 
         /// </summary>
