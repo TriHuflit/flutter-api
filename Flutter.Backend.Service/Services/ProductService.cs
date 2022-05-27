@@ -410,7 +410,7 @@ namespace Flutter.Backend.Service.Services
             {
                 item.IsShow = IsShowConstain.DELETE;
                 item.SetUpdatedInFor(_currentUserService.UserId, _currentUserService.UserName);
-                _classifyProductRepository.Update(item,c=>c.Id == item.Id);
+                _classifyProductRepository.Update(item, c => c.Id == item.Id);
             }
 
             return await BuildResult(result, productId, MSG_DELETE_SUCCESSFULLY);
@@ -470,16 +470,19 @@ namespace Flutter.Backend.Service.Services
         {
             var result = new AppActionResultMessage<SearchResultData>();
             int pageIndex = request.PageIndex > 1 ? request.PageIndex : 1;
-            int pageSize = request.PageSize > 10 ? request.PageSize : 10;
-
+            int pageSize = request.PageSize > 6 ? request.PageSize : 6;
+            int Count = 0;
             IEnumerable<Product> products;
             var dtoProducts = new List<DtoProduct>();
             products = await _productRepository.FindByAsync(p => p.IsShow != IsShowConstain.DELETE);
+
+            Count = products.Count() / pageSize;
+            if (products.Count() / pageSize != 0)
+            {
+                Count++;
+            }
             // Pagination for Product
-            products = products.OrderBy(p => p.Name)
-                        .Skip((pageIndex - 1) * pageSize)
-                        .Take(pageSize)
-                        .ToList();
+            products = products.OrderBy(p => p.Name).ToList();
             dtoProducts = _mapper.Map<IEnumerable<Product>, List<DtoProduct>>(products);
 
             foreach (var dtoProduct in dtoProducts)
@@ -502,7 +505,7 @@ namespace Flutter.Backend.Service.Services
             {
                 PageIndex = pageIndex,
                 PageSize = pageSize,
-                ListProduct = dtoProducts
+                ListProduct = dtoProducts,
             };
 
             return await BuildResult(result, searchResultData, MSG_FIND_SUCCESSFULLY);
@@ -699,6 +702,89 @@ namespace Flutter.Backend.Service.Services
         private bool IsValidateStatusProduct(int isShow)
         {
             return isShow == IsShowConstain.ACTIVE || isShow == IsShowConstain.INACTIVE;
+        }
+
+        public async Task<AppActionResultMessage<SearchResultData>> GetProductPromotionAsync()
+        {
+            var result = new AppActionResultMessage<SearchResultData>();
+            var products = new List<Product>();
+            for (int i=0;i<4;i++)
+            {
+                var product = (from p in await _productRepository.GetAll()
+                               join c in await _classifyProductRepository.GetAll()
+                               on p.Id equals c.ProductId
+                               where p.IsShow == IsShowConstain.ACTIVE
+                               && c.PromotionPrice != 0 && products.All(r=> r.Id != p.Id)
+                               select p).FirstOrDefault();
+
+                products.Add(product);
+            }
+           
+
+            var dtoProducts = _mapper.Map<IEnumerable<Product>, IEnumerable<DtoProduct>>(products);
+
+            foreach (var dtoProduct in dtoProducts)
+            {
+                var category = await _categoryRepository.GetAsync(c => c.Id == ObjectId.Parse(dtoProduct.CategoryId) && c.IsShow != IsShowConstain.DELETE);
+                if (category != null)
+                {
+                    dtoProduct.CategoryName = category.Name;
+                }
+
+                var brand = await _brandRepository.GetAsync(b => b.Id == ObjectId.Parse(dtoProduct.BrandId) && b.IsShow != IsShowConstain.DELETE);
+                if (brand != null)
+                {
+                    dtoProduct.BrandName = brand.Name;
+                }
+
+            }
+
+            var searchResultData = new SearchResultData
+            {
+                PageIndex = 1,
+                PageSize = 4,
+                ListProduct = dtoProducts,
+            };
+
+            return await BuildResult(result, searchResultData, MSG_FIND_SUCCESSFULLY);
+        }
+
+        public async Task<AppActionResultMessage<SearchResultData>> GetProductBestSellerAsync()
+        {
+            var result = new AppActionResultMessage<SearchResultData>();
+
+            var products = (from d in await _productRepository.GetAll()
+                            join c in await _classifyProductRepository.GetAll()
+                            on d.Id equals c.ProductId
+                            where d.IsShow == IsShowConstain.ACTIVE
+                            select d).Take(10).ToList();
+
+            var dtoProducts = _mapper.Map<IEnumerable<Product>, IEnumerable<DtoProduct>>(products);
+
+            foreach (var dtoProduct in dtoProducts)
+            {
+                var category = await _categoryRepository.GetAsync(c => c.Id == ObjectId.Parse(dtoProduct.CategoryId) && c.IsShow != IsShowConstain.DELETE);
+                if (category != null)
+                {
+                    dtoProduct.CategoryName = category.Name;
+                }
+
+                var brand = await _brandRepository.GetAsync(b => b.Id == ObjectId.Parse(dtoProduct.BrandId) && b.IsShow != IsShowConstain.DELETE);
+                if (brand != null)
+                {
+                    dtoProduct.BrandName = brand.Name;
+                }
+
+            }
+
+            var searchResultData = new SearchResultData
+            {
+                PageIndex = 1,
+                PageSize = 10,
+                ListProduct = dtoProducts,
+            };
+
+            return await BuildResult(result, searchResultData, MSG_FIND_SUCCESSFULLY);
         }
 
 

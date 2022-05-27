@@ -152,6 +152,31 @@ namespace Flutter.Backend.Api.Controllers
         }
 
         /// <summary>
+        /// Promotion Product
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("promotion")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetPromotionProductAsync()
+        {
+
+            try
+            {
+                var result = await _productService.GetProductPromotionAsync();
+                if (!result.IsSuccess)
+                {
+                    return NotFound(result);
+                }
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        /// <summary>
         /// Gets the product.
         /// </summary>
         /// <param name="productId">The product identifier.</param>
