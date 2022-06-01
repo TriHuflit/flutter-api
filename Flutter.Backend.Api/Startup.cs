@@ -116,7 +116,8 @@ namespace Flutter.Backend.Api
             services.AddTransient<IRoleRepository, RoleRespository>();
             services.AddTransient<IMessageRepository, MessageResResponsitory>();
             services.AddTransient<IAppUserRepository, AppUserRepository>();
-
+            services.AddTransient<IOrderRepository, OrderRespository>();
+            services.AddTransient<IVoucherRepository, VoucherRespository>();
             // database,cloud,redis,and email
             services.AddHttpContextAccessor();
             services.AddAutoMapper(typeof(AutoMapperProfile).Assembly);
