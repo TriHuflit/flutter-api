@@ -20,6 +20,8 @@
 
         public const string SubjectRegister = "Đăng Ký Tài Khoản Cho Ứng Dụng HTC";
 
+        public const string SubjectConfirm = "Đặt Hàng Thành Công";
+
         public const string SubjectResetPassword = "Lấy Lại Mật Khẩu Cho Tài Khoản Ứng Dụng HTC";
     }
 }

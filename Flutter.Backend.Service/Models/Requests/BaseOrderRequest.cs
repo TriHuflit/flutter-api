@@ -5,7 +5,7 @@ namespace Flutter.Backend.Service.Models.Requests
 {
     public class BaseOrderRequest
     {
-        public List<OrderDetail> OrderDetails { get; set; }
+        public List<CreateOrderDetailRequest> OrderDetails { get; set; }
 
     }
 }

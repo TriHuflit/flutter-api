@@ -13,7 +13,7 @@ namespace Flutter.Backend.DAL.Domains
 
         public Ship Ship { get; set; }
 
-        public List<OrderDetail> OrderDetails { get; set; }
+        public IEnumerable<OrderDetail> OrderDetails { get; set; }
 
         public Location AddressReceive { get; set; }
 

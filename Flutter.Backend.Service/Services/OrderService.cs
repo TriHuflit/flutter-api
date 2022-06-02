@@ -67,8 +67,17 @@ namespace Flutter.Backend.Service.Services
 
             var order = await _orderRepository.GetAsync(o => o.UserId == user.Id && o.Status == StatusOrderConstain.DRAFT);
 
+            foreach(var item in request.OrderDetails)
+            {
+                if (!ObjectId.TryParse(item.ClassifyProductId, out ObjectId cslProObj))
+                {
+                    return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, item.ClassifyProductId);
+                }
+            }
+
             if (order == null)
             {
+                var orderDetailRequest = _mapper.Map<IEnumerable<CreateOrderDetailRequest>, IEnumerable<OrderDetail>>(request.OrderDetails);
                 order = new Order
                 {
                     UserOrder = user.FullName,
@@ -77,22 +86,15 @@ namespace Flutter.Backend.Service.Services
                     AddressReceive = user.Location,
                     PhoneReceive = user.Phone,
                     Email = user.Email,
-                    OrderDetails = request.OrderDetails
+                    OrderDetails = orderDetailRequest,
                 };
+                foreach (var item in order.OrderDetails)
+                {
+                    order.TotalPrice += item.Price * item.Count;
+                }
+                order.SetFullInfor(user.Id.ToString(), user.UserName);
+                _orderRepository.Add(order);
             }
-            else
-            {
-                order.OrderDetails = request.OrderDetails;
-
-            }
-
-            foreach (var item in order.OrderDetails)
-            {
-                order.TotalPrice += item.Price * item.Count;
-            }
-
-            order.SetFullInfor(user.Id.ToString(), user.UserName);
-            _orderRepository.Add(order);
 
             var dtoOrder = _mapper.Map<Order, DtoOrder>(order);
 
@@ -113,9 +115,21 @@ namespace Flutter.Backend.Service.Services
                 return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.Id));
             }
 
-            var order = await _orderRepository.GetAsync(o => o.Id == objOrder && (
-            o.Status != StatusOrderConstain.DELIVERY || o.Status != StatusOrderConstain.CONFIRM
-            || o.Status != StatusOrderConstain.SUCCESS));
+            if (!ObjectId.TryParse(_currentUserService.UserId, out ObjectId objUser))
+            {
+                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(_currentUserService.UserId));
+            }
+
+            foreach (var item in request.OrderDetails)
+            {
+                if (!ObjectId.TryParse(item.ClassifyProductId, out ObjectId cslProObj))
+                {
+                    return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, item.ClassifyProductId);
+                }
+            }
+
+            var order = await _orderRepository.GetAsync(o => o.Id == objOrder 
+            && o.Status == StatusOrderConstain.DRAFT && o.UserId == objUser);
 
             if (order == null)
             {
@@ -123,8 +137,14 @@ namespace Flutter.Backend.Service.Services
             }
             else
             {
-                order.OrderDetails = request.OrderDetails;
+                var orderDetailRequest = _mapper.Map<IEnumerable<CreateOrderDetailRequest>, IEnumerable<OrderDetail>>(request.OrderDetails);
+                order.OrderDetails = orderDetailRequest;
+                foreach (var item in order.OrderDetails)
+                {
+                    order.TotalPrice += item.Price * item.Count;
+                }              
             }
+
             order.SetUpdatedInFor(_currentUserService.UserId, _currentUserService.UserName);
             _orderRepository.Update(order, o => o.Id == objOrder);
 
@@ -218,7 +238,7 @@ namespace Flutter.Backend.Service.Services
 
             var dtoOrder = _mapper.Map<IEnumerable<Order>, IEnumerable<DtoOrder>>(order);
 
-            return await BuildResult(result, dtoOrder, MSG_SAVE_SUCCESSFULLY);
+            return await BuildResult(result, dtoOrder, MSG_FIND_SUCCESSFULLY);
 
         }
 
@@ -308,27 +328,16 @@ namespace Flutter.Backend.Service.Services
                 return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, nameof(order));
             }
 
-            if (!ObjectId.TryParse(request.VoucherId, out ObjectId objVoucher))
-            {
-                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.VoucherId));
-            }
+           
 
-
-            var voucher = await _voucherRepository.GetAsync(v => v.Id == objVoucher && v.FromDate >= DateTime.UtcNow
-                                                                    && v.ToDate <= DateTime.UtcNow && v.IsShow == IsShowConstain.ACTIVE);
-
-            if (voucher == null)
-            {
-                return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, nameof(request.VoucherId));
-            }
+            var orderDetailRequest = _mapper.Map<IEnumerable<CreateOrderDetailRequest>, IEnumerable<OrderDetail>>(request.OrderDetails);
 
             order.AddressReceive = request.AddressReceive;
-            order.PhoneReceive = request.PhoneReceive;
-            order.VoucherId = objVoucher;
+            order.PhoneReceive = request.PhoneReceive;        
             order.Description = request.Description;
             order.IsPayment = request.IsPayment;
             order.Status = StatusOrderConstain.PENDING;
-            order.OrderDetails = request.OrderDetails;
+            order.OrderDetails = orderDetailRequest;
 
             /// caculator total with voucher
 
@@ -355,15 +364,32 @@ namespace Flutter.Backend.Service.Services
                 _classifyProductRepository.Update(classifyProduct, c => c.Id == classifyProduct.Id);
             }
 
-            if (voucher.FromCondition >= order.TotalPrice && order.TotalPrice <= voucher.ToCondition)
+            if (!string.IsNullOrEmpty(request.VoucherId))
             {
-                if (voucher.DisCountPercent != 0)
+                if (!ObjectId.TryParse(request.VoucherId, out ObjectId objVoucher))
                 {
-                    order.TotalPrice = order.TotalPrice - (order.TotalPrice / voucher.DisCountPercent);
+                    return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.VoucherId));
                 }
-                else
+
+                var voucher = await _voucherRepository.GetAsync(v => v.Id == objVoucher && v.FromDate >= DateTime.UtcNow
+                                                                        && v.ToDate <= DateTime.UtcNow && v.IsShow == IsShowConstain.ACTIVE);
+
+                if (voucher == null)
                 {
-                    order.TotalPrice = order.TotalPrice - voucher.DisCountAmount;
+                    return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, nameof(request.VoucherId));
+                }
+                order.VoucherId = objVoucher;
+
+                if (voucher.FromCondition >= order.TotalPrice && order.TotalPrice <= voucher.ToCondition)
+                {
+                    if (voucher.DisCountPercent != 0)
+                    {
+                        order.TotalPrice = order.TotalPrice - (order.TotalPrice / voucher.DisCountPercent);
+                    }
+                    else
+                    {
+                        order.TotalPrice = order.TotalPrice - voucher.DisCountAmount;
+                    }
                 }
             }
 
@@ -374,7 +400,7 @@ namespace Flutter.Backend.Service.Services
             var requestSendMail = new MailRequest
             {
                 Body =String.Format(template.TemplateHTML,order.Id),
-                Subject = SendMailConstain.SubjectRegister,
+                Subject = SendMailConstain.SubjectConfirm,
                 ToEmail = order.Email
             };
 

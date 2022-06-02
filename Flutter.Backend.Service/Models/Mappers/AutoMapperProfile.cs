@@ -1,7 +1,8 @@
 ﻿using AutoMapper;
 using Flutter.Backend.DAL.Domains;
 using Flutter.Backend.Service.Models.Dtos;
-
+using Flutter.Backend.Service.Models.Requests;
+using MongoDB.Bson;
 
 namespace Flutter.Backend.Service.Models.Mappers
 {
@@ -28,6 +29,19 @@ namespace Flutter.Backend.Service.Models.Mappers
 
             CreateMap<Brand, DtoBrand>(MemberList.Destination)
                 .ForMember(l => l.Id, opt => opt.MapFrom(x => x.Id.ToString()));
+
+            CreateMap<Order, DtoOrder>(MemberList.Destination)
+                .ForMember(l => l.Id, opt => opt.MapFrom(x => x.Id.ToString()))
+                .ForMember(l => l.UserId, opt => opt.MapFrom(x => x.UserId.ToString()))
+                .ForMember(l => l.VoucherId, opt => opt.MapFrom(x => x.VoucherId.ToString()));
+
+
+
+            CreateMap<OrderDetail, DtoOrderDetail>(MemberList.Destination)
+                .ForMember(l => l.ClassifyProductId, opt => opt.MapFrom(x => x.ClassifyProductId.ToString()));
+
+            CreateMap<CreateOrderDetailRequest, OrderDetail>(MemberList.Destination)
+                .ForMember(l => l.ClassifyProductId, opt => opt.MapFrom(x => ObjectId.Parse(x.ClassifyProductId)));
         }
     }
 }

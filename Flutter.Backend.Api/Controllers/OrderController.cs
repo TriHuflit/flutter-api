@@ -45,6 +45,26 @@ namespace Flutter.Backend.Api.Controllers
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
+        [HttpPost]
+        [Route("comfirn-by-user")]
+        [ProducesResponseType(typeof(AppActionResultMessage<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(AppActionResultMessage<string>), StatusCodes.Status400BadRequest)]
+        [Authorize]
+        public async Task<IActionResult> ConfirmOrderAsync(ConfirmOrderRequest request)
+        {
+            var result = await _orderService.ConfirmOrderByUserAsync(request);
+            if (result.IsSuccess)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpPut]
         [Route("update")]
         [ProducesResponseType(typeof(AppActionResultMessage<DtoOrder>), StatusCodes.Status200OK)]
