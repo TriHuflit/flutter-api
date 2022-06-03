@@ -21,7 +21,7 @@ namespace Flutter.Backend.Api.Controllers
         }
 
         /// <summary>
-        /// 
+        /// Authorize lại  !!!
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>

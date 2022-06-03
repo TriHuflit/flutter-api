@@ -24,6 +24,7 @@ namespace Flutter.Backend.Service.Services
 
         private readonly IMapper _mapper;
 
+        private readonly IValidationService _validationService;
         private readonly ICurrentUserService _currentUserService;
         private readonly ISendMailService _sendMailService;
 
@@ -35,7 +36,8 @@ namespace Flutter.Backend.Service.Services
             ISendMailService sendMailService,
             IVoucherRepository voucherRepository,
             IClassifyProductRepository classifyProductRepository,
-            ITemplateSendMailRepository templateSendMailRepository) : base(messageService)
+            ITemplateSendMailRepository templateSendMailRepository,
+            IValidationService validationService) : base(messageService)
         {
 
             _orderRepository = orderRepository;
@@ -46,6 +48,7 @@ namespace Flutter.Backend.Service.Services
             _voucherRepository = voucherRepository;
             _classifyProductRepository = classifyProductRepository;
             _templateSendMailRepository = templateSendMailRepository;
+            _validationService = validationService;
         }
 
 
@@ -67,17 +70,18 @@ namespace Flutter.Backend.Service.Services
 
             var order = await _orderRepository.GetAsync(o => o.UserId == user.Id && o.Status == StatusOrderConstain.DRAFT);
 
-            foreach(var item in request.OrderDetails)
+            foreach (var item in request.OrderDetails)
             {
                 if (!ObjectId.TryParse(item.ClassifyProductId, out ObjectId cslProObj))
                 {
-                    return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, item.ClassifyProductId);
+                    return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(item.ClassifyProductId));
                 }
             }
 
             if (order == null)
             {
                 var orderDetailRequest = _mapper.Map<IEnumerable<CreateOrderDetailRequest>, IEnumerable<OrderDetail>>(request.OrderDetails);
+
                 order = new Order
                 {
                     UserOrder = user.FullName,
@@ -90,6 +94,13 @@ namespace Flutter.Backend.Service.Services
                 };
                 foreach (var item in order.OrderDetails)
                 {
+                    var classifyProduct = await _classifyProductRepository.GetAsync(c => c.Id == item.ClassifyProductId
+                    && c.IsShow == IsShowConstain.ACTIVE);
+
+                    if (classifyProduct == null)
+                    {
+                        return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, nameof(classifyProduct));
+                    }
                     order.TotalPrice += item.Price * item.Count;
                 }
                 order.SetFullInfor(user.Id.ToString(), user.UserName);
@@ -128,7 +139,7 @@ namespace Flutter.Backend.Service.Services
                 }
             }
 
-            var order = await _orderRepository.GetAsync(o => o.Id == objOrder 
+            var order = await _orderRepository.GetAsync(o => o.Id == objOrder
             && o.Status == StatusOrderConstain.DRAFT && o.UserId == objUser);
 
             if (order == null)
@@ -142,7 +153,7 @@ namespace Flutter.Backend.Service.Services
                 foreach (var item in order.OrderDetails)
                 {
                     order.TotalPrice += item.Price * item.Count;
-                }              
+                }
             }
 
             order.SetUpdatedInFor(_currentUserService.UserId, _currentUserService.UserName);
@@ -204,13 +215,26 @@ namespace Flutter.Backend.Service.Services
         /// <param name="OrderId"></param>
         /// <returns></returns>
         /// <exception cref="System.NotImplementedException"></exception>
-        public Task<AppActionResultMessage<string>> ConfirmOrderByStaffAsync(string OrderId)
+        public async Task<AppActionResultMessage<string>> ConfirmOrderByStaffAsync(string OrderId)
         {
             var result = new AppActionResultMessage<string>();
 
+            if (!ObjectId.TryParse(OrderId, out ObjectId objOrder))
+            {
+                return await BuildError(result, OrderId, ERR_MSG_ID_ISVALID_FORMART);
+            }
 
+            var order = await _orderRepository.GetAsync(o => o.Id == objOrder && o.Status == StatusOrderConstain.PENDING);
+            if (order == null)
+            {
+                return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, nameof(order));
+            }
 
-            throw new System.NotImplementedException();
+            order.Status = StatusOrderConstain.CONFIRM;
+            order.SetUpdatedInFor(_currentUserService.UserId, _currentUserService.UserName);
+            _orderRepository.Update(order, o => o.Id == order.Id);
+
+            return await BuildResult(result, OrderId, MSG_UPDATE_SUCCESSFULLY);
         }
 
         /// <summary>
@@ -320,6 +344,16 @@ namespace Flutter.Backend.Service.Services
                 return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(_currentUserService.UserId));
             }
 
+            if (!_validationService.ValidatePhoneNumberFormat(request.PhoneReceive))
+            {
+                return await BuildError(result, ERR_MSG_PHONE_ISVALID_FORMART, nameof(request.PhoneReceive));
+            }
+
+            if (!_validationService.ValidateVnPhoneNumberFormat(request.PhoneReceive))
+            {
+                return await BuildError(result, ERR_MSG_PHONE_ISVALID_FORMART_VN, nameof(request.PhoneReceive));
+            }
+
             var order = await _orderRepository.GetAsync(o => o.Id == objOrder &&
                                                           o.UserId == objUser && o.Status == StatusOrderConstain.DRAFT);
 
@@ -328,12 +362,10 @@ namespace Flutter.Backend.Service.Services
                 return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, nameof(order));
             }
 
-           
-
             var orderDetailRequest = _mapper.Map<IEnumerable<CreateOrderDetailRequest>, IEnumerable<OrderDetail>>(request.OrderDetails);
 
             order.AddressReceive = request.AddressReceive;
-            order.PhoneReceive = request.PhoneReceive;        
+            order.PhoneReceive = request.PhoneReceive;
             order.Description = request.Description;
             order.IsPayment = request.IsPayment;
             order.Status = StatusOrderConstain.PENDING;
@@ -393,13 +425,10 @@ namespace Flutter.Backend.Service.Services
                 }
             }
 
-            order.SetUpdatedInFor(_currentUserService.UserId, _currentUserService.UserName);
-            _orderRepository.Update(order, o => o.Id == objOrder);
-
             var template = await _templateSendMailRepository.GetAsync(t => t.Key == SendMailConstain.TemplateEmailConfirm);
             var requestSendMail = new MailRequest
             {
-                Body =String.Format(template.TemplateHTML,order.Id),
+                Body = String.Format(template.TemplateHTML, order.Id),
                 Subject = SendMailConstain.SubjectConfirm,
                 ToEmail = order.Email
             };
@@ -409,7 +438,8 @@ namespace Flutter.Backend.Service.Services
             {
                 return await BuildError(result, ERR_MSG_EMAIL_IS_NOT_CONFIRM);
             }
-
+            order.SetUpdatedInFor(_currentUserService.UserId, _currentUserService.UserName);
+            _orderRepository.Update(order, o => o.Id == objOrder);
             // Add Message
             return await BuildResult(result, order.Id.ToString(), "Đặt hàng thành công");
         }

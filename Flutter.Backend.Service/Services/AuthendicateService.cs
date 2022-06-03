@@ -259,9 +259,6 @@ namespace Flutter.Backend.Service.Services
             }
 
             //send email comfirm account
-            _appUserRepository.Add(newUser);
-            newUser.SetFullInfor(newUser.Id.ToString(), newUser.UserName);
-            _appUserRepository.Update(newUser, u => u.Id == newUser.Id);
             var template = await _templateSendMailRepository.GetAsync(t => t.Key == SendMailConstain.TemplateEmailRegister);
             var urlComfirmEmail = String.Format(SendMailConstain.EmailComfirmUrl, newUser.Id.ToString());
             var requestSendMail = new MailRequest
@@ -276,6 +273,11 @@ namespace Flutter.Backend.Service.Services
             {
                 return await BuildError(result, ERR_MSG_EMAIL_IS_NOT_CONFIRM);
             }
+
+            _appUserRepository.Add(newUser);
+            newUser.SetFullInfor(newUser.Id.ToString(), newUser.UserName);
+            _appUserRepository.Update(newUser, u => u.Id == newUser.Id);
+
 
             return await BuildResult(result, newUser.Id.ToString(), MSG_SAVE_SUCCESSFULLY);
         }
