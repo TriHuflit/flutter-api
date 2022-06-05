@@ -1,10 +1,12 @@
 ﻿using System;
 
-namespace Flutter.Backend.DAL.Domains
+namespace Flutter.Backend.Service.Models.Dtos
 {
-    public class Voucher : AuditLogSystem
+    public class DtoVoucher : DtoAuditLogSystem
     {
-        public string Title  { get; set; }
+        public string Id { get; set; }
+
+        public string Title { get; set; }
 
         public DateTime FromDate { get; set; }
 
@@ -14,12 +16,10 @@ namespace Flutter.Backend.DAL.Domains
 
         public int DisCountAmount { get; set; }
 
-        public string ImageVoucher { get; set; }
-
         public int FromCondition { get; set; }
 
         public int ToCondition { get; set; }
-       
+
         public string Description { get; set; }
 
         public string Type { get; set; }

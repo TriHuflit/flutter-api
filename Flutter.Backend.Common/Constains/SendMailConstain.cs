@@ -8,7 +8,9 @@
 
         public const string TemplateEmailRegister = "TEMPLATE_EMAIL_REGISTER_ACCOUNT";
 
-        public const string TemplateEmailConfirm = "TEMPLATE_EMAIL_CONFIRM_ORDER";
+        public const string TemplateEmailConfirmUser  = "TEMPLATE_EMAIL_CONFIRM_USER_ORDER";
+
+        public const string TemplateEmailConfirmStaff = "TEMPLATE_EMAIL_CONFIRM_STAFF_ORDER";
 
         public const string TemplateEmailCancle = "TEMPLATE_EMAIL_CANCLE_ORDER";
 
@@ -20,7 +22,9 @@
 
         public const string SubjectRegister = "Đăng Ký Tài Khoản Cho Ứng Dụng HTC";
 
-        public const string SubjectConfirm = "Đặt Hàng Thành Công";
+        public const string SubjectConfirmUser = "Đặt Hàng Thành Công";
+
+        public const string SubjectConfirmStaff = "Đơn Hàng Đã Được Xác Nhận";
 
         public const string SubjectResetPassword = "Lấy Lại Mật Khẩu Cho Tài Khoản Ứng Dụng HTC";
     }

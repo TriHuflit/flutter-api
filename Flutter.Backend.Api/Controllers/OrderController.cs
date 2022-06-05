@@ -50,9 +50,29 @@ namespace Flutter.Backend.Api.Controllers
         [ProducesResponseType(typeof(AppActionResultMessage<string>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(AppActionResultMessage<string>), StatusCodes.Status400BadRequest)]
         [Authorize]
-        public async Task<IActionResult> ConfirmOrderAsync(ConfirmOrderRequest request)
+        public async Task<IActionResult> ConfirmOrderByUserAsync(ConfirmOrderRequest request)
         {
             var result = await _orderService.ConfirmOrderByUserAsync(request);
+            if (result.IsSuccess)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("confirm-by-staff/{OrderId}")]
+        [ProducesResponseType(typeof(AppActionResultMessage<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(AppActionResultMessage<string>), StatusCodes.Status400BadRequest)]
+        [Authorize]
+        public async Task<IActionResult> ConfirmOrderByStaffAsync(string OrderId)
+        {
+            var result = await _orderService.ConfirmOrderByStaffAsync(OrderId);
             if (result.IsSuccess)
             {
                 return Ok(result);
@@ -112,6 +132,25 @@ namespace Flutter.Backend.Api.Controllers
         public async Task<IActionResult> GetInfoOrderAsync()
         {
             var result = await _orderService.GetInfoOrderAsync();
+            if (result.IsSuccess)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("get-detail-portal/{OrderId}")]
+        [ProducesResponseType(typeof(AppActionResultMessage<DtoOrder>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(AppActionResultMessage<DtoOrder>), StatusCodes.Status400BadRequest)]
+        [Authorize]
+        public async Task<IActionResult> GetDetailsOrderPortalAsync(string OrderId)
+        {
+            var result = await _orderService.GetDetailsOrderPortalAsync(OrderId);
             if (result.IsSuccess)
             {
                 return Ok(result);

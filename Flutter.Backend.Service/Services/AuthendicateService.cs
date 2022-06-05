@@ -548,9 +548,6 @@ namespace Flutter.Backend.Service.Services
 
             if (jwtToken == null) return false;
 
-
-            if (jwtToken.ValidTo.ToLocalTime() < DateTime.UtcNow) return false;
-
             return true;
         }
 
