@@ -19,12 +19,12 @@ namespace Flutter.Backend.Service.Models.Requests
         [Required]
         public string ImageVoucher { get; set; }
 
-        public int DisCountAmount { get; set; }
+        public decimal DisCountAmount { get; set; }
 
         [Required]
-        public int FromCondition { get; set; }
+        public decimal FromCondition { get; set; }
 
-        public int ToCondition { get; set; }
+        public decimal ToCondition { get; set; }
 
         [Required]
         public string Description { get; set; }
