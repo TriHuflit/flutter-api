@@ -14,7 +14,7 @@ namespace Flutter.Backend.Service.Models.Requests
         public string Password { get; set; }
 
         //[Required]
-        public string ComfirmPassWord { get; set; }
+        public string ConfirmPassWord { get; set; }
 
         //[Required]
         //[MaxLength(50)]

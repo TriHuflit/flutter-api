@@ -177,9 +177,9 @@ namespace Flutter.Backend.Service.Services
                 return await BuildError(result, ERR_MSG_PASSWORD_ISVALID_FORMART);
             }
 
-            if (request.Password != request.ComfirmPassWord)
+            if (request.Password != request.ConfirmPassWord)
             {
-                return await BuildError(result, ERR_MSG_PASSWORD_ISVALID_FORMART);
+                return await BuildError(result, ERR_MSG_PASSWORD_IS_NOT_SAME);
             }
 
             //validation phone

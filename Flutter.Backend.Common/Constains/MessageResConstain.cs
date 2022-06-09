@@ -26,7 +26,8 @@
         public const string ERR_MSG_USERNAME_IS_NOT_FOUND = "ERR_MSG_USERNAME_IS_NOT_FOUND";
         public const string ERR_MSG_PHONE_IS_EXIST = "ERR_MSG_PHONE_IS_EXIST";
         public const string ERR_MSG_EMAIL_IS_EXIST = "ERR_MSG_EMAIL_IS_EXIST";
-        public const string ERR_MSG_PASSWORD_ISVALID_FORMART = "ERR_MSG_DATA_NOT_FOUND";
+        public const string ERR_MSG_PASSWORD_ISVALID_FORMART = "ERR_MSG_PASSWORD_ISVALID_FORMART";
+        public const string ERR_MSG_PASSWORD_IS_NOT_SAME = "ERR_MSG_PASSWORD_IS_NOT_SAME";
         public const string ERR_MSG_USERNAME_IS_VALID = "ERR_MSG_USERNAME_IS_VALID";
         public const string ERR_MSG_EMAIL_IS_NOT_CONFIRM = "ERR_MSG_EMAIL_IS_NOT_CONFIRM";
         public const string ERR_MSG_ACCOUNT_INACTIVE = "ERR_MSG_ACCOUNT_INACTIVE";
