@@ -177,9 +177,9 @@ namespace Flutter.Backend.Service.Services
                 return await BuildError(result, ERR_MSG_PASSWORD_ISVALID_FORMART);
             }
 
-            if (request.Password != request.ComfirmPassWord)
+            if (request.Password != request.ConfirmPassWord)
             {
-                return await BuildError(result, ERR_MSG_PASSWORD_ISVALID_FORMART);
+                return await BuildError(result, ERR_MSG_PASSWORD_IS_NOT_SAME);
             }
 
             //validation phone
@@ -225,6 +225,7 @@ namespace Flutter.Backend.Service.Services
             {
                 return await BuildError(result, ERR_MSG_GENDER_INVALID, request.Gender);
             }
+            var role = await _roleRepository.GetAsync(r => r.Name == "User");
 
             // create new user
             string hashPassword = HashPassWord(request.Password);
@@ -246,6 +247,7 @@ namespace Flutter.Backend.Service.Services
                 Birth = request.Birth,
                 Phone = request.Phone,
                 Gender = request.Gender,
+                RoleId = role.Id ,
             };
 
             if (request.Gender == AppUserGenderConstain.Female)
@@ -257,6 +259,12 @@ namespace Flutter.Backend.Service.Services
             {
                 newUser.Avatar = _config[ConfigAppsettingConstaint.AvatarMale];
             }
+
+
+
+            _appUserRepository.Add(newUser);
+            newUser.SetFullInfor(newUser.Id.ToString(), newUser.UserName);
+            _appUserRepository.Update(newUser, u => u.Id == newUser.Id);
 
             //send email comfirm account
             var template = await _templateSendMailRepository.GetAsync(t => t.Key == SendMailConstain.TemplateEmailRegister);
@@ -273,12 +281,6 @@ namespace Flutter.Backend.Service.Services
             {
                 return await BuildError(result, ERR_MSG_EMAIL_IS_NOT_CONFIRM);
             }
-
-            _appUserRepository.Add(newUser);
-            newUser.SetFullInfor(newUser.Id.ToString(), newUser.UserName);
-            _appUserRepository.Update(newUser, u => u.Id == newUser.Id);
-
-
             return await BuildResult(result, newUser.Id.ToString(), MSG_SAVE_SUCCESSFULLY);
         }
 
