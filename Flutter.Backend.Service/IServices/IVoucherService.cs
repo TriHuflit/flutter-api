@@ -14,11 +14,11 @@ namespace Flutter.Backend.Service.IServices
 
         Task<AppActionResultMessage<string>> DeleteVoucherAsync(string VoucherId);
 
-        Task<AppActionResultMessage<IEnumerable<DtoVoucher>>> GetAllVoucherAsync(PaginationRequest request);
+        Task<AppActionResultMessage<IEnumerable<DtoVoucher>>> GetAllVoucherAsync();
 
         Task<AppActionResultMessage<DtoVoucher>> GetVoucherAsync(string productId);
 
-        Task<AppActionResultMessage<IEnumerable<DtoVoucher>>> GetAllVoucherMobileAsync(PaginationRequest request);
+        Task<AppActionResultMessage<IEnumerable<DtoVoucher>>> GetAllVoucherMobileAsync();
 
         Task<AppActionResultMessage<DtoVoucher>> GetVoucherMobileAsync(string productId);
 

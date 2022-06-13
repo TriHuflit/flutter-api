@@ -16,6 +16,8 @@ namespace Flutter.Backend.Service.Models.Dtos
 
         public decimal DisCountAmount { get; set; }
 
+        public decimal LimitDisCountAmout { get; set; }
+
         public decimal FromCondition { get; set; }
 
         public decimal ToCondition { get; set; }

@@ -16,5 +16,7 @@
 
         public const string RedisUrl = "Redis:RedisUrl";
         public const string InstanceName = "Redis:InstanceName";
+
+        public const string ImageVoucher = "ImageVoucher";
     }
 }

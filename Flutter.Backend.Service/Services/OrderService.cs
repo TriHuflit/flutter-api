@@ -461,6 +461,7 @@ namespace Flutter.Backend.Service.Services
                 }
                 order.VoucherId = objVoucher;
 
+                // chỉnh logic lại chỗ này
                 if (voucher.FromCondition >= order.TotalPrice && order.TotalPrice <= voucher.ToCondition)
                 {
                     if (voucher.DisCountPercent != 0)

@@ -5,6 +5,7 @@ using Flutter.Backend.DAL.Domains;
 using Flutter.Backend.Service.IServices;
 using Flutter.Backend.Service.Models.Dtos;
 using Flutter.Backend.Service.Models.Requests;
+using Microsoft.Extensions.Configuration;
 using MongoDB.Bson;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -16,6 +17,7 @@ namespace Flutter.Backend.Service.Services
     {
         private readonly IVoucherRepository _voucherRepository;
 
+        private readonly IConfiguration _config;
         private readonly IMapper _mapper;
 
         private readonly IUploadImageService _uploadImageService;
@@ -23,6 +25,7 @@ namespace Flutter.Backend.Service.Services
 
         public VoucherService(
             IMapper mapper,
+            IConfiguration config,
             IUploadImageService uploadImageService,
             ICurrentUserService currentUserService,
             IVoucherRepository voucherRepository,
@@ -33,7 +36,7 @@ namespace Flutter.Backend.Service.Services
             _uploadImageService = uploadImageService;
             _currentUserService = currentUserService;
             _mapper = mapper;
-
+            _config = config;
         }
 
         public async Task<AppActionResultMessage<string>> CreateVoucherAsync(BaseVoucherRequest request)
@@ -91,16 +94,12 @@ namespace Flutter.Backend.Service.Services
                 ToCondition = request.ToCondition,
                 DisCountAmount = request.DisCountAmount,
                 DisCountPercent = request.DisCountPercent,
+                LimitDisCountAmout = request.LimitDisCountAmout,
+                ImageVoucher = _config[ConfigAppsettingConstaint.ImageVoucher],
                 IsShow = request.IsShow,
                 Type = request.Type
             };
 
-            var imageVoucherImageResult = await _uploadImageService.UploadImage(request.ImageVoucher);
-            if (!imageVoucherImageResult.IsSuccess)
-            {
-                return await BuildError(result, imageVoucherImageResult.Message);
-            }
-            voucher.ImageVoucher = imageVoucherImageResult.Data;
 
             voucher.SetFullInfor(_currentUserService.UserId, _currentUserService.UserName);
             _voucherRepository.Add(voucher);
@@ -135,24 +134,55 @@ namespace Flutter.Backend.Service.Services
             return await BuildResult(result, voucher.Id.ToString(), MSG_DELETE_SUCCESSFULLY);
         }
 
-        public Task<AppActionResultMessage<IEnumerable<DtoVoucher>>> GetAllVoucherAsync(PaginationRequest request)
+        public async Task<AppActionResultMessage<IEnumerable<DtoVoucher>>> GetAllVoucherAsync()
         {
-            throw new System.NotImplementedException();
+            var result = new AppActionResultMessage<IEnumerable<DtoVoucher>>();
+
+            var voucher = await _voucherRepository.FindByAsync(v => v.IsShow != IsShowConstain.DELETE);
+
+
+            var dtoVoucher = _mapper.Map<IEnumerable<Voucher>, IEnumerable<DtoVoucher>>(voucher);
+
+            return await BuildResult(result, dtoVoucher, MSG_FIND_SUCCESSFULLY);
         }
 
-        public Task<AppActionResultMessage<IEnumerable<DtoVoucher>>> GetAllVoucherMobileAsync(PaginationRequest request)
+        public async Task<AppActionResultMessage<IEnumerable<DtoVoucher>>> GetAllVoucherMobileAsync()
         {
-            throw new System.NotImplementedException();
+            var result = new AppActionResultMessage<IEnumerable<DtoVoucher>>();
+
+            var voucher = await _voucherRepository.FindByAsync(v => v.IsShow == IsShowConstain.ACTIVE);
+
+
+            var dtoVoucher = _mapper.Map<IEnumerable<Voucher>, IEnumerable<DtoVoucher>>(voucher);
+
+            return await BuildResult(result, dtoVoucher, MSG_FIND_SUCCESSFULLY);
         }
 
-        public Task<AppActionResultMessage<DtoVoucher>> GetVoucherAsync(string productId)
+        public async Task<AppActionResultMessage<DtoVoucher>> GetVoucherAsync(string voucherId)
         {
-            throw new System.NotImplementedException();
+            var result = new AppActionResultMessage<DtoVoucher>();
+
+            if (!ObjectId.TryParse(voucherId, out ObjectId objectVoucherId))
+            {
+                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(voucherId));
+            }
+
+            var voucher = await _voucherRepository.GetAsync(v => v.Id == objectVoucherId && v.IsShow != IsShowConstain.DELETE);
+
+            var dtoVoucher = _mapper.Map<Voucher, DtoVoucher>(voucher);
+
+            return await BuildResult(result, dtoVoucher, MSG_FIND_SUCCESSFULLY);
         }
 
-        public Task<AppActionResultMessage<DtoVoucher>> GetVoucherMobileAsync(string productId)
+        public async Task<AppActionResultMessage<DtoVoucher>> GetVoucherMobileAsync(string voucherId)
         {
-            throw new System.NotImplementedException();
+            var result = new AppActionResultMessage<DtoVoucher>();
+
+            var voucher = await _voucherRepository.GetAsync(v => v.IsShow != IsShowConstain.DELETE);
+
+            var dtoVoucher = _mapper.Map<Voucher, DtoVoucher>(voucher);
+
+            return await BuildResult(result, dtoVoucher, MSG_FIND_SUCCESSFULLY);
         }
 
         public async Task<AppActionResultMessage<string>> UpdateVoucherAsync(UpdateVoucherRequest request)

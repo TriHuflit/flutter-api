@@ -16,10 +16,9 @@ namespace Flutter.Backend.Service.Models.Requests
 
         public int DisCountPercent { get; set; }
 
-        [Required]
-        public string ImageVoucher { get; set; }
-
         public decimal DisCountAmount { get; set; }
+
+        public decimal LimitDisCountAmout { get; set; }
 
         [Required]
         public decimal FromCondition { get; set; }
