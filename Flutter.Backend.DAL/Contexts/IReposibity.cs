@@ -25,5 +25,7 @@ namespace Flutter.Backend.DAL.Contexts
         IEnumerable<T> FindBy(Expression<Func<T, bool>> specification);
 
         Task<IEnumerable<T>> FindByAsync(Expression<Func<T, bool>> specification);
+
+        Task<IEnumerable<T>> FindByAsync(FilterDefinition<T> filter);
     }
 }

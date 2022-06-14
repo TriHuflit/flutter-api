@@ -40,6 +40,11 @@ namespace Flutter.Backend.DAL.Implementations
             return data.ToList();
         }
 
+        public async Task<IEnumerable<T>> FindByAsync(FilterDefinition<T> filter)
+        {
+            return await _mongoCollection.Find(filter).ToListAsync();
+        }
+
         public virtual async Task<T> Get(Expression<Func<T, bool>> specification)
         {
             var data = await _mongoCollection.FindAsync(specification);

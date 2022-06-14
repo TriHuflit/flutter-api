@@ -178,7 +178,17 @@ namespace Flutter.Backend.Service.Services
         {
             var result = new AppActionResultMessage<DtoVoucher>();
 
-            var voucher = await _voucherRepository.GetAsync(v => v.IsShow != IsShowConstain.DELETE);
+            if (!ObjectId.TryParse(voucherId, out ObjectId objectVoucherId))
+            {
+                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(voucherId));
+            }
+
+            var voucher = await _voucherRepository.GetAsync(v => v.Id == objectVoucherId && v.IsShow == IsShowConstain.ACTIVE);
+            if (voucher == null)
+            {
+                return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, voucherId);
+            }
+
 
             var dtoVoucher = _mapper.Map<Voucher, DtoVoucher>(voucher);
 

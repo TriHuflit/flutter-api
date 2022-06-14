@@ -19,5 +19,11 @@
         /// </summary>
         public string BrandSearch { get; set; }
 
+        /// <summary>
+        /// Filter price
+        /// </summary>
+        public int SortPrice { get; set; }
+
+
     }
 }

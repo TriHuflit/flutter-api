@@ -255,7 +255,7 @@ namespace Flutter.Backend.Service.Services
             var template = await _templateSendMailRepository.GetAsync(t => t.Key == SendMailConstain.TemplateEmailConfirmStaff);
             var requestSendMail = new MailRequest
             {
-                Body = String.Format(template.TemplateHTML, order.Id,_currentUserService.UserName, oderDetailHtml),
+                Body = String.Format(template.TemplateHTML, order.Id, _currentUserService.UserName, oderDetailHtml),
                 Subject = SendMailConstain.SubjectConfirmStaff,
                 ToEmail = order.Email
             };
@@ -462,11 +462,19 @@ namespace Flutter.Backend.Service.Services
                 order.VoucherId = objVoucher;
 
                 // chỉnh logic lại chỗ này
-                if (voucher.FromCondition >= order.TotalPrice && order.TotalPrice <= voucher.ToCondition)
+                if (voucher.FromCondition >= order.TotalPrice && (order.TotalPrice == 0 || order.TotalPrice <= voucher.ToCondition))
                 {
                     if (voucher.DisCountPercent != 0)
                     {
-                        order.TotalPrice = order.TotalPrice - (order.TotalPrice / voucher.DisCountPercent);
+                        var disCountPrice = order.TotalPrice - (order.TotalPrice / voucher.DisCountPercent);
+                        if(disCountPrice > voucher.LimitDisCountAmout)
+                        {
+                            order.TotalPrice = order.TotalPrice - voucher.LimitDisCountAmout;
+                        }
+                        else
+                        {
+                            order.TotalPrice = order.TotalPrice - (order.TotalPrice / voucher.DisCountPercent);
+                        }        
                     }
                     else
                     {

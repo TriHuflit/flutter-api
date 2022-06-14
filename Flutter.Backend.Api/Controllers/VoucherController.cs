@@ -70,6 +70,51 @@ namespace Flutter.Backend.Api.Controllers
             return BadRequest(result);
         }
 
+        [HttpGet]
+        [Route("mobile/all")]
+        [ProducesResponseType(typeof(AppActionResultMessage<IEnumerable<DtoVoucher>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(AppActionResultMessage<IEnumerable<DtoVoucher>>), StatusCodes.Status400BadRequest)]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetAllVoucherForMobileAsync()
+        {
+            var result = await _voucherService.GetAllVoucherMobileAsync();
+            if (result.IsSuccess)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result);
+        }
+
+        [HttpGet]
+        [Route("details/{VoucherId}")]
+        [ProducesResponseType(typeof(AppActionResultMessage<IEnumerable<DtoVoucher>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(AppActionResultMessage<IEnumerable<DtoVoucher>>), StatusCodes.Status400BadRequest)]
+        [Authorize]
+        public async Task<IActionResult> GetDetailVoucherAsync(string VoucherId)
+        {
+            var result = await _voucherService.GetVoucherAsync(VoucherId);
+            if (result.IsSuccess)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result);
+        }
+
+        [HttpGet]
+        [Route("mobile/details/{VoucherId}")]
+        [ProducesResponseType(typeof(AppActionResultMessage<IEnumerable<DtoVoucher>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(AppActionResultMessage<IEnumerable<DtoVoucher>>), StatusCodes.Status400BadRequest)]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetDetailVoucherMobileAsync(string VoucherId)
+        {
+            var result = await _voucherService.GetVoucherMobileAsync(VoucherId);
+            if (result.IsSuccess)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result);
+        }
+
 
     }
 }

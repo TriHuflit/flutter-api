@@ -7,8 +7,11 @@ using Flutter.Backend.Service.Models.Dtos;
 using Flutter.Backend.Service.Models.Requests;
 using Flutter.Backend.Service.Models.Responses;
 using MongoDB.Bson;
+using MongoDB.Driver;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using static Flutter.Backend.Common.Constains.MessageResConstain;
 
@@ -254,7 +257,7 @@ namespace Flutter.Backend.Service.Services
             // Update or Create new classifyProduct
             foreach (var classifyProduct in request.ClassifyProducts)
             {
-                bool isDelele = true;
+
                 if (classifyProduct.Id != null)
                 {
                     if (!ObjectId.TryParse(classifyProduct.Id, out ObjectId objClassPro))
@@ -522,51 +525,55 @@ namespace Flutter.Backend.Service.Services
             var result = new AppActionResultMessage<IEnumerable<DtoProduct>>();
             int pageIndex = request.PageIndex > 1 ? request.PageIndex : 1;
             int pageSize = request.PageSize > 10 ? request.PageSize : 10;
-            IEnumerable<Product> products = new List<Product>();
-            Category category;
-            Brand brand;
+            var paramKey = request.KeySearch ?? string.Empty;
+            var paramCategory = request.CategorySearch ?? string.Empty;
+            var paramBrand = request.BrandSearch ?? string.Empty;
+            var paramFilterPrice = request.SortPrice != -1 && request.SortPrice != 1 ?  0 : request.SortPrice ;
 
-            if (string.IsNullOrEmpty(request.KeySearch)
-                && string.IsNullOrEmpty(request.CategorySearch)
-                && string.IsNullOrEmpty(request.BrandSearch))
-            {
-                return await BuildError(result, ERR_MSG_DATA_NOT_FOUND);
-            }
+            Expression<Func<Product, bool>> UserGuideFilter = ex => string.IsNullOrEmpty(paramKey) || (ex.Name != null && ex.Name.ToLower().Contains(paramKey));
+            var finalFilter = Builders<Product>.Filter.Where(UserGuideFilter);
 
-            if (!string.IsNullOrEmpty(request.KeySearch))
-            {
-                products = await _productRepository.FindByAsync(p => p.Name.ToLower().Contains(request.KeySearch.ToLower())
-                && p.IsShow != IsShowConstain.DELETE);
-            }
 
-            if (!string.IsNullOrEmpty(request.CategorySearch))
+            if (!string.IsNullOrEmpty(paramCategory))
             {
-                category = await _categoryRepository.GetAsync(c => c.Name.ToLower().Contains(request.CategorySearch.ToLower()) && c.IsShow != IsShowConstain.DELETE);
-                if (category != null)
+                if (!ObjectId.TryParse(paramCategory, out ObjectId objCategory))
                 {
-                    products = await _productRepository.FindByAsync(p => p.CategoryId == category.Id);
+                    return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, paramCategory);
                 }
+                var categoryFilter = Builders<Product>.Filter.Where(ex => ex.CategoryId == objCategory);
+                finalFilter = Builders<Product>.Filter.And(finalFilter, categoryFilter);
 
             }
 
-            if (!string.IsNullOrEmpty(request.BrandSearch))
+            if (!string.IsNullOrEmpty(paramBrand))
             {
-                brand = await _brandRepository.GetAsync(b => b.Name.ToLower().Contains(request.BrandSearch.ToLower()) && b.IsShow != IsShowConstain.DELETE);
-                if (brand != null)
+                if (!ObjectId.TryParse(paramBrand, out ObjectId objBrand))
                 {
-                    products = await _productRepository.FindByAsync(p => p.BrandId == brand.Id);
-
+                    return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, paramBrand);
                 }
+                var brandFilter = Builders<Product>.Filter.Where(ex => ex.BrandId == objBrand);
+                finalFilter = Builders<Product>.Filter.And(finalFilter, brandFilter);
 
             }
-
+      
+            var products = await _productRepository.FindByAsync(finalFilter);
             // Pagination for Product
-            products = products.OrderBy(p => p.Name)
-                        .Skip((pageIndex - 1) * pageSize)
-                        .Take(pageSize)
-                        .ToList();
+            if (paramFilterPrice == 1)
+            {
+                products = products.OrderBy(p => p.FromPrice)
+                      .Skip((pageIndex - 1) * pageSize)
+                      .Take(pageSize)
+                      .ToList();
+            }
 
-
+            if (paramFilterPrice == -1)
+            {
+                products = products.OrderByDescending(p => p.FromPrice)
+                      .Skip((pageIndex - 1) * pageSize)
+                      .Take(pageSize)
+                      .ToList();
+            }
+          
             var dtoProduct = _mapper.Map<IEnumerable<Product>, IEnumerable<DtoProduct>>(products);
 
             return await BuildResult(result, dtoProduct, MSG_FIND_SUCCESSFULLY);
@@ -708,18 +715,18 @@ namespace Flutter.Backend.Service.Services
         {
             var result = new AppActionResultMessage<SearchResultData>();
             var products = new List<Product>();
-            for (int i=0;i<4;i++)
+            for (int i = 0; i < 4; i++)
             {
                 var product = (from p in await _productRepository.GetAll()
                                join c in await _classifyProductRepository.GetAll()
                                on p.Id equals c.ProductId
                                where p.IsShow == IsShowConstain.ACTIVE
-                               && c.PromotionPrice != 0 && products.All(r=> r.Id != p.Id)
+                               && c.PromotionPrice != 0 && products.All(r => r.Id != p.Id)
                                select p).FirstOrDefault();
 
                 products.Add(product);
             }
-           
+
 
             var dtoProducts = _mapper.Map<IEnumerable<Product>, IEnumerable<DtoProduct>>(products);
 

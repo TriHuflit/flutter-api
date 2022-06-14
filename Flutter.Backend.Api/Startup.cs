@@ -107,7 +107,7 @@ namespace Flutter.Backend.Api
             //register service and respository
             services.AddInterfaceServices();
 
-           
+            services.AddTransient<IBannerRepository, BannerRepository>();
             services.AddTransient<IProductRepository, ProductRespository>();
             services.AddTransient<ICategoryRepository, CaterogyRespository>();
             services.AddTransient<IBrandRepository, BrandRespository>();
