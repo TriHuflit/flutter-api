@@ -555,9 +555,9 @@ namespace Flutter.Backend.Service.Services
                 finalFilter = Builders<Product>.Filter.And(finalFilter, brandFilter);
 
             }
-      
+            
             var products = await _productRepository.FindByAsync(finalFilter);
-            // Pagination for Product
+
             if (paramFilterPrice == 1)
             {
                 products = products.OrderBy(p => p.FromPrice)
@@ -573,6 +573,8 @@ namespace Flutter.Backend.Service.Services
                       .Take(pageSize)
                       .ToList();
             }
+            // Pagination for Product
+          
           
             var dtoProduct = _mapper.Map<IEnumerable<Product>, IEnumerable<DtoProduct>>(products);
 
@@ -624,6 +626,43 @@ namespace Flutter.Backend.Service.Services
 
             return await BuildResult(result, searchResultData, MSG_FIND_SUCCESSFULLY);
         }
+
+        /// <summary>
+        /// Get product related
+        /// </summary>
+        /// <param name="productId"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public async Task<AppActionResultMessage<IEnumerable<DtoProduct>>> GetProductRelatedAsync(string productId)
+        {
+            var result = new AppActionResultMessage<IEnumerable<DtoProduct>>();
+
+            if (!ObjectId.TryParse(productId, out ObjectId objProductId))
+            {
+                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(productId));
+            }
+
+            var product = await _productRepository.GetAsync(p =>p.Id == objProductId && p.IsShow == IsShowConstain.ACTIVE);
+            if(product == null)
+            {
+                return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, productId);
+            }
+
+            var finalFilter = Builders<Product>.Filter.Where(ex => ex.CategoryId == product.CategoryId);
+
+            var brandFilter = Builders<Product>.Filter.Where(ex => ex.BrandId == product.BrandId);
+            finalFilter = Builders<Product>.Filter.And(finalFilter, brandFilter);
+
+            var relatedProducts = await _productRepository.FindByAsync(finalFilter);
+
+            relatedProducts = relatedProducts.OrderBy(p => p.Name).Take(4).ToList();
+
+            var dtoProduct = _mapper.Map<IEnumerable<Product>,IEnumerable<DtoProduct>>(relatedProducts);
+
+            return await BuildResult(result, dtoProduct, MSG_FIND_SUCCESSFULLY);
+        }
+
+
 
         /// <summary>
         /// Gets the product mobile asynchronous.
@@ -794,7 +833,7 @@ namespace Flutter.Backend.Service.Services
             return await BuildResult(result, searchResultData, MSG_FIND_SUCCESSFULLY);
         }
 
-
+    
         #endregion private method
 
         #region private class method

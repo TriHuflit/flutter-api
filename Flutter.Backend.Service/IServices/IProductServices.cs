@@ -25,6 +25,8 @@ namespace Flutter.Backend.Service.IServices
 
         Task<AppActionResultMessage<DtoProductDetail>> GetProductMobileAsync(string productId);
 
+        Task<AppActionResultMessage<IEnumerable<DtoProduct>>> GetProductRelatedAsync(string productId);
+
         Task<AppActionResultMessage<SearchResultData>> GetProductPromotionAsync();
 
         Task<AppActionResultMessage<SearchResultData>> GetProductBestSellerAsync();

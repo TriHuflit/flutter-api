@@ -227,6 +227,31 @@ namespace Flutter.Backend.Api.Controllers
         }
 
         /// <summary>
+        /// Gets all products for mobile.
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("mobile/related/{productId}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetProductsRelatedMobileAsync(string productId)
+        {
+
+            try
+            {
+                var result = await _productService.GetProductRelatedAsync(productId);
+                if (!result.IsSuccess)
+                {
+                    return NotFound(result);
+                }
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        /// <summary>
         /// Gets the product for mobile.
         /// </summary>
         /// <param name="productId">The product identifier.</param>
