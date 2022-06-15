@@ -6,8 +6,12 @@ namespace Flutter.Backend.Service.Models.Requests
     {
         [Required]
         public string ImageBanner { get; set; }
+
         [Required]
         public string Content { get; set; }
+
+        [Required]
+        public string IdProduct { get; set; }
 
         public int IsShowOnMobile { get; set; }
     }

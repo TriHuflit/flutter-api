@@ -63,13 +63,13 @@ namespace Flutter.Backend.Service.Services
             if (request.DisCountAmount > 0 && request.DisCountPercent > 0)
             {
                 // Add message
-                return await BuildError(result, "Giảm giá phần trăm và giảm giá ... không được có cùng lúc");
+                return await BuildError(result, "Giảm giá phần trăm và giảm giá tiền không được có cùng lúc");
             }
 
             if (request.DisCountAmount == 0 && request.DisCountPercent == 0)
             {
                 // Add message
-                return await BuildError(result, "Giảm giá phần trăm và giảm giá ... không được bỏ trống cùng lúc");
+                return await BuildError(result, "Giảm giá phần trăm và giảm giá tiền không được bỏ trống cùng lúc");
             }
 
             if (request.ToDate < request.FromDate)
@@ -260,8 +260,6 @@ namespace Flutter.Backend.Service.Services
         }
         #endregion private method
 
-        #region private class method
 
-        #endregion private class method
     }
 }

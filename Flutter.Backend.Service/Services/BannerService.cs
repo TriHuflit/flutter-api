@@ -17,9 +17,10 @@ namespace Flutter.Backend.Service.Services
     public class BannerService : GenericErrorTextService, IBannerService
     {
         private readonly IBannerRepository _bannerRepository;
+        private readonly IProductRepository _productRepository;
 
-        private readonly IConfiguration _config;
         private readonly IMapper _mapper;
+        private readonly IConfiguration _config;
 
         private readonly IUploadImageService _uploadImageService;
         private readonly ICurrentUserService _currentUserService;
@@ -30,7 +31,8 @@ namespace Flutter.Backend.Service.Services
             IUploadImageService uploadImageService,
             ICurrentUserService currentUserService,
             IBannerRepository bannerRepository,
-            IMessageService messageService) : base(messageService)
+            IMessageService messageService,
+            IProductRepository productRepository) : base(messageService)
         {
 
             _bannerRepository = bannerRepository;
@@ -38,6 +40,7 @@ namespace Flutter.Backend.Service.Services
             _currentUserService = currentUserService;
             _mapper = mapper;
             _config = config;
+            _productRepository = productRepository;
         }
 
         public async Task<AppActionResultMessage<string>> CreateBannerAsync(BaseBannerRequest request)
@@ -49,10 +52,22 @@ namespace Flutter.Backend.Service.Services
                 return await BuildError(result, "Trạng thái banner không đúng");
             }
 
+            if (!ObjectId.TryParse(request.IdProduct, out ObjectId objProduct))
+            {
+                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, request.IdProduct);
+            }
+
+            var product = await _productRepository.GetAsync(p => p.Id == objProduct && p.IsShow == IsShowConstain.ACTIVE);
+            if (product == null)
+            {
+                return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, request.IdProduct);
+            }
+
             var banner = new Banner
             {
                 Content = request.Content,
                 IsShowOnMobile = request.IsShowOnMobile,
+                IdProduct = objProduct
             };
 
             var imageResult = await _uploadImageService.UploadImage(request.ImageBanner);
@@ -94,9 +109,16 @@ namespace Flutter.Backend.Service.Services
         {
             var result = new AppActionResultMessage<IEnumerable<DtoBanner>>();
 
-            var banners = await _bannerRepository.FindByAsync(b => b.IsShowOnMobile != IsShowConstain.DELETE);
+            var banners = await _bannerRepository.FindByAsync(b => b.IsShowOnMobile != IsShowConstain.DELETE);       
 
             var dtoBanner = _mapper.Map<IEnumerable<Banner>, IEnumerable<DtoBanner>>(banners);
+
+            foreach (var banner in dtoBanner)
+            {
+                var product = await _productRepository.GetAsync(p => p.Id ==ObjectId.Parse(banner.IdProduct) && p.IsShow == IsShowConstain.ACTIVE);
+                banner.ProductName = product.Name;
+                banner.Price = product.FromPrice;
+            }
 
             return await BuildResult(result, dtoBanner, MSG_FIND_SUCCESSFULLY);
         }
@@ -108,6 +130,12 @@ namespace Flutter.Backend.Service.Services
             var banners = await _bannerRepository.FindByAsync(b => b.IsShowOnMobile == IsShowConstain.ACTIVE);
 
             var dtoBanner = _mapper.Map<IEnumerable<Banner>, IEnumerable<DtoBanner>>(banners);
+            foreach (var banner in dtoBanner)
+            {
+                var product = await _productRepository.GetAsync(p => p.Id == ObjectId.Parse(banner.IdProduct) && p.IsShow == IsShowConstain.ACTIVE);
+                banner.ProductName = product.Name;
+                banner.Price = product.FromPrice;
+            }
 
             return await BuildResult(result, dtoBanner, MSG_FIND_SUCCESSFULLY);
         }
@@ -126,8 +154,12 @@ namespace Flutter.Backend.Service.Services
             {
                 return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, bannerId);
             }
+            var product = await _productRepository.GetAsync(p => p.Id == banner.IdProduct && p.IsShow == IsShowConstain.ACTIVE);
 
             var dtoBanner = _mapper.Map<Banner, DtoBanner>(banner);
+
+            dtoBanner.ProductName = product.Name;
+            dtoBanner.Price = product.FromPrice;
 
             return await BuildResult(result, dtoBanner, MSG_FIND_SUCCESSFULLY);
         }
@@ -146,9 +178,11 @@ namespace Flutter.Backend.Service.Services
             {
                 return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, bannerId);
             }
-
+            var product = await _productRepository.GetAsync(p => p.Id == banner.IdProduct && p.IsShow == IsShowConstain.ACTIVE);
             var dtoBanner = _mapper.Map<Banner, DtoBanner>(banner);
 
+            dtoBanner.ProductName = product.Name;
+            dtoBanner.Price = product.FromPrice;
             return await BuildResult(result, dtoBanner, MSG_FIND_SUCCESSFULLY);
         }
 
@@ -170,6 +204,22 @@ namespace Flutter.Backend.Service.Services
             if (!string.IsNullOrEmpty(request.Content))
             {
                 banner.Content = request.Content;
+            }
+
+            if (!string.IsNullOrEmpty(request.IdProduct))
+            {
+                if (!ObjectId.TryParse(request.IdProduct, out ObjectId objProduct))
+                {
+                    return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, request.IdProduct);
+                }
+
+                var product = await _productRepository.GetAsync(p => p.Id == objProduct && p.IsShow == IsShowConstain.ACTIVE);
+                if (product == null)
+                {
+                    return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, request.IdProduct);
+                }
+
+                banner.IdProduct = objProduct;
             }
 
             if (ValidateStatusBanner(request.IsShowOnMobile))

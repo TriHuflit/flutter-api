@@ -46,6 +46,9 @@ namespace Flutter.Backend.Service.Models.Mappers
 
             CreateMap<Banner, DtoBanner>(MemberList.Destination)
                 .ForMember(l => l.Id, opt => opt.MapFrom(x => x.Id.ToString()));
+
+            CreateMap<News, DtoNews>(MemberList.Destination)
+             .ForMember(l => l.Id, opt => opt.MapFrom(x => x.Id.ToString()));
         }
     }
 }
