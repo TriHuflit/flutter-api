@@ -2,6 +2,7 @@
 using Flutter.Backend.DAL.Domains;
 using Flutter.Backend.Service.IServices;
 using Flutter.Backend.Service.Models.Dtos;
+using Flutter.Backend.Service.Models.Requests;
 using System.Threading.Tasks;
 
 namespace Flutter.Backend.Service.Services
@@ -22,17 +23,17 @@ namespace Flutter.Backend.Service.Services
             throw new System.NotImplementedException();
         }
 
-        public Task<AppActionResultMessage<string>> UpdateAvatarAsync()
+        public Task<AppActionResultMessage<string>> UpdateAvatarAsync(UpdateAvatarRequest request)
         {
             throw new System.NotImplementedException();
         }
 
-        public Task<AppActionResultMessage<string>> UpdateInfoUserAsync()
+        public Task<AppActionResultMessage<string>> UpdateInfoUserAsync(UpdateUserRequest request)
         {
             throw new System.NotImplementedException();
         }
 
-        public Task<AppActionResultMessage<string>> UpdatePassWordAsync()
+        public Task<AppActionResultMessage<string>> UpdatePassWordAsync(UpdatePasswordRequest request)
         {
             throw new System.NotImplementedException();
         }
