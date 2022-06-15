@@ -15,7 +15,7 @@ namespace Flutter.Backend.Service.IServices
 
         Task<AppActionResultMessage<string>> DeleteProductAsync(string productId);
 
-        Task<AppActionResultMessage<IEnumerable<DtoProduct>>> SearchProductAsync(SearchRequestProduct request);
+        Task<AppActionResultMessage<SearchResultData>> SearchProductAsync(SearchRequestProduct request);
 
         Task<AppActionResultMessage<SearchResultData>> GetAllProductAsync(PaginationRequest request);
 

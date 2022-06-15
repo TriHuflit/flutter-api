@@ -520,9 +520,9 @@ namespace Flutter.Backend.Service.Services
         /// <param name="request">The request.</param>
         /// <returns></returns>
         /// <exception cref="System.NotImplementedException"></exception>
-        public async Task<AppActionResultMessage<IEnumerable<DtoProduct>>> SearchProductAsync(SearchRequestProduct request)
+        public async Task<AppActionResultMessage<SearchResultData>> SearchProductAsync(SearchRequestProduct request)
         {
-            var result = new AppActionResultMessage<IEnumerable<DtoProduct>>();
+            var result = new AppActionResultMessage<SearchResultData>();
             int pageIndex = request.PageIndex > 1 ? request.PageIndex : 1;
             int pageSize = request.PageSize > 10 ? request.PageSize : 10;
             var paramKey = request.KeySearch ?? string.Empty;
@@ -577,8 +577,13 @@ namespace Flutter.Backend.Service.Services
           
           
             var dtoProduct = _mapper.Map<IEnumerable<Product>, IEnumerable<DtoProduct>>(products);
-
-            return await BuildResult(result, dtoProduct, MSG_FIND_SUCCESSFULLY);
+            var searchProduct = new SearchResultData
+            {
+                PageIndex = pageIndex,
+                PageSize = pageSize,
+                ListProduct = dtoProduct,
+            };
+            return await BuildResult(result, searchProduct, MSG_FIND_SUCCESSFULLY);
         }
 
         /// <summary>
