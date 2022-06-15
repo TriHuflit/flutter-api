@@ -87,8 +87,8 @@ namespace Flutter.Backend.Api.Controllers
 
         [HttpGet]
         [Route("details/{VoucherId}")]
-        [ProducesResponseType(typeof(AppActionResultMessage<IEnumerable<DtoVoucher>>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(AppActionResultMessage<IEnumerable<DtoVoucher>>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(AppActionResultMessage<DtoVoucher>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(AppActionResultMessage<DtoVoucher>), StatusCodes.Status400BadRequest)]
         [Authorize]
         public async Task<IActionResult> GetDetailVoucherAsync(string VoucherId)
         {
@@ -102,8 +102,8 @@ namespace Flutter.Backend.Api.Controllers
 
         [HttpGet]
         [Route("mobile/details/{VoucherId}")]
-        [ProducesResponseType(typeof(AppActionResultMessage<IEnumerable<DtoVoucher>>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(AppActionResultMessage<IEnumerable<DtoVoucher>>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(AppActionResultMessage<DtoVoucher>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(AppActionResultMessage<DtoVoucher>), StatusCodes.Status400BadRequest)]
         [AllowAnonymous]
         public async Task<IActionResult> GetDetailVoucherMobileAsync(string VoucherId)
         {

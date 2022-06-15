@@ -8,9 +8,9 @@ namespace Flutter.Backend.Service.IServices
 {
     public interface IBannerService
     {
-        Task<AppActionResultMessage<string>> CreateBannerAsync(BaseVoucherRequest request);
+        Task<AppActionResultMessage<string>> CreateBannerAsync(BaseBannerRequest request);
 
-        Task<AppActionResultMessage<string>> UpdateBannerAsync(UpdateVoucherRequest request);
+        Task<AppActionResultMessage<string>> UpdateBannerAsync(UpdateBannerRequest request);
 
         Task<AppActionResultMessage<string>> DeleteBannerAsync(string bannerId);
 

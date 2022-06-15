@@ -7,5 +7,7 @@
         public string ImageBanner { get; set; }
 
         public string Content { get; set; }
+
+        public int IsShowOnMobile { get; set; }
     }
 }
