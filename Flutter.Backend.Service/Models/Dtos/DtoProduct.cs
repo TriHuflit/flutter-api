@@ -60,6 +60,5 @@ namespace Flutter.Backend.Service.Models.Dtos
         /// Active product.
         /// </summary>
         public int? IsShow { get; set; }
-        public bool IsPromotion { get; set; }
     }
 }

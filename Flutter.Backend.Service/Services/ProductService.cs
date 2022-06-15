@@ -648,14 +648,10 @@ namespace Flutter.Backend.Service.Services
                 return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, productId);
             }
 
-            var finalFilter = Builders<Product>.Filter.Where(ex => ex.CategoryId == product.CategoryId);
+            var relatedProducts = await _productRepository.FindByAsync(p => p.Id != objProductId && p.IsShow == IsShowConstain.ACTIVE
+                                                                                    && p.CategoryId == product.CategoryId);
 
-            var brandFilter = Builders<Product>.Filter.Where(ex => ex.BrandId == product.BrandId);
-            finalFilter = Builders<Product>.Filter.And(finalFilter, brandFilter);
-
-            var relatedProducts = await _productRepository.FindByAsync(finalFilter);
-
-            relatedProducts = relatedProducts.OrderBy(p => p.Name).Take(4).ToList();
+            relatedProducts = relatedProducts.OrderBy(p => p.Name).Take(4);
 
             var dtoProduct = _mapper.Map<IEnumerable<Product>,IEnumerable<DtoProduct>>(relatedProducts);
 
