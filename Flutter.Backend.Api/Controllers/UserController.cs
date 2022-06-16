@@ -23,7 +23,7 @@ namespace Flutter.Backend.Api.Controllers
 
         [HttpGet]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = RoleConstain.USER)]
-        [Route("/get-info")]
+        [Route("get-info")]
         [ProducesResponseType(typeof(AppActionResultMessage<DtoUser>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(AppActionResultMessage<DtoUser>), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetInfoUserAsync()
@@ -39,7 +39,7 @@ namespace Flutter.Backend.Api.Controllers
 
         [HttpPut]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = RoleConstain.USER)]
-        [Route("/update-info")]
+        [Route("update-info")]
         [ProducesResponseType(typeof(AppActionResultMessage<DtoUser>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(AppActionResultMessage<DtoUser>), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> UpdateInfoUserAsync(UpdateUserRequest request)
@@ -55,7 +55,7 @@ namespace Flutter.Backend.Api.Controllers
 
         [HttpPut]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = RoleConstain.USER)]
-        [Route("/update-avatar")]
+        [Route("update-avatar")]
         [ProducesResponseType(typeof(AppActionResultMessage<DtoUser>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(AppActionResultMessage<DtoUser>), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> UpdateAvatarUserAsync(UpdateAvatarRequest request)
@@ -70,7 +70,7 @@ namespace Flutter.Backend.Api.Controllers
 
         [HttpPut]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = RoleConstain.USER)]
-        [Route("/update-password")]
+        [Route("update-password")]
         [ProducesResponseType(typeof(AppActionResultMessage<DtoUser>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(AppActionResultMessage<DtoUser>), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> UpdatePasswordUserAsync(UpdatePasswordRequest request)

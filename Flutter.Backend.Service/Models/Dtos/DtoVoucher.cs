@@ -20,6 +20,8 @@ namespace Flutter.Backend.Service.Models.Dtos
 
         public decimal FromCondition { get; set; }
 
+        public string ImageVoucher { get; set; }
+
         public decimal ToCondition { get; set; }
 
         public string Description { get; set; }
