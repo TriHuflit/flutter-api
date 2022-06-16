@@ -48,6 +48,9 @@ namespace Flutter.Backend.Service.Models.Mappers
 
             CreateMap<News, DtoNews>(MemberList.Destination)
              .ForMember(l => l.Id, opt => opt.MapFrom(x => x.Id.ToString()));
+
+            CreateMap<AppUser, DtoUser>(MemberList.Destination)
+                .ForMember(l => l.RoleId, opt => opt.MapFrom(x => x.Id.ToString()));
         }
     }
 }
