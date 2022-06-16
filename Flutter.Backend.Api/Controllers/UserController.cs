@@ -21,6 +21,22 @@ namespace Flutter.Backend.Api.Controllers
             _userService = userService;
         }
 
+        [HttpGet]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = RoleConstain.USER)]
+        [Route("/get-info")]
+        [ProducesResponseType(typeof(AppActionResultMessage<DtoUser>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(AppActionResultMessage<DtoUser>), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetInfoUserAsync()
+        {
+            var result = await _userService.GetInfoUserAsync();
+            if (result.IsSuccess)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result);
+        }
+
+
         [HttpPut]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = RoleConstain.USER)]
         [Route("/update-info")]
