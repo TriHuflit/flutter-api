@@ -1,7 +1,9 @@
-﻿using Flutter.Backend.DAL.Domains;
+﻿using Flutter.Backend.Common.Constains;
+using Flutter.Backend.DAL.Domains;
 using Flutter.Backend.Service.IServices;
 using Flutter.Backend.Service.Models.Dtos;
 using Flutter.Backend.Service.Models.Requests;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -26,7 +28,7 @@ namespace Flutter.Backend.Api.Controllers
         [Route("create")]
         [ProducesResponseType(typeof(AppActionResultMessage<DtoVoucher>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(AppActionResultMessage<DtoVoucher>), StatusCodes.Status400BadRequest)]
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = RoleConstain.MANAGER)]
         public async Task<IActionResult> CreateVoucherAsync(BaseVoucherRequest request)
         {
             var result = await _voucherService.CreateVoucherAsync(request);
@@ -43,6 +45,7 @@ namespace Flutter.Backend.Api.Controllers
         [Route("update")]
         [ProducesResponseType(typeof(AppActionResultMessage<DtoVoucher>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(AppActionResultMessage<DtoVoucher>), StatusCodes.Status400BadRequest)]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = RoleConstain.MANAGER)]
         public async Task<IActionResult> UpdateVoucherAsync(UpdateVoucherRequest request)
         {
             var result = await _voucherService.UpdateVoucherAsync(request);
@@ -59,7 +62,7 @@ namespace Flutter.Backend.Api.Controllers
         [Route("all")]
         [ProducesResponseType(typeof(AppActionResultMessage<IEnumerable<DtoVoucher>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(AppActionResultMessage<IEnumerable<DtoVoucher>>), StatusCodes.Status400BadRequest)]
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = RoleConstain.MANAGER)]
         public async Task<IActionResult> GetAllVoucherAsync()
         {
             var result = await _voucherService.GetAllVoucherAsync();
@@ -89,7 +92,7 @@ namespace Flutter.Backend.Api.Controllers
         [Route("details/{VoucherId}")]
         [ProducesResponseType(typeof(AppActionResultMessage<DtoVoucher>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(AppActionResultMessage<DtoVoucher>), StatusCodes.Status400BadRequest)]
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = RoleConstain.MANAGER)]
         public async Task<IActionResult> GetDetailVoucherAsync(string VoucherId)
         {
             var result = await _voucherService.GetVoucherAsync(VoucherId);

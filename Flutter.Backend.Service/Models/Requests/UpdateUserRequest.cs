@@ -11,11 +11,6 @@ namespace Flutter.Backend.Service.Models.Requests
         public string FullName { get; set; }
 
         /// <summary>
-        /// UserName.
-        /// </summary>
-        public string UserName { get; set; }
-
-        /// <summary>
         ///Address.
         /// </summary>
         public Location Location { get; set; }
@@ -40,9 +35,5 @@ namespace Flutter.Backend.Service.Models.Requests
         /// </summary>
         public DateTime Birth { get; set; }
 
-        /// <summary>
-        /// Avatar.
-        /// </summary>
-        public string Avatar { get; set; }
     }
 }

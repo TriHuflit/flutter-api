@@ -20,11 +20,6 @@ namespace Flutter.Backend.Service.Models.Dtos
         public string UserName { get; set; }
 
         /// <summary>
-        /// HashPassword.
-        /// </summary>
-        public string HashPassword { get; set; }
-
-        /// <summary>
         ///Address.
         /// </summary>
         public Location Location { get; set; }
