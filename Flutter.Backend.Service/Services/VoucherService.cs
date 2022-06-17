@@ -256,7 +256,7 @@ namespace Flutter.Backend.Service.Services
 
         public bool ValidateVoucher(string TypeVoucher)
         {
-            return TypeVoucher == TypeVoucherConstain.VOUCHER_ORDER || TypeVoucher == TypeVoucherConstain.VOUCHER_DELEVERY;
+            return TypeVoucher == TypeVoucherConstain.VOUCHER_ORDER || TypeVoucher == TypeVoucherConstain.VOUCHER_DELIVERY;
         }
         #endregion private method
 
