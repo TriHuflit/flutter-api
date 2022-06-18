@@ -152,6 +152,30 @@ namespace Flutter.Backend.Api.Controllers
         }
 
         /// <summary>
+        /// Gets all products.
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("all-banner")]
+        public async Task<IActionResult> GetAllProductsBanner()
+        {
+
+            try
+            {
+                var result = await _productService.GetAllProductBanner();
+                if (!result.IsSuccess)
+                {
+                    return NotFound(result);
+                }
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        /// <summary>
         /// Promotion Product
         /// </summary>
         /// <param name="request"></param>

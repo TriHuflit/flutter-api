@@ -30,5 +30,7 @@ namespace Flutter.Backend.Service.IServices
         Task<AppActionResultMessage<SearchResultData>> GetProductPromotionAsync();
 
         Task<AppActionResultMessage<SearchResultData>> GetProductBestSellerAsync();
+
+        Task<AppActionResultMessage<IEnumerable<DtoProductBanner>>> GetAllProductBanner();
     }
 }

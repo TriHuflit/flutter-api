@@ -663,7 +663,21 @@ namespace Flutter.Backend.Service.Services
             return await BuildResult(result, dtoProduct, MSG_FIND_SUCCESSFULLY);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public async Task<AppActionResultMessage<IEnumerable<DtoProductBanner>>> GetAllProductBanner()
+        {
+            var result = new AppActionResultMessage<IEnumerable<DtoProductBanner>>();
 
+            var products = await _productRepository.GetAll();
+
+            var dtoProductBanner = _mapper.Map<IEnumerable<Product>, IEnumerable<DtoProductBanner>>(products);
+
+            return await BuildResult(result, dtoProductBanner, MSG_FIND_SUCCESSFULLY);
+        }
 
         /// <summary>
         /// Gets the product mobile asynchronous.
@@ -834,7 +848,9 @@ namespace Flutter.Backend.Service.Services
             return await BuildResult(result, searchResultData, MSG_FIND_SUCCESSFULLY);
         }
 
-    
+
+
+
         #endregion private method
 
         #region private class method
