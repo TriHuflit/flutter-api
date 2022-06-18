@@ -10,6 +10,8 @@ namespace Flutter.Backend.Service.Models.Requests
 
         public string Description { get; set; }
 
+        public int Ship { get; set; }
+
         public Location AddressReceive { get; set; }
 
         public string PhoneReceive { get; set; }

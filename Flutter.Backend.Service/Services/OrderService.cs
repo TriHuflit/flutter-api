@@ -85,15 +85,6 @@ namespace Flutter.Backend.Service.Services
                 {
                     return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, item.ClassifyProductId);
                 }
-                
-                if(classifyProduct.PromotionPrice > 0)
-                {
-                    item.Price = classifyProduct.PromotionPrice;
-                }
-                else
-                {
-                    item.Price = classifyProduct.OriginalPrice;
-                }
             }
 
             if (order == null)
@@ -168,9 +159,9 @@ namespace Flutter.Backend.Service.Services
         /// 
         /// </summary>
         /// <returns></returns>
-        public async Task<AppActionResultMessage<DtoOrder>> GetInfoOrderAsync()
+        public async Task<AppActionResultMessage<DtoOrderDraft>> GetInfoOrderDraftAsync()
         {
-            var result = new AppActionResultMessage<DtoOrder>();
+            var result = new AppActionResultMessage<DtoOrderDraft>();
 
             if (!ObjectId.TryParse(_currentUserService.UserId, out ObjectId objUser))
             {
@@ -179,7 +170,7 @@ namespace Flutter.Backend.Service.Services
 
             var user = await _appUserRepository.GetAsync(u => u.Id == objUser);
             var order = await _orderRepository.GetAsync(o => o.UserId == user.Id && o.Status == StatusOrderConstain.DRAFT);
-            var dtoOrder = _mapper.Map<Order, DtoOrder>(order);
+            var dtoOrder = _mapper.Map<Order, DtoOrderDraft>(order);
 
             return await BuildResult(result, dtoOrder, MSG_SAVE_SUCCESSFULLY);
         }
@@ -394,7 +385,7 @@ namespace Flutter.Backend.Service.Services
             order.IsPayment = request.IsPayment;
             order.Status = StatusOrderConstain.PENDING;
             order.OrderDetails = orderDetailRequest;
-
+            order.Ship = request.Ship;
             /// caculator total with voucher
 
             foreach (var item in order.OrderDetails)

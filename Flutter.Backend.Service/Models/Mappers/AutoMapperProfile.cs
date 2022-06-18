@@ -35,6 +35,9 @@ namespace Flutter.Backend.Service.Models.Mappers
                 .ForMember(l => l.UserId, opt => opt.MapFrom(x => x.UserId.ToString()))
                 .ForMember(l => l.VoucherId, opt => opt.MapFrom(x => x.VoucherId.ToString()));
 
+            CreateMap<Order, DtoOrderDraft>(MemberList.Destination)
+                .ForMember(l => l.Id, opt => opt.MapFrom(x => x.Id.ToString()));
+
             CreateMap<OrderDetail, DtoOrderDetail>(MemberList.Destination)
                 .ForMember(l => l.ClassifyProductId, opt => opt.MapFrom(x => x.ClassifyProductId.ToString()));
 

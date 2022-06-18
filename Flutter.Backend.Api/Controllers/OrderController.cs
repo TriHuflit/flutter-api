@@ -48,7 +48,7 @@ namespace Flutter.Backend.Api.Controllers
         /// <param name="request"></param>
         /// <returns></returns>
         [HttpPost]
-        [Route("comfirn-by-user")]
+        [Route("confirm-by-user")]
         [ProducesResponseType(typeof(AppActionResultMessage<string>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(AppActionResultMessage<string>), StatusCodes.Status400BadRequest)]
         [Authorize]
@@ -114,7 +114,7 @@ namespace Flutter.Backend.Api.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = RoleConstain.USER)]
         public async Task<IActionResult> GetInfoOrderAsync()
         {
-            var result = await _orderService.GetInfoOrderAsync();
+            var result = await _orderService.GetInfoOrderDraftAsync();
             if (result.IsSuccess)
             {
                 return Ok(result);

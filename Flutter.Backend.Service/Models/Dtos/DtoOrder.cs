@@ -13,7 +13,7 @@ namespace Flutter.Backend.Service.Models.Dtos
 
         public string VoucherId { get; set; }
 
-        public Ship Ship { get; set; }
+        public int Ship { get; set; }
 
         public IEnumerable<DtoOrderDetail> OrderDetails { get; set; }
 
