@@ -85,6 +85,7 @@ namespace Flutter.Backend.Service.Services
                 {
                     return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, item.ClassifyProductId);
                 }
+                
             }
 
             if (order == null)
@@ -104,6 +105,9 @@ namespace Flutter.Backend.Service.Services
                 foreach (var item in order.OrderDetails)
                 {
                     order.TotalPrice += item.Price * item.Count;
+                    var classifyProduct = await _classifyProductRepository.GetAsync(c => c.Id == item.ClassifyProductId && c.IsShow == IsShowConstain.ACTIVE);
+
+                    item.Image =  classifyProduct.Image;
                 }
                 order.SetFullInfor(user.Id.ToString(), user.UserName);
                 _orderRepository.Add(order);
