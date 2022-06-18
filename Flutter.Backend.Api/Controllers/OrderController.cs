@@ -109,8 +109,8 @@ namespace Flutter.Backend.Api.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("get-info")]
-        [ProducesResponseType(typeof(AppActionResultMessage<DtoOrder>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(AppActionResultMessage<DtoOrder>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(AppActionResultMessage<DtoOrderDraft>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(AppActionResultMessage<DtoOrderDraft>), StatusCodes.Status400BadRequest)]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = RoleConstain.USER)]
         public async Task<IActionResult> GetInfoOrderAsync()
         {
