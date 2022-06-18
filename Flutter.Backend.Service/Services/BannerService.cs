@@ -240,7 +240,7 @@ namespace Flutter.Backend.Service.Services
             banner.SetUpdatedInFor(_currentUserService.UserId, _currentUserService.UserName);
             _bannerRepository.Update(banner, b => b.Id == ObjBanner);
 
-            return await BuildResult(result, MSG_UPDATE_SUCCESSFULLY);
+            return await BuildResult(result,banner.Id.ToString(), MSG_UPDATE_SUCCESSFULLY);
         }
 
         #region Private Method
