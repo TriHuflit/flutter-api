@@ -87,7 +87,7 @@ namespace Flutter.Backend.Service.Services
             news.SetUpdatedInFor(_currentUserService.UserId, _currentUserService.UserName);
             _newsRepository.Update(news, n => n.Id == objNews);
 
-            return await BuildResult(result, news.Id.ToString(),MSG_DELETE_SUCCESSFULLY);
+            return await BuildResult(result, news.Id.ToString(), MSG_DELETE_SUCCESSFULLY);
         }
 
 
@@ -95,7 +95,7 @@ namespace Flutter.Backend.Service.Services
         {
             var result = new AppActionResultMessage<IEnumerable<DtoNews>>();
 
-            var news = await _newsRepository.GetAll();
+            var news = await _newsRepository.FindByAsync(n=>n.IsShow != IsShowConstain.DELETE);
 
             var dtoNews = _mapper.Map<IEnumerable<News>, IEnumerable<DtoNews>>(news);
 
@@ -107,7 +107,7 @@ namespace Flutter.Backend.Service.Services
 
             var result = new AppActionResultMessage<IEnumerable<DtoNews>>();
 
-            var news = await _newsRepository.GetAll();
+            var news = await _newsRepository.FindByAsync(n=>n.IsShow == IsShowConstain.ACTIVE);
 
             var dtoNews = _mapper.Map<IEnumerable<News>, IEnumerable<DtoNews>>(news);
 
@@ -124,7 +124,7 @@ namespace Flutter.Backend.Service.Services
                 return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, newsId);
             }
 
-            var news = await _newsRepository.GetAsync(n => n.Id == objNews && n.IsShow == IsShowConstain.ACTIVE);
+            var news = await _newsRepository.GetAsync(n => n.Id == objNews && n.IsShow != IsShowConstain.DELETE);
             if (news == null)
             {
                 return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, newsId);
@@ -132,7 +132,7 @@ namespace Flutter.Backend.Service.Services
 
             var dtoNews = _mapper.Map<News, DtoNews>(news);
 
-            return await BuildResult(result, MSG_FIND_SUCCESSFULLY);
+            return await BuildResult(result, dtoNews, MSG_FIND_SUCCESSFULLY);
         }
 
         public async Task<AppActionResultMessage<DtoNews>> GetNewsMobileAsync(string newsId)
@@ -202,6 +202,9 @@ namespace Flutter.Backend.Service.Services
                 }
                 news.Thumbnail = imageResult.Data;
             }
+
+            news.SetUpdatedInFor(_currentUserService.UserId, _currentUserService.UserName);
+            _newsRepository.Update(news, n => n.Id == news.Id);
 
             return await BuildResult(result, news.Id.ToString(), MSG_UPDATE_SUCCESSFULLY);
         }

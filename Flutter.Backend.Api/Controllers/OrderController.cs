@@ -51,7 +51,7 @@ namespace Flutter.Backend.Api.Controllers
         [Route("confirm-by-user")]
         [ProducesResponseType(typeof(AppActionResultMessage<string>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(AppActionResultMessage<string>), StatusCodes.Status400BadRequest)]
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = RoleConstain.USER)]
         public async Task<IActionResult> ConfirmOrderByUserAsync(ConfirmOrderRequest request)
         {
             var result = await _orderService.ConfirmOrderByUserAsync(request);
@@ -71,7 +71,7 @@ namespace Flutter.Backend.Api.Controllers
         [Route("confirm-by-staff/{OrderId}")]
         [ProducesResponseType(typeof(AppActionResultMessage<string>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(AppActionResultMessage<string>), StatusCodes.Status400BadRequest)]
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = RoleConstain.MANAGER)]
         public async Task<IActionResult> ConfirmOrderByStaffAsync(string OrderId)
         {
             var result = await _orderService.ConfirmOrderByStaffAsync(OrderId);
@@ -92,7 +92,7 @@ namespace Flutter.Backend.Api.Controllers
         [Route("delete/{OrderId}")]
         [ProducesResponseType(typeof(AppActionResultMessage<DtoOrder>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(AppActionResultMessage<DtoOrder>), StatusCodes.Status400BadRequest)]
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = RoleConstain.USER)]
         public async Task<IActionResult> DeleteOrderAsync(string OrderId)
         {
             var result = await _orderService.DeleteOrderAsync(OrderId);
@@ -130,7 +130,7 @@ namespace Flutter.Backend.Api.Controllers
         [Route("get-detail-portal/{OrderId}")]
         [ProducesResponseType(typeof(AppActionResultMessage<DtoOrder>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(AppActionResultMessage<DtoOrder>), StatusCodes.Status400BadRequest)]
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = RoleConstain.MANAGER)]
         public async Task<IActionResult> GetDetailsOrderPortalAsync(string OrderId)
         {
             var result = await _orderService.GetDetailsOrderPortalAsync(OrderId);
@@ -149,7 +149,7 @@ namespace Flutter.Backend.Api.Controllers
         [Route("all-pending-portal")]
         [ProducesResponseType(typeof(AppActionResultMessage<IEnumerable<DtoOrder>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(AppActionResultMessage<IEnumerable<DtoOrder>>), StatusCodes.Status400BadRequest)]
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = RoleConstain.MANAGER)]
         public async Task<IActionResult> GetAllOrderPendingPortalAsync()
         {
             var result = await _orderService.GetAllOrderPendingPortalAsync();
@@ -168,7 +168,7 @@ namespace Flutter.Backend.Api.Controllers
         [Route("all-delivery-portal")]
         [ProducesResponseType(typeof(AppActionResultMessage<IEnumerable<DtoOrder>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(AppActionResultMessage<IEnumerable<DtoOrder>>), StatusCodes.Status400BadRequest)]
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = RoleConstain.MANAGER)]
         public async Task<IActionResult> GetAllOrderDeliveryPortalAsync()
         {
             var result = await _orderService.GetAllOrderDeliveryPortalAsync();
@@ -187,7 +187,7 @@ namespace Flutter.Backend.Api.Controllers
         [Route("all-cancle-portal")]
         [ProducesResponseType(typeof(AppActionResultMessage<IEnumerable<DtoOrder>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(AppActionResultMessage<IEnumerable<DtoOrder>>), StatusCodes.Status400BadRequest)]
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = RoleConstain.MANAGER)]
         public async Task<IActionResult> GetAllOrderCancleOrderPortalAsync()
         {
             var result = await _orderService.GetAllOrderCancleOrderPortalAsync();
@@ -206,7 +206,7 @@ namespace Flutter.Backend.Api.Controllers
         [Route("all-success-portal")]
         [ProducesResponseType(typeof(AppActionResultMessage<IEnumerable<DtoOrder>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(AppActionResultMessage<IEnumerable<DtoOrder>>), StatusCodes.Status400BadRequest)]
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = RoleConstain.MANAGER)]
         public async Task<IActionResult> GetAllOrderSuccessOrderPortalAsync()
         {
             var result = await _orderService.GetAllOrderSuccessOrderPortalAsync();
