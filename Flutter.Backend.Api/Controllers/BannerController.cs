@@ -22,8 +22,8 @@ namespace Flutter.Backend.Api.Controllers
 
         [HttpPost]
         [Route("create")]
-        [ProducesResponseType(typeof(AppActionResultMessage<DtoBanner>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(AppActionResultMessage<DtoBanner>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(AppActionResultMessage<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(AppActionResultMessage<string>), StatusCodes.Status400BadRequest)]
         [Authorize]
         public async Task<IActionResult> CreateBannerAsync(BaseBannerRequest request)
         {
@@ -38,11 +38,26 @@ namespace Flutter.Backend.Api.Controllers
 
         [HttpPut]
         [Route("update")]
-        [ProducesResponseType(typeof(AppActionResultMessage<DtoBanner>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(AppActionResultMessage<DtoBanner>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(AppActionResultMessage<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(AppActionResultMessage<string>), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> UpdateBannerAsync(UpdateBannerRequest request)
         {
             var result = await _bannerSerivce.UpdateBannerAsync(request);
+            if (result.IsSuccess)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result);
+        }
+
+
+        [HttpDelete]
+        [Route("delete/{bannerId}")]
+        [ProducesResponseType(typeof(AppActionResultMessage<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(AppActionResultMessage<string>), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> DeleteBannerAsync(string bannerId)
+        {
+            var result = await _bannerSerivce.DeleteBannerAsync(bannerId);
             if (result.IsSuccess)
             {
                 return Ok(result);

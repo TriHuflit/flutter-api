@@ -102,7 +102,7 @@ namespace Flutter.Backend.Service.Services
             banner.SetUpdatedInFor(_currentUserService.UserId, _currentUserService.UserName);
             _bannerRepository.Update(banner, b => b.Id == banner.Id);
 
-            return await BuildResult(result, MSG_DELETE_SUCCESSFULLY);
+            return await BuildResult(result,banner.Id.ToString(), MSG_DELETE_SUCCESSFULLY);
         }
 
         public async Task<AppActionResultMessage<IEnumerable<DtoBanner>>> GetAllBannerAsync()
