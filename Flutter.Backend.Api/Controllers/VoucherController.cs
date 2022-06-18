@@ -26,8 +26,8 @@ namespace Flutter.Backend.Api.Controllers
 
         [HttpPost]
         [Route("create")]
-        [ProducesResponseType(typeof(AppActionResultMessage<DtoVoucher>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(AppActionResultMessage<DtoVoucher>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(AppActionResultMessage<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(AppActionResultMessage<string>), StatusCodes.Status400BadRequest)]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = RoleConstain.MANAGER)]
         public async Task<IActionResult> CreateVoucherAsync(BaseVoucherRequest request)
         {
@@ -43,8 +43,8 @@ namespace Flutter.Backend.Api.Controllers
 
         [HttpPut]
         [Route("update")]
-        [ProducesResponseType(typeof(AppActionResultMessage<DtoVoucher>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(AppActionResultMessage<DtoVoucher>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(AppActionResultMessage<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(AppActionResultMessage<string>), StatusCodes.Status400BadRequest)]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = RoleConstain.MANAGER)]
         public async Task<IActionResult> UpdateVoucherAsync(UpdateVoucherRequest request)
         {
@@ -56,6 +56,22 @@ namespace Flutter.Backend.Api.Controllers
             return BadRequest(result);
         }
 
+
+
+        [HttpDelete]
+        [Route("delete/{voucherId}")]
+        [ProducesResponseType(typeof(AppActionResultMessage<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(AppActionResultMessage<string>), StatusCodes.Status400BadRequest)]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = RoleConstain.MANAGER)]
+        public async Task<IActionResult> DeleteVoucherAsync(string voucherId)
+        {
+            var result = await _voucherService.DeleteVoucherAsync(voucherId);
+            if (result.IsSuccess)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result);
+        }
 
 
         [HttpGet]

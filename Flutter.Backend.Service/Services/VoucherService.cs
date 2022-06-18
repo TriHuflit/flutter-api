@@ -7,6 +7,7 @@ using Flutter.Backend.Service.Models.Dtos;
 using Flutter.Backend.Service.Models.Requests;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Bson;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using static Flutter.Backend.Common.Constains.MessageResConstain;
@@ -20,20 +21,17 @@ namespace Flutter.Backend.Service.Services
         private readonly IConfiguration _config;
         private readonly IMapper _mapper;
 
-        private readonly IUploadImageService _uploadImageService;
         private readonly ICurrentUserService _currentUserService;
 
         public VoucherService(
             IMapper mapper,
             IConfiguration config,
-            IUploadImageService uploadImageService,
             ICurrentUserService currentUserService,
             IVoucherRepository voucherRepository,
             IMessageService messageService) : base(messageService)
         {
 
             _voucherRepository = voucherRepository;
-            _uploadImageService = uploadImageService;
             _currentUserService = currentUserService;
             _mapper = mapper;
             _config = config;
@@ -72,10 +70,16 @@ namespace Flutter.Backend.Service.Services
                 return await BuildError(result, "Giảm giá phần trăm và giảm giá tiền không được bỏ trống cùng lúc");
             }
 
-            if (request.ToDate < request.FromDate)
+            if (request.FromDate.Date < DateTime.UtcNow.Date && request.ToDate.Date < DateTime.UtcNow.Date)
             {
                 // Add message
-                return await BuildError(result, "Ngày bắt đầu không được lớn hơn ngày kết thúc");
+                return await BuildError(result, "Ngày bắt đầu và ngày kết thúc thấp hơn ngày hiện tại",request.FromDate.Date);
+            }
+
+            if (request.ToDate.Date < request.FromDate.Date)
+            {
+                // Add message
+                return await BuildError(result, "Ngày bắt đầu không được lớn hơn ngày kết thúc", request.FromDate.Date);
             }
 
             if ((request.DisCountAmount > 0 && request.DisCountPercent > 0) && request.ToCondition < request.FromCondition)
@@ -127,6 +131,11 @@ namespace Flutter.Backend.Service.Services
                 return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, nameof(voucher));
             }
 
+            if (voucher.ToDate.Date >= DateTime.UtcNow.Date && voucher.FromDate.Date <= DateTime.UtcNow.Date)
+            {
+                return await BuildError(result, "Không thể xóa voucher khi vẫn còn đang trong thời gian áp dụng", voucher.Id.ToString());
+            }
+
             voucher.IsShow = IsShowConstain.DELETE;
             voucher.SetUpdatedInFor(_currentUserService.UserId, _currentUserService.UserName);
             _voucherRepository.Update(voucher, v => v.Id == objVoucher);
@@ -150,7 +159,8 @@ namespace Flutter.Backend.Service.Services
         {
             var result = new AppActionResultMessage<IEnumerable<DtoVoucher>>();
 
-            var voucher = await _voucherRepository.FindByAsync(v => v.IsShow == IsShowConstain.ACTIVE);
+            var voucher = await _voucherRepository.FindByAsync(v => v.IsShow == IsShowConstain.ACTIVE && v.FromDate <= DateTime.UtcNow
+                                                                                        && v.ToDate > DateTime.UtcNow);
 
 
             var dtoVoucher = _mapper.Map<IEnumerable<Voucher>, IEnumerable<DtoVoucher>>(voucher);
@@ -183,7 +193,8 @@ namespace Flutter.Backend.Service.Services
                 return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(voucherId));
             }
 
-            var voucher = await _voucherRepository.GetAsync(v => v.Id == objectVoucherId && v.IsShow == IsShowConstain.ACTIVE);
+            var voucher = await _voucherRepository.GetAsync(v => v.Id == objectVoucherId && v.IsShow == IsShowConstain.ACTIVE && v.FromDate <= DateTime.UtcNow
+                                                                                                                    && v.ToDate > DateTime.UtcNow);
             if (voucher == null)
             {
                 return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, voucherId);
@@ -213,6 +224,12 @@ namespace Flutter.Backend.Service.Services
             {
                 // Add message
                 return await BuildError(result, "Ngày bắt đầu không được lớn hơn ngày kết thúc");
+            }
+
+            if (request.FromDate.Date < DateTime.UtcNow.Date && request.ToDate.Date < DateTime.UtcNow.Date)
+            {
+                // Add message
+                return await BuildError(result, "Ngày bắt đầu và ngày kết thúc thấp hơn ngày hiện tại", request.FromDate.Date);
             }
 
             var voucher = await _voucherRepository.GetAsync(v => v.Id == objVoucher && v.IsShow != IsShowConstain.DELETE);
