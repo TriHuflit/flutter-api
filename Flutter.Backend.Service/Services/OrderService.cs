@@ -67,14 +67,32 @@ namespace Flutter.Backend.Service.Services
             }
 
             var user = await _appUserRepository.GetAsync(u => u.Id == objUser);
+            if(user == null)
+            {
+                return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, _currentUserService.UserId);
+            }
 
             var order = await _orderRepository.GetAsync(o => o.UserId == user.Id && o.Status == StatusOrderConstain.DRAFT);
-
             foreach (var item in request.OrderDetails)
             {
                 if (!ObjectId.TryParse(item.ClassifyProductId, out ObjectId cslProObj))
                 {
                     return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(item.ClassifyProductId));
+                }
+
+                var classifyProduct = await _classifyProductRepository.GetAsync(c => c.Id == cslProObj && c.IsShow == IsShowConstain.ACTIVE);
+                if(classifyProduct == null)
+                {
+                    return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, item.ClassifyProductId);
+                }
+                
+                if(classifyProduct.PromotionPrice > 0)
+                {
+                    item.Price = classifyProduct.PromotionPrice;
+                }
+                else
+                {
+                    item.Price = classifyProduct.OriginalPrice;
                 }
             }
 
@@ -94,17 +112,23 @@ namespace Flutter.Backend.Service.Services
                 };
                 foreach (var item in order.OrderDetails)
                 {
-                    var classifyProduct = await _classifyProductRepository.GetAsync(c => c.Id == item.ClassifyProductId
-                    && c.IsShow == IsShowConstain.ACTIVE);
-
-                    if (classifyProduct == null)
-                    {
-                        return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, nameof(classifyProduct));
-                    }
                     order.TotalPrice += item.Price * item.Count;
                 }
                 order.SetFullInfor(user.Id.ToString(), user.UserName);
                 _orderRepository.Add(order);
+            }
+            else
+            {
+
+                var orderDetailRequest = _mapper.Map<IEnumerable<CreateOrderDetailRequest>, IEnumerable<OrderDetail>>(request.OrderDetails);
+                order.OrderDetails = orderDetailRequest;
+                foreach (var item in order.OrderDetails)
+                {
+                    order.TotalPrice += item.Price * item.Count;
+                }
+
+                order.SetUpdatedInFor(_currentUserService.UserId, _currentUserService.UserName);
+                _orderRepository.Update(order, o => o.Id == order.Id);
             }
 
             var dtoOrder = _mapper.Map<Order, DtoOrder>(order);
@@ -112,55 +136,6 @@ namespace Flutter.Backend.Service.Services
             return await BuildResult(result, dtoOrder, MSG_FIND_SUCCESSFULLY);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        public async Task<AppActionResultMessage<DtoOrder>> UpdateOrderAsync(UpdateOrderRequest request)
-        {
-            var result = new AppActionResultMessage<DtoOrder>();
-
-            if (!ObjectId.TryParse(request.Id, out ObjectId objOrder))
-            {
-                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.Id));
-            }
-
-            if (!ObjectId.TryParse(_currentUserService.UserId, out ObjectId objUser))
-            {
-                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(_currentUserService.UserId));
-            }
-
-            foreach (var item in request.OrderDetails)
-            {
-                if (!ObjectId.TryParse(item.ClassifyProductId, out ObjectId cslProObj))
-                {
-                    return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, item.ClassifyProductId);
-                }
-            }
-
-            var order = await _orderRepository.GetAsync(o => o.Id == objOrder
-            && o.Status == StatusOrderConstain.DRAFT && o.UserId == objUser);
-
-            if (order == null)
-            {
-                return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, nameof(request.Id));
-            }
-            else
-            {
-                var orderDetailRequest = _mapper.Map<IEnumerable<CreateOrderDetailRequest>, IEnumerable<OrderDetail>>(request.OrderDetails);
-                order.OrderDetails = orderDetailRequest;
-                foreach (var item in order.OrderDetails)
-                {
-                    order.TotalPrice += item.Price * item.Count;
-                }
-            }
-
-            order.SetUpdatedInFor(_currentUserService.UserId, _currentUserService.UserName);
-            _orderRepository.Update(order, o => o.Id == objOrder);
-
-            return await BuildResult(result, MSG_SAVE_SUCCESSFULLY);
-        }
 
         /// <summary>
         /// 

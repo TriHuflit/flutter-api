@@ -1,7 +1,9 @@
-﻿using Flutter.Backend.DAL.Domains;
+﻿using Flutter.Backend.Common.Constains;
+using Flutter.Backend.DAL.Domains;
 using Flutter.Backend.Service.IServices;
 using Flutter.Backend.Service.Models.Dtos;
 using Flutter.Backend.Service.Models.Requests;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -80,25 +82,6 @@ namespace Flutter.Backend.Api.Controllers
             return BadRequest(result);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        [HttpPut]
-        [Route("update")]
-        [ProducesResponseType(typeof(AppActionResultMessage<DtoOrder>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(AppActionResultMessage<DtoOrder>), StatusCodes.Status400BadRequest)]
-        [Authorize]
-        public async Task<IActionResult> UpdateOrderAsync(UpdateOrderRequest request)
-        {
-            var result = await _orderService.UpdateOrderAsync(request);
-            if (result.IsSuccess)
-            {
-                return Ok(result);
-            }
-            return BadRequest(result);
-        }
 
         /// <summary>
         /// 
@@ -128,7 +111,7 @@ namespace Flutter.Backend.Api.Controllers
         [Route("get-info")]
         [ProducesResponseType(typeof(AppActionResultMessage<DtoOrder>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(AppActionResultMessage<DtoOrder>), StatusCodes.Status400BadRequest)]
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = RoleConstain.USER)]
         public async Task<IActionResult> GetInfoOrderAsync()
         {
             var result = await _orderService.GetInfoOrderAsync();

@@ -32,8 +32,6 @@ namespace Flutter.Backend.Service.IServices
         /// <returns></returns>
         Task<AppActionResultMessage<DtoOrder>> CreateDraftOrderAsync(BaseOrderRequest request);
 
-        Task<AppActionResultMessage<DtoOrder>> UpdateOrderAsync(UpdateOrderRequest request);
-
         Task<AppActionResultMessage<string>> DeleteOrderAsync(string OrderId);
 
         Task<AppActionResultMessage<DtoOrder>> GetInfoOrderAsync();
