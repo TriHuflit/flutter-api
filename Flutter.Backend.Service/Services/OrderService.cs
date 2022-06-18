@@ -57,9 +57,9 @@ namespace Flutter.Backend.Service.Services
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        public async Task<AppActionResultMessage<DtoOrder>> CreateDraftOrderAsync(BaseOrderRequest request)
+        public async Task<AppActionResultMessage<string>> CreateDraftOrderAsync(BaseOrderRequest request)
         {
-            var result = new AppActionResultMessage<DtoOrder>();
+            var result = new AppActionResultMessage<string>();
 
             if (!ObjectId.TryParse(_currentUserService.UserId, out ObjectId objUser))
             {
@@ -122,9 +122,9 @@ namespace Flutter.Backend.Service.Services
                 _orderRepository.Update(order, o => o.Id == order.Id);
             }
 
-            var dtoOrder = _mapper.Map<Order, DtoOrder>(order);
+            
 
-            return await BuildResult(result, dtoOrder, MSG_FIND_SUCCESSFULLY);
+            return await BuildResult(result, order.Id.ToString(), MSG_SAVE_SUCCESSFULLY);
         }
 
 

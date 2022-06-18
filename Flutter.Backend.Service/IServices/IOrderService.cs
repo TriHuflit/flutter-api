@@ -30,7 +30,7 @@ namespace Flutter.Backend.Service.IServices
         /// User Order
         /// </summary>
         /// <returns></returns>
-        Task<AppActionResultMessage<DtoOrder>> CreateDraftOrderAsync(BaseOrderRequest request);
+        Task<AppActionResultMessage<string>> CreateDraftOrderAsync(BaseOrderRequest request);
 
         Task<AppActionResultMessage<string>> DeleteOrderAsync(string OrderId);
 

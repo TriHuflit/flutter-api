@@ -31,7 +31,7 @@ namespace Flutter.Backend.Api.Controllers
         [Route("create")]
         [ProducesResponseType(typeof(AppActionResultMessage<DtoOrder>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(AppActionResultMessage<DtoOrder>), StatusCodes.Status400BadRequest)]
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = RoleConstain.USER)]
         public async Task<IActionResult> CreateOrderAsync(BaseOrderRequest request)
         {
             var result = await _orderService.CreateDraftOrderAsync(request);

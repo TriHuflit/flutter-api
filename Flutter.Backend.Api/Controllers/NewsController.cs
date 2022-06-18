@@ -24,8 +24,8 @@ namespace Flutter.Backend.Api.Controllers
 
         [HttpPost]
         [Route("create")]
-        [ProducesResponseType(typeof(AppActionResultMessage<DtoNews>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(AppActionResultMessage<DtoNews>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(AppActionResultMessage<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(AppActionResultMessage<string>), StatusCodes.Status400BadRequest)]
         [Authorize]
         public async Task<IActionResult> CreateNewsAsync(BaseNewsRequest request)
         {
@@ -40,8 +40,8 @@ namespace Flutter.Backend.Api.Controllers
 
         [HttpPut]
         [Route("update")]
-        [ProducesResponseType(typeof(AppActionResultMessage<DtoNews>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(AppActionResultMessage<DtoNews>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(AppActionResultMessage<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(AppActionResultMessage<string>), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> UpdateNewsAsync(UpdateNewsRequest request)
         {
             var result = await _newsService.UpdateNewsAsync(request);
@@ -51,6 +51,22 @@ namespace Flutter.Backend.Api.Controllers
             }
             return BadRequest(result);
         }
+
+
+        [HttpDelete]
+        [Route("delete/{newsId}")]
+        [ProducesResponseType(typeof(AppActionResultMessage<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(AppActionResultMessage<string>), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> DeleteNewsAsync(string newsId)
+        {
+            var result = await _newsService.DeleteNewsAsync(newsId);
+            if (result.IsSuccess)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result);
+        }
+
 
         [HttpGet]
         [Route("all")]

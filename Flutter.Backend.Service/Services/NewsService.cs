@@ -63,7 +63,7 @@ namespace Flutter.Backend.Service.Services
             news.SetFullInfor(_currentUserService.UserId, _currentUserService.UserName);
             _newsRepository.Add(news);
 
-            return await BuildResult(result, MSG_SAVE_SUCCESSFULLY);
+            return await BuildResult(result, news.Id.ToString(), MSG_SAVE_SUCCESSFULLY);
         }
 
 
@@ -87,7 +87,7 @@ namespace Flutter.Backend.Service.Services
             news.SetUpdatedInFor(_currentUserService.UserId, _currentUserService.UserName);
             _newsRepository.Update(news, n => n.Id == objNews);
 
-            return await BuildResult(result, MSG_DELETE_SUCCESSFULLY);
+            return await BuildResult(result, news.Id.ToString(),MSG_DELETE_SUCCESSFULLY);
         }
 
 
@@ -203,7 +203,7 @@ namespace Flutter.Backend.Service.Services
                 news.Thumbnail = imageResult.Data;
             }
 
-            return await BuildResult(result, MSG_UPDATE_SUCCESSFULLY);
+            return await BuildResult(result, news.Id.ToString(), MSG_UPDATE_SUCCESSFULLY);
         }
 
         #region Private Method
