@@ -21,6 +21,9 @@ namespace Flutter.Backend.Service.Services
     {
         private readonly IProductRepository _productRepository;
         private readonly IClassifyProductRepository _classifyProductRepository;
+        private readonly IRoleRepository _roleRepository;
+        private readonly IOrderRepository _orderRepository;
+        private readonly IAppUserRepository _appUserRepository;
         private readonly ICategoryRepository _categoryRepository;
         private readonly IBrandRepository _brandRepository;
 
@@ -36,12 +39,18 @@ namespace Flutter.Backend.Service.Services
             IClassifyProductRepository classifyProductRepository,
             IUploadImageService uploadImageService,
             ICurrentUserService currentUserService,
+             IRoleRepository roleRepository,
+            IOrderRepository orderRepository,
+            IAppUserRepository appUserRepository,
             IMessageService messageService) : base(messageService)
         {
 
             _productRepository = productRepository;
             _categoryRepository = categoryRepository;
             _brandRepository = brandRepository;
+            _orderRepository = orderRepository;
+            _roleRepository = roleRepository;
+            _appUserRepository = appUserRepository;
             _classifyProductRepository = classifyProductRepository;
             _uploadImageService = uploadImageService;
             _currentUserService = currentUserService;
@@ -528,7 +537,7 @@ namespace Flutter.Backend.Service.Services
             var paramKey = request.KeySearch ?? string.Empty;
             var paramCategory = request.CategorySearch ?? string.Empty;
             var paramBrand = request.BrandSearch ?? string.Empty;
-            var paramFilterPrice = request.SortPrice != -1 && request.SortPrice != 1 ?  0 : request.SortPrice ;
+            var paramFilterPrice = request.SortPrice != -1 && request.SortPrice != 1 ? 0 : request.SortPrice;
 
             Expression<Func<Product, bool>> UserGuideFilter = ex => string.IsNullOrEmpty(paramKey) || (ex.Name != null && ex.Name.ToLower().Contains(paramKey));
             var finalFilter = Builders<Product>.Filter.Where(UserGuideFilter);
@@ -555,7 +564,7 @@ namespace Flutter.Backend.Service.Services
                 finalFilter = Builders<Product>.Filter.And(finalFilter, brandFilter);
 
             }
-            
+
             var products = await _productRepository.FindByAsync(finalFilter);
 
             if (paramFilterPrice == 1)
@@ -574,8 +583,8 @@ namespace Flutter.Backend.Service.Services
                       .ToList();
             }
             // Pagination for Product
-          
-          
+
+
             var dtoProduct = _mapper.Map<IEnumerable<Product>, IEnumerable<DtoProduct>>(products);
             var searchProduct = new SearchResultData
             {
@@ -647,8 +656,8 @@ namespace Flutter.Backend.Service.Services
                 return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(productId));
             }
 
-            var product = await _productRepository.GetAsync(p =>p.Id == objProductId && p.IsShow == IsShowConstain.ACTIVE);
-            if(product == null)
+            var product = await _productRepository.GetAsync(p => p.Id == objProductId && p.IsShow == IsShowConstain.ACTIVE);
+            if (product == null)
             {
                 return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, productId);
             }
@@ -658,7 +667,7 @@ namespace Flutter.Backend.Service.Services
 
             relatedProducts = relatedProducts.OrderBy(p => p.Name).Take(4);
 
-            var dtoProduct = _mapper.Map<IEnumerable<Product>,IEnumerable<DtoProduct>>(relatedProducts);
+            var dtoProduct = _mapper.Map<IEnumerable<Product>, IEnumerable<DtoProduct>>(relatedProducts);
 
             return await BuildResult(result, dtoProduct, MSG_FIND_SUCCESSFULLY);
         }
@@ -723,48 +732,42 @@ namespace Flutter.Backend.Service.Services
             return await BuildResult(result, dtoproduct, MSG_FIND_SUCCESSFULLY);
         }
 
-        #region private method
-        private async Task<AppActionResultMessage<ProductInfo>> ValidateProductAsync(BaseProductRequest request)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public async Task<AppActionResultMessage<DtoStatistical>> GetStatisticalAsync()
         {
-            var result = new AppActionResultMessage<ProductInfo>();
+            var result = new AppActionResultMessage<DtoStatistical>();
 
-            if (!ObjectId.TryParse(request.CategoryId, out ObjectId objCategoryId))
+            var totalOrderSuccess = await _orderRepository.FindByAsync(o => o.Status == StatusOrderConstain.SUCCESS_USER || o.Status == StatusOrderConstain.SUCCESS_STAFF);
+            var totalOrderWaitingConfirm = await _orderRepository.FindByAsync(o => o.Status == StatusOrderConstain.PENDING);
+            decimal totalPriceOfMonth = 0;
+            foreach (var item in totalOrderSuccess)
             {
-                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.CategoryId));
+                if (item.CreatedByTime.Month == DateTime.UtcNow.Month)
+                {
+                    totalPriceOfMonth += item.TotalPrice;
+                }
             }
+            var roleUser = await _roleRepository.GetAsync(r => r.Name == RoleConstain.USER);
+            var totalUser = await _appUserRepository.FindByAsync(u => u.RoleId == roleUser.Id && u.IsActive == IsShowConstain.ACTIVE);
 
-            if (!ObjectId.TryParse(request.BrandId, out ObjectId objBrandId))
+            var dtoStatistical = new DtoStatistical
             {
-                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.BrandId));
-            }
-
-
-            var brand = await _brandRepository.FindByAsync(x => x.Id == objBrandId);
-            if (brand == null)
-            {
-                return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, nameof(brand));
-            }
-
-            var category = await _categoryRepository.FindByAsync(x => x.Id == objCategoryId);
-            if (category == null)
-            {
-                return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, nameof(category));
-            }
-
-            var productInfo = new ProductInfo
-            {
-                CategoryId = objCategoryId,
-                BrandId = objBrandId,
+                TotalOrderSuccess = totalOrderSuccess.Count(),
+                TotalOrderWaitingConfirm = totalOrderWaitingConfirm.Count(),
+                TotalPriceOfMonth = totalPriceOfMonth,
+                TotalUser = totalUser.Count(),
             };
 
-            return result.BuildResult(productInfo);
+            return await BuildResult(result, dtoStatistical, MSG_FIND_SUCCESSFULLY);
         }
 
-        private bool IsValidateStatusProduct(int isShow)
-        {
-            return isShow == IsShowConstain.ACTIVE || isShow == IsShowConstain.INACTIVE;
-        }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public async Task<AppActionResultMessage<SearchResultData>> GetProductPromotionAsync()
         {
             var result = new AppActionResultMessage<SearchResultData>();
@@ -810,6 +813,10 @@ namespace Flutter.Backend.Service.Services
             return await BuildResult(result, searchResultData, MSG_FIND_SUCCESSFULLY);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public async Task<AppActionResultMessage<SearchResultData>> GetProductBestSellerAsync()
         {
             var result = new AppActionResultMessage<SearchResultData>();
@@ -847,6 +854,51 @@ namespace Flutter.Backend.Service.Services
 
             return await BuildResult(result, searchResultData, MSG_FIND_SUCCESSFULLY);
         }
+
+
+        #region private method
+        private async Task<AppActionResultMessage<ProductInfo>> ValidateProductAsync(BaseProductRequest request)
+        {
+            var result = new AppActionResultMessage<ProductInfo>();
+
+            if (!ObjectId.TryParse(request.CategoryId, out ObjectId objCategoryId))
+            {
+                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.CategoryId));
+            }
+
+            if (!ObjectId.TryParse(request.BrandId, out ObjectId objBrandId))
+            {
+                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.BrandId));
+            }
+
+
+            var brand = await _brandRepository.FindByAsync(x => x.Id == objBrandId);
+            if (brand == null)
+            {
+                return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, nameof(brand));
+            }
+
+            var category = await _categoryRepository.FindByAsync(x => x.Id == objCategoryId);
+            if (category == null)
+            {
+                return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, nameof(category));
+            }
+
+            var productInfo = new ProductInfo
+            {
+                CategoryId = objCategoryId,
+                BrandId = objBrandId,
+            };
+
+            return result.BuildResult(productInfo);
+        }
+
+        private bool IsValidateStatusProduct(int isShow)
+        {
+            return isShow == IsShowConstain.ACTIVE || isShow == IsShowConstain.INACTIVE;
+        }
+
+
 
 
 

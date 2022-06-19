@@ -219,8 +219,7 @@ namespace Flutter.Backend.Service.Services
                     $"<td style= 'border: 1px solid black;border-collapse: collapse;padding: 8px;'>{item.Price * item.Count}VNĐ </td> </tr>";
             }
 
-            order.Status = StatusOrderConstain.CONFIRM;
-            order.SetUpdatedInFor(_currentUserService.UserId, _currentUserService.UserName);
+          
 
             var template = await _templateSendMailRepository.GetAsync(t => t.Key == SendMailConstain.TemplateEmailConfirmStaff);
             var requestSendMail = new MailRequest
@@ -235,10 +234,75 @@ namespace Flutter.Backend.Service.Services
             {
                 return await BuildError(result, ERR_MSG_EMAIL_IS_NOT_CONFIRM);
             }
-
+            order.Status = StatusOrderConstain.CONFIRM;
+            order.SetUpdatedInFor(_currentUserService.UserId, _currentUserService.UserName);
             _orderRepository.Update(order, o => o.Id == order.Id);
             //add message
             return await BuildResult(result, OrderId, "Xác nhận đơn hàng thành công");
+        }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="OrderId"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public async Task<AppActionResultMessage<string>> ComfirmOrderDeliveryByStaffAsync(string OrderId)
+        {
+
+            var result = new AppActionResultMessage<string>();
+
+            if (!ObjectId.TryParse(OrderId, out ObjectId objOrder))
+            {
+                return await BuildError(result, OrderId, ERR_MSG_ID_ISVALID_FORMART);
+            }
+
+
+            var order = await _orderRepository.GetAsync(o => o.Id == objOrder && o.Status == StatusOrderConstain.CONFIRM);
+            if (order == null)
+            {
+                return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, nameof(order));
+            }
+
+
+            var oderDetailHtml = "";
+            var i = 0;
+            //draw table html in body email
+            foreach (var item in order.OrderDetails)
+            {
+                i++;
+                oderDetailHtml += $"<tr><th style= 'border: 1px solid black;border-collapse: collapse;'>{i}</th>" +
+                    $"<td style= 'border: 1px solid black;border-collapse: collapse;padding: 8px;'>{item.ProductName}</td>" +
+                    $"<td style= 'border: 1px solid black;border-collapse: collapse;padding: 8px;'>{item.ClassifyProductName}</td>" +
+                    $"<td style= 'border: 1px solid black;border-collapse: collapse;padding: 8px;'><img src ='{item.Image}' width = '100' alt = ''></td>" +
+                    $"<td style= 'border: 1px solid black;border-collapse: collapse;padding: 8px;'>{item.Count}</td>" +
+                    $"<td style= 'border: 1px solid black;border-collapse: collapse;padding: 8px;'>{item.Price}VNĐ </td>" +
+                    $"<td style= 'border: 1px solid black;border-collapse: collapse;padding: 8px;'>{item.Price * item.Count}VNĐ </td> </tr>";
+            }
+
+
+
+            var template = await _templateSendMailRepository.GetAsync(t => t.Key == SendMailConstain.TemplateEmailDelivery);
+            var requestSendMail = new MailRequest
+            {
+                Body = String.Format(template.TemplateHTML, order.Id, _currentUserService.UserName, oderDetailHtml),
+                Subject = SendMailConstain.SubjectDeliveryStaff,
+                ToEmail = order.Email
+            };
+
+            var sendMailResult = await _sendMailService.SendMailRegisterAsync(requestSendMail);
+            if (!sendMailResult.IsSuccess)
+            {
+                return await BuildError(result, ERR_MSG_EMAIL_IS_NOT_CONFIRM);
+            }
+
+
+            order.Status = StatusOrderConstain.DELIVERY;
+            order.SetUpdatedInFor(_currentUserService.UserId, _currentUserService.UserName);
+            _orderRepository.Update(order, o => o.Id == order.Id);
+
+            return await BuildResult(result, OrderId, "Cập nhật đơn hàng thành công");
         }
 
         /// <summary>
@@ -247,10 +311,71 @@ namespace Flutter.Backend.Service.Services
         /// <param name="OrderId"></param>
         /// <returns></returns>
         /// <exception cref="System.NotImplementedException"></exception>
-        public Task<AppActionResultMessage<string>> ComfirmOrderCancelByStaffAsync(string OrderId)
+        public async Task<AppActionResultMessage<string>> ComfirmOrderCancelByStaffAsync(string OrderId)
         {
             // Modify stock classifyProduct
-            throw new System.NotImplementedException();
+            var result = new AppActionResultMessage<string>();
+
+            if (!ObjectId.TryParse(OrderId, out ObjectId objOrder))
+            {
+                return await BuildError(result, OrderId, ERR_MSG_ID_ISVALID_FORMART);
+            }
+            if (!ObjectId.TryParse(_currentUserService.UserId, out ObjectId objUser))
+            {
+                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(_currentUserService.UserId));
+            }
+
+            var order = await _orderRepository.GetAsync(o => o.Id == objOrder && o.Status == StatusOrderConstain.PENDING);
+            if (order == null)
+            {
+                return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, nameof(order));
+            }
+
+            var oderDetailHtml = "";
+            var i = 0;
+            //draw table html in body email
+            foreach (var item in order.OrderDetails)
+            {
+                i++;
+                oderDetailHtml += $"<tr><th style= 'border: 1px solid black;border-collapse: collapse;'>{i}</th>" +
+                    $"<td style= 'border: 1px solid black;border-collapse: collapse;padding: 8px;'>{item.ProductName}</td>" +
+                    $"<td style= 'border: 1px solid black;border-collapse: collapse;padding: 8px;'>{item.ClassifyProductName}</td>" +
+                    $"<td style= 'border: 1px solid black;border-collapse: collapse;padding: 8px;'><img src ='{item.Image}' width = '100' alt = ''></td>" +
+                    $"<td style= 'border: 1px solid black;border-collapse: collapse;padding: 8px;'>{item.Count}</td>" +
+                    $"<td style= 'border: 1px solid black;border-collapse: collapse;padding: 8px;'>{item.Price}VNĐ </td>" +
+                    $"<td style= 'border: 1px solid black;border-collapse: collapse;padding: 8px;'>{item.Price * item.Count}VNĐ </td> </tr>";
+            }
+
+          
+
+            var template = await _templateSendMailRepository.GetAsync(t => t.Key == SendMailConstain.TemplateEmailCancle);
+            var requestSendMail = new MailRequest
+            {
+                Body = String.Format(template.TemplateHTML, order.Id, _currentUserService.UserName, oderDetailHtml),
+                Subject = SendMailConstain.SubjectConfirmStaff,
+                ToEmail = order.Email
+            };
+
+            var sendMailResult = await _sendMailService.SendMailRegisterAsync(requestSendMail);
+            if (!sendMailResult.IsSuccess)
+            {
+                return await BuildError(result, ERR_MSG_EMAIL_IS_NOT_CONFIRM);
+            }
+
+            foreach(var item in order.OrderDetails)
+            {
+                var classifyProduct = await _classifyProductRepository.GetAsync(c => c.Id == item.ClassifyProductId && c.IsShow != IsShowConstain.DELETE);
+                if(classifyProduct != null)
+                {
+                    classifyProduct.Stock += item.Count;
+                }
+            }
+
+            order.Status = StatusOrderConstain.CANCEL;
+            order.SetUpdatedInFor(_currentUserService.UserId, _currentUserService.UserName);
+            _orderRepository.Update(order, o => o.Id == order.Id);
+            //add message
+            return await BuildResult(result, OrderId, "Hủy đơn hàng thành công");
         }
 
         /// <summary>
@@ -478,9 +603,31 @@ namespace Flutter.Backend.Service.Services
         /// </summary>
         /// <param name="OrderId"></param>
         /// <returns></returns>
-        public Task<AppActionResultMessage<string>> CancelOrderByUserAsync(string OrderId)
-        {
-            throw new System.NotImplementedException();
+        public async Task<AppActionResultMessage<string>> CancelOrderByUserAsync(string OrderId)
+        { 
+            var result = new AppActionResultMessage<string>();
+
+            if (!ObjectId.TryParse(OrderId, out ObjectId objOrder))
+            {
+                return await BuildError(result, OrderId, ERR_MSG_ID_ISVALID_FORMART);
+            }
+
+            if (!ObjectId.TryParse(_currentUserService.UserId, out ObjectId objUser))
+            {
+                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(_currentUserService.UserId));
+            }
+
+            var order = await _orderRepository.GetAsync(o => o.Id == objOrder && (o.Status == StatusOrderConstain.PENDING || o.Status == StatusOrderConstain.CONFIRM));
+            if (order == null)
+            {
+                return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, nameof(order));
+            }
+
+            order.Status = StatusOrderConstain.CANCEL;
+            order.SetUpdatedInFor(_currentUserService.UserId, _currentUserService.UserName);
+            _orderRepository.Update(order, o => o.Id == order.Id);
+
+            return await BuildResult(result, OrderId, "Hủy đơn hàng thành công.Vui lòng chờ xác nhận.");
         }
 
 
@@ -570,6 +717,7 @@ namespace Flutter.Backend.Service.Services
 
             return await BuildResult(result, dtoOrder, MSG_SAVE_SUCCESSFULLY);
         }
+
 
         #region private method
 

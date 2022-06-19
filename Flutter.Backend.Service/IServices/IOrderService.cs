@@ -17,6 +17,8 @@ namespace Flutter.Backend.Service.IServices
 
         Task<AppActionResultMessage<string>> ComfirmOrderCancelByStaffAsync(string OrderId);
 
+        Task<AppActionResultMessage<string>> ComfirmOrderDeliveryByStaffAsync(string OrderId);
+
         Task<AppActionResultMessage<IEnumerable<DtoOrder>>> GetAllOrderPendingPortalAsync();
 
         Task<AppActionResultMessage<IEnumerable<DtoOrder>>> GetAllOrderDeliveryPortalAsync();

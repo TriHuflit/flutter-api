@@ -5,8 +5,12 @@ using Flutter.Backend.DAL.Domains;
 using Flutter.Backend.Service.IServices;
 using Flutter.Backend.Service.Models.Dtos;
 using Flutter.Backend.Service.Models.Requests;
+using Microsoft.Extensions.Configuration;
 using MongoDB.Bson;
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,7 +21,9 @@ namespace Flutter.Backend.Service.Services
     public class UserService : GenericErrorTextService, IUserService
     {
         private readonly IAppUserRepository _appUserRepository;
+        private readonly IRoleRepository _roleRepository;
 
+        private readonly IConfiguration _config;
         private readonly ICurrentUserService _currentUserService;
         private readonly IUploadImageService _uploadImageService;
         private readonly IValidationService _validationService;
@@ -25,14 +31,18 @@ namespace Flutter.Backend.Service.Services
 
         public UserService(
             IAppUserRepository appUserRepository,
-             IMessageService messageService,
-              IMapper mapper,
-             ICurrentUserService currentUserService,
-             IUploadImageService uploadImageService,
-             IValidationService validationService) : base(messageService)
+            IMessageService messageService,
+            IMapper mapper,
+            ICurrentUserService currentUserService,
+            IUploadImageService uploadImageService,
+            IRoleRepository roleRepository,
+            IConfiguration config,
+            IValidationService validationService) : base(messageService)
         {
             _appUserRepository = appUserRepository;
             _currentUserService = currentUserService;
+            _roleRepository = roleRepository;
+            _config = config;
             _mapper = mapper;
             _uploadImageService = uploadImageService;
             _validationService = validationService;
@@ -224,7 +234,150 @@ namespace Flutter.Backend.Service.Services
             return await BuildResult(result, MSG_SAVE_SUCCESSFULLY);
         }
 
+        public async Task<AppActionResultMessage<string>> CreateStaffAsync(CreateStaffRequest request)
+        {
+            var result = new AppActionResultMessage<string>();
 
+            //validation username
+            if (!_validationService.ValidateUserName(request.Username))
+            {
+                return await BuildError(result, ERR_MSG_USERNAME_IS_VALID, nameof(request.Username));
+            }
+
+            var trackDataResult = await ReadFile(request);
+            if (!trackDataResult.IsSuccess)
+            {
+                return await BuildError(result, trackDataResult.Message);
+            }
+
+            //validation password
+            if (!_validationService.ValidatePasswordFormat(request.Password))
+            {
+                return await BuildError(result, ERR_MSG_PASSWORD_ISVALID_FORMART);
+            }
+
+            var role = await _roleRepository.GetAsync(r => r.Name == request.Role);
+            if (role == null)
+            {
+                return await BuildError(result, "Chức vụ không hợp lệ", request.Role);
+            }
+
+            var staff = new AppUser
+            {
+                FullName = request.FullName,
+                UserName = request.Username,
+                HashPassword = HashPassWord(request.Password),
+                RoleId = role.Id,
+                IsActive = request.IsActive
+            };
+
+
+            var imageUploadResult = await _uploadImageService.UploadImage(request.Avatar);
+            if (!imageUploadResult.IsSuccess)
+            {
+                return await BuildError(result, imageUploadResult.Message, imageUploadResult.Data);
+            }
+            staff.Avatar = imageUploadResult.Data;
+
+            staff.SetFullInfor(_currentUserService.UserId, _currentUserService.UserName);
+            _appUserRepository.Add(staff);
+
+
+            return await BuildResult(result, staff.Id.ToString(), MSG_FIND_SUCCESSFULLY);
+        }
+
+        public async Task<AppActionResultMessage<string>> BlockStaffAsync(string idStaff)
+        {
+            var result = new AppActionResultMessage<string>();
+
+            if (!ObjectId.TryParse(idStaff, out ObjectId objStaff))
+            {
+                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, idStaff);
+            }
+
+            var role = await _roleRepository.GetAsync(r => r.Name == RoleConstain.STAFF);
+            var staff = await _appUserRepository.GetAsync(u => u.Id == objStaff && u.RoleId == role.Id);
+
+            if (staff == null)
+            {
+                return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, idStaff);
+            }
+
+            staff.IsActive = IsShowConstain.DELETE;
+            staff.SetUpdatedInFor(_currentUserService.UserId, _currentUserService.UserName);
+            _appUserRepository.Update(staff, s => s.Id == staff.Id);
+
+            return await BuildResult(result, staff.Id.ToString(), MSG_FIND_SUCCESSFULLY);
+
+        }
+
+        public async Task<AppActionResultMessage<string>> UpdateRoleAsync(UpdateRoleRequest request)
+        {
+            var result = new AppActionResultMessage<string>();
+
+            if (!ObjectId.TryParse(request.Id, out ObjectId objStaff))
+            {
+                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, request.Id);
+            }
+
+            var role = await _roleRepository.GetAsync(r => r.Name == request.RoleName);
+            if (role == null)
+            {
+                return await BuildError(result, "Chức vụ không hợp lệ", request.RoleName);
+            }
+
+            var staff = await _appUserRepository.GetAsync(s => s.Id == objStaff);
+            if (staff == null)
+            {
+                return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, request.Id);
+            }
+
+            staff.RoleId = role.Id;
+            staff.SetUpdatedInFor(_currentUserService.UserId, _currentUserService.UserName);
+            _appUserRepository.Update(staff,s=>s.Id == staff.Id);
+
+
+            return await BuildResult(result, staff.Id.ToString(), MSG_FIND_SUCCESSFULLY);
+        }
+
+        public async Task<AppActionResultMessage<IEnumerable<DtoStaff>>> GettAllStaffAsync()
+        {
+            var result = new AppActionResultMessage<IEnumerable<DtoStaff>>();
+
+            var role = await _roleRepository.GetAsync(r => r.Name == RoleConstain.STAFF);
+            var staff = await _appUserRepository.FindByAsync(u => u.RoleId == role.Id);
+
+            var dtoStaff = _mapper.Map<IEnumerable<AppUser>, IEnumerable<DtoStaff>>(staff);
+            foreach (var item in dtoStaff)
+            {
+                item.RoleName = role.Name;
+            }
+
+            return await BuildResult(result, dtoStaff, MSG_FIND_SUCCESSFULLY);
+        }
+
+        public async Task<AppActionResultMessage<DtoStaff>> GettDetailStaffAsync(string idStaff)
+        {
+            var result = new AppActionResultMessage<DtoStaff>();
+
+            if (!ObjectId.TryParse(idStaff, out ObjectId objStaff))
+            {
+                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, idStaff);
+            }
+
+            var role = await _roleRepository.GetAsync(r => r.Name == RoleConstain.STAFF);
+            var staff = await _appUserRepository.GetAsync(u => u.Id == objStaff && u.RoleId == role.Id);
+
+            if (staff == null)
+            {
+                return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, idStaff);
+            }
+
+            var dtoStaff = _mapper.Map<AppUser, DtoStaff>(staff);
+            dtoStaff.RoleName = role.Name;
+
+            return await BuildResult(result, dtoStaff, MSG_FIND_SUCCESSFULLY);
+        }
         #region Private Method
         private string HashPassWord(string password)
         {
@@ -264,6 +417,40 @@ namespace Flutter.Backend.Service.Services
         {
             return Gender == "Nam" || Gender == "Nữ";
         }
+
+        private async Task<AppActionResultMessage<string>> ReadFile(CreateStaffRequest staff)
+        {
+            var result = new AppActionResultMessage<string>();
+
+            HttpWebRequest request = (HttpWebRequest)
+            WebRequest.Create(_config[ConfigAppsettingConstaint.TrackData]);
+            HttpWebResponse response = (HttpWebResponse)
+                request.GetResponse();
+            Stream resStream = response.GetResponseStream();
+            StreamReader v = new(resStream);
+            string[] line = v.ReadToEnd().Split(new char[] { '\r' });
+            for (int i = 0; i < line.Length; i++)
+            {
+                line[i] = line[i].ToLower();
+                if (line[i].Contains(staff.Username.ToLower()))
+                {
+                    return await BuildError(result, ERR_MSG_USERNAME_IS_VALID, nameof(staff.Username));
+                }
+
+                if (line[i].Contains(staff.Password.ToLower()))
+                {
+                    return await BuildError(result, ERR_MSG_USERNAME_IS_VALID, nameof(staff.Password));
+                }
+
+                if (line[i].Contains(staff.FullName.ToLower()))
+                {
+                    return await BuildError(result, ERR_MSG_USERNAME_IS_VALID, nameof(staff.FullName));
+                }
+            }
+
+            return await BuildResult(result, MSG_FIND_SUCCESSFULLY);
+        }
+
         #endregion Private Method
     }
 }

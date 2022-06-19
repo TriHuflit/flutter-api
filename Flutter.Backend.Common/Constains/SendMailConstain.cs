@@ -26,6 +26,10 @@
 
         public const string SubjectConfirmStaff = "Đơn Hàng Đã Được Xác Nhận";
 
+        public const string SubjectCancleStaff = "Đơn Hàng Đã Được Hủy";
+
+        public const string SubjectDeliveryStaff = "Đơn Hàng Đã Giao";
+
         public const string SubjectResetPassword = "Lấy Lại Mật Khẩu Cho Tài Khoản Ứng Dụng HTC";
     }
 }

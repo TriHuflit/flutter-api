@@ -300,5 +300,32 @@ namespace Flutter.Backend.Api.Controllers
             }
 
         }
+
+
+
+        /// <summary>
+        /// Gets the product for mobile.
+        /// </summary>
+        /// <param name="productId">The product identifier.</param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("statistical")]
+        public async Task<IActionResult> GetStatisticalAsync()
+        {
+            try
+            {
+                var result = await _productService.GetStatisticalAsync();
+                if (!result.IsSuccess)
+                {
+                    return NotFound(result);
+                }
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+        }
     }
 }
