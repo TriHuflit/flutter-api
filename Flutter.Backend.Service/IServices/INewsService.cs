@@ -22,5 +22,7 @@ namespace Flutter.Backend.Service.IServices
         Task<AppActionResultMessage<IEnumerable<DtoNews>>> GetAllNewsMobileAsync();
 
         Task<AppActionResultMessage<DtoNews>> GetNewsMobileAsync(string newsId);
+
+        Task<AppActionResultMessage<IEnumerable<DtoNews>>> GetNewsRelatedMobileAsync(string newsId);
     }
 }

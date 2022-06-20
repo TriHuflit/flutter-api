@@ -118,9 +118,25 @@ namespace Flutter.Backend.Api.Controllers
         [ProducesResponseType(typeof(AppActionResultMessage<DtoNews>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(AppActionResultMessage<DtoNews>), StatusCodes.Status400BadRequest)]
         [AllowAnonymous]
-        public async Task<IActionResult> GetDetailVoucherMobileAsync(string newsId)
+        public async Task<IActionResult> GetNewsMobileAsync(string newsId)
         {
             var result = await _newsService.GetNewsMobileAsync(newsId);
+            if (result.IsSuccess)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result);
+        }
+
+
+        [HttpGet]
+        [Route("mobile/related/{newsId}")]
+        [ProducesResponseType(typeof(AppActionResultMessage<IEnumerable<DtoNews>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(AppActionResultMessage<IEnumerable<DtoNews>>), StatusCodes.Status400BadRequest)]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetRelatedNewsMobileAsync(string newsId)
+        {
+            var result = await _newsService.GetNewsRelatedMobileAsync(newsId);
             if (result.IsSuccess)
             {
                 return Ok(result);

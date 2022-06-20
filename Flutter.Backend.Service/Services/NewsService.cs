@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using MongoDB.Bson;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 using static Flutter.Backend.Common.Constains.MessageResConstain;
 
 namespace Flutter.Backend.Service.Services
@@ -155,7 +156,28 @@ namespace Flutter.Backend.Service.Services
             return await BuildResult(result, dtoNews, MSG_FIND_SUCCESSFULLY);
         }
 
+        public async Task<AppActionResultMessage<IEnumerable<DtoNews>>> GetNewsRelatedMobileAsync(string newsId)
+        {
 
+            var result = new AppActionResultMessage<IEnumerable<DtoNews>>();
+
+
+            if (!ObjectId.TryParse(newsId, out ObjectId objNews))
+            {
+                return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, newsId);
+            }
+
+            var news = await _newsRepository.FindByAsync(n => n.Id != objNews && n.IsShow == IsShowConstain.ACTIVE);
+            if (news == null)
+            {
+                return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, newsId);
+            }
+            news.Take(4);
+
+            var dtoNews = _mapper.Map<IEnumerable<News>, IEnumerable<DtoNews>>(news);
+
+            return await BuildResult(result, dtoNews, MSG_FIND_SUCCESSFULLY);
+        }
 
         public async Task<AppActionResultMessage<string>> UpdateNewsAsync(UpdateNewsRequest request)
         {
