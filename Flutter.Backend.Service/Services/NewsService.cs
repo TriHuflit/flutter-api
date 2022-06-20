@@ -95,7 +95,7 @@ namespace Flutter.Backend.Service.Services
         {
             var result = new AppActionResultMessage<IEnumerable<DtoNews>>();
 
-            var news = await _newsRepository.FindByAsync(n=>n.IsShow != IsShowConstain.DELETE);
+            var news = await _newsRepository.FindByAsync(n => n.IsShow != IsShowConstain.DELETE);
 
             var dtoNews = _mapper.Map<IEnumerable<News>, IEnumerable<DtoNews>>(news);
 
@@ -107,7 +107,7 @@ namespace Flutter.Backend.Service.Services
 
             var result = new AppActionResultMessage<IEnumerable<DtoNews>>();
 
-            var news = await _newsRepository.FindByAsync(n=>n.IsShow == IsShowConstain.ACTIVE);
+            var news = await _newsRepository.FindByAsync(n => n.IsShow == IsShowConstain.ACTIVE);
 
             var dtoNews = _mapper.Map<IEnumerable<News>, IEnumerable<DtoNews>>(news);
 
@@ -152,7 +152,7 @@ namespace Flutter.Backend.Service.Services
 
             var dtoNews = _mapper.Map<News, DtoNews>(news);
 
-            return await BuildResult(result, MSG_FIND_SUCCESSFULLY);
+            return await BuildResult(result, dtoNews, MSG_FIND_SUCCESSFULLY);
         }
 
 

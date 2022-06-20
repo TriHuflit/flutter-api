@@ -111,6 +111,7 @@ namespace Flutter.Backend.Api
             services.AddTransient<IProductRepository, ProductRespository>();
             services.AddTransient<ICategoryRepository, CaterogyRespository>();
             services.AddTransient<IBrandRepository, BrandRespository>();
+            services.AddTransient<IFeedBackRepository, FeedBackRepository>();
             services.AddTransient<ITemplateSendMailRepository, TemplateSendMailRepository>();
             services.AddTransient<IClassifyProductRepository, ClassifyProductRepository>();
             services.AddTransient<IRoleRepository, RoleRespository>();

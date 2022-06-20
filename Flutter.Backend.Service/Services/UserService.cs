@@ -334,7 +334,7 @@ namespace Flutter.Backend.Service.Services
 
             staff.RoleId = role.Id;
             staff.SetUpdatedInFor(_currentUserService.UserId, _currentUserService.UserName);
-            _appUserRepository.Update(staff,s=>s.Id == staff.Id);
+            _appUserRepository.Update(staff, s => s.Id == staff.Id);
 
 
             return await BuildResult(result, staff.Id.ToString(), MSG_FIND_SUCCESSFULLY);
@@ -344,13 +344,15 @@ namespace Flutter.Backend.Service.Services
         {
             var result = new AppActionResultMessage<IEnumerable<DtoStaff>>();
 
-            var role = await _roleRepository.GetAsync(r => r.Name == RoleConstain.STAFF);
-            var staff = await _appUserRepository.FindByAsync(u => u.RoleId == role.Id);
+            var role = await _roleRepository.GetAsync(r => r.Name == RoleConstain.USER);
+            var staff = await _appUserRepository.FindByAsync(s=>s.RoleId != role.Id);
 
             var dtoStaff = _mapper.Map<IEnumerable<AppUser>, IEnumerable<DtoStaff>>(staff);
-            foreach (var item in dtoStaff)
+
+            foreach(var item in dtoStaff)
             {
-                item.RoleName = role.Name;
+                var roleStaff = await _roleRepository.GetAsync(r => r.Id == ObjectId.Parse(item.RoleId));
+                item.RoleName = roleStaff.Name;
             }
 
             return await BuildResult(result, dtoStaff, MSG_FIND_SUCCESSFULLY);
