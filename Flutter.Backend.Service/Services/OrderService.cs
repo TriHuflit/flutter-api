@@ -120,6 +120,9 @@ namespace Flutter.Backend.Service.Services
                 foreach (var item in order.OrderDetails)
                 {
                     order.TotalPrice += item.Price * item.Count;
+                    var classifyProduct = await _classifyProductRepository.GetAsync(c => c.Id == item.ClassifyProductId && c.IsShow == IsShowConstain.ACTIVE);
+
+                    item.Image = classifyProduct.Image;
                 }
 
                 order.SetUpdatedInFor(_currentUserService.UserId, _currentUserService.UserName);

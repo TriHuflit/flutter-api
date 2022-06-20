@@ -9,7 +9,7 @@ namespace Flutter.Backend.Service.IServices
     {
         Task<AppActionResultMessage<DtoAuthent>> AuthendicateUserAsync(AuthendicateRequest request);
 
-        Task<AppActionResultMessage<DtoAuthent>> AuthendicateAdminAsync(AuthendicateRequest request);
+        Task<AppActionResultMessage<DtoAuthentAdmin>> AuthendicateAdminAsync(AuthendicateRequest request);
 
         Task<AppActionResultMessage<string>> RegisterAsync(RegisterRequest request);
 

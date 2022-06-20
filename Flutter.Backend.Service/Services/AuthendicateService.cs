@@ -104,9 +104,9 @@ namespace Flutter.Backend.Service.Services
         /// </summary>
         /// <param name="request">The request.</param>
         /// <returns></returns>
-        public async Task<AppActionResultMessage<DtoAuthent>> AuthendicateAdminAsync(AuthendicateRequest request)
+        public async Task<AppActionResultMessage<DtoAuthentAdmin>> AuthendicateAdminAsync(AuthendicateRequest request)
         {
-            var result = new AppActionResultMessage<DtoAuthent>();
+            var result = new AppActionResultMessage<DtoAuthentAdmin>();
 
             string hashPassword = HashPassWord(request.Password);
 
@@ -142,11 +142,21 @@ namespace Flutter.Backend.Service.Services
 
             token.ExpiresRefresh = refreshToken.ExpiresRefresh;
             token.RefreshToken = refreshToken.RefreshToken;
+
+            var dtoAuthentAdmin = new DtoAuthentAdmin
+            {
+                AccessToken = token.AccessToken,
+                ExpiresAccess = token.ExpiresAccess,
+                RefreshToken = token.RefreshToken,
+                ExpiresRefresh = token.ExpiresRefresh,
+                RoleName = role.Name,
+            };
+
             user.RefreshToken = refreshToken.RefreshToken;
             user.SetUpdatedInFor(user.Id.ToString(), user.UserName);
             _appUserRepository.Update(user, u => u.Id == user.Id);
 
-            return await BuildResult(result, token, MSG_LOGIN_SUCCESSFULLY);
+            return await BuildResult(result, dtoAuthentAdmin , MSG_LOGIN_SUCCESSFULLY);
         }
 
         /// <summary>
