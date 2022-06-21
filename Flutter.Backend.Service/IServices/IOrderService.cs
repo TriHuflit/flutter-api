@@ -36,6 +36,8 @@ namespace Flutter.Backend.Service.IServices
 
         Task<AppActionResultMessage<string>> DeleteOrderAsync(string OrderId);
 
+        Task<AppActionResultMessage<IEnumerable<DtoOrder>>> GetAllOrderByUserAsync();
+
         Task<AppActionResultMessage<DtoOrderDraft>> GetInfoOrderDraftAsync();
 
         Task<AppActionResultMessage<string>> ConfirmOrderByUserAsync(ConfirmOrderRequest request);

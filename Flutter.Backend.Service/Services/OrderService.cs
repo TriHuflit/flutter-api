@@ -721,6 +721,28 @@ namespace Flutter.Backend.Service.Services
             return await BuildResult(result, dtoOrder, MSG_SAVE_SUCCESSFULLY);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public async Task<AppActionResultMessage<IEnumerable<DtoOrder>>> GetAllOrderByUserAsync()
+        {
+            var result = new AppActionResultMessage<IEnumerable<DtoOrder>>();
+
+            if (!ObjectId.TryParse(_currentUserService.UserId, out ObjectId objUser))
+            {
+                return await BuildError(result, _currentUserService.UserId, ERR_MSG_ID_ISVALID_FORMART);
+
+            }
+
+            var order = await _orderRepository.FindByAsync(o => o.UserId == objUser && o.Status != StatusOrderConstain.DRAFT);
+            order = order.OrderBy(o => o.CreatedByTime);
+
+            var dtoOrder = _mapper.Map<IEnumerable<Order>, IEnumerable<DtoOrder>>(order);
+
+            return await BuildResult(result, dtoOrder, MSG_SAVE_SUCCESSFULLY);
+        }
+
 
         #region private method
 

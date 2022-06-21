@@ -216,5 +216,25 @@ namespace Flutter.Backend.Api.Controllers
             }
             return BadRequest(result);
         }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("all-notification")]
+        [ProducesResponseType(typeof(AppActionResultMessage<IEnumerable<DtoOrder>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(AppActionResultMessage<IEnumerable<DtoOrder>>), StatusCodes.Status400BadRequest)]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = RoleConstain.USER)]
+        public async Task<IActionResult> GetAllOrderByUserAsync()
+        {
+            var result = await _orderService.GetAllOrderByUserAsync();
+            if (result.IsSuccess)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result);
+        }
     }
 }
