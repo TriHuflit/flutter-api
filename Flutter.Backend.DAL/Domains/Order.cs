@@ -11,7 +11,7 @@ namespace Flutter.Backend.DAL.Domains
 
         public ObjectId? VoucherId { get; set; }
 
-        public int Ship { get; set; }
+        public decimal Ship { get; set; }
 
         public IEnumerable<OrderDetail> OrderDetails { get; set; }
 

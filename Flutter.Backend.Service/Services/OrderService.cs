@@ -559,26 +559,51 @@ namespace Flutter.Backend.Service.Services
                 }
                 order.VoucherId = objVoucher;
 
-                // chỉnh logic lại chỗ này
-                if (voucher.FromCondition >= order.TotalPrice && (order.TotalPrice == 0 || order.TotalPrice <= voucher.ToCondition))
+                if(voucher.Type == TypeVoucherConstain.VOUCHER_DELIVERY)
                 {
-                    if (voucher.DisCountPercent != 0)
+                    if (voucher.FromCondition >= order.TotalPrice && (voucher.ToCondition == 0 || order.TotalPrice <= voucher.ToCondition))
                     {
-                        var disCountPrice = order.TotalPrice - (order.TotalPrice / voucher.DisCountPercent);
-                        if(disCountPrice > voucher.LimitDisCountAmout)
+                        if (voucher.DisCountPercent != 0)
                         {
-                            order.TotalPrice = order.TotalPrice - voucher.LimitDisCountAmout;
+                            var disCountPrice = order.Ship - (order.Ship / voucher.DisCountPercent);
+                            if (disCountPrice > voucher.LimitDisCountAmout)
+                            {
+                                order.Ship = order.Ship - voucher.LimitDisCountAmout;
+                            }
+                            else
+                            {
+                                order.Ship = order.Ship - (order.Ship / voucher.DisCountPercent);
+                            }
                         }
                         else
                         {
-                            order.TotalPrice = order.TotalPrice - (order.TotalPrice / voucher.DisCountPercent);
-                        }        
-                    }
-                    else
-                    {
-                        order.TotalPrice = order.TotalPrice - voucher.DisCountAmount;
+                            order.Ship = order.Ship - voucher.DisCountAmount;
+                        }
                     }
                 }
+                else
+                {
+                    if (voucher.FromCondition >= order.TotalPrice && (voucher.ToCondition == 0 || order.TotalPrice <= voucher.ToCondition))
+                    {
+                        if (voucher.DisCountPercent != 0)
+                        {
+                            var disCountPrice = order.TotalPrice - (order.TotalPrice / voucher.DisCountPercent);
+                            if (disCountPrice > voucher.LimitDisCountAmout)
+                            {
+                                order.TotalPrice = order.TotalPrice - voucher.LimitDisCountAmout;
+                            }
+                            else
+                            {
+                                order.TotalPrice = order.TotalPrice - (order.TotalPrice / voucher.DisCountPercent);
+                            }
+                        }
+                        else
+                        {
+                            order.TotalPrice = order.TotalPrice - voucher.DisCountAmount;
+                        }
+                    }
+                }
+                
             }
 
             var template = await _templateSendMailRepository.GetAsync(t => t.Key == SendMailConstain.TemplateEmailConfirmUser);
