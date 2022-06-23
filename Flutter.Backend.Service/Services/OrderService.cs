@@ -117,6 +117,7 @@ namespace Flutter.Backend.Service.Services
 
                 var orderDetailRequest = _mapper.Map<IEnumerable<CreateOrderDetailRequest>, IEnumerable<OrderDetail>>(request.OrderDetails);
                 order.OrderDetails = orderDetailRequest;
+                order.TotalPrice = 0;
                 foreach (var item in order.OrderDetails)
                 {
                     order.TotalPrice += item.Price * item.Count;
@@ -518,6 +519,7 @@ namespace Flutter.Backend.Service.Services
             order.Status = StatusOrderConstain.PENDING;
             order.OrderDetails = orderDetailRequest;
             order.Ship = request.Ship;
+            order.TotalPrice = 0;
             /// caculator total with voucher
 
             foreach (var item in order.OrderDetails)
