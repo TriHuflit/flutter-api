@@ -329,7 +329,7 @@ namespace Flutter.Backend.Service.Services
                 return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(_currentUserService.UserId));
             }
 
-            var order = await _orderRepository.GetAsync(o => o.Id == objOrder && o.Status == StatusOrderConstain.PENDING);
+            var order = await _orderRepository.GetAsync(o => o.Id == objOrder && o.Status == StatusOrderConstain.PENDING_CANCEL);
             if (order == null)
             {
                 return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, nameof(order));
@@ -647,7 +647,7 @@ namespace Flutter.Backend.Service.Services
                 return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(_currentUserService.UserId));
             }
 
-            var order = await _orderRepository.GetAsync(o => o.Id == objOrder && o.Status == StatusOrderConstain.PENDING_CANCEL);
+            var order = await _orderRepository.GetAsync(o => o.Id == objOrder && (o.Status == StatusOrderConstain.PENDING || o.Status == StatusOrderConstain.CONFIRM));
             if (order == null)
             {
                 return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, nameof(order));
