@@ -194,7 +194,7 @@ namespace Flutter.Backend.Service.Services
             }
 
             var voucher = await _voucherRepository.GetAsync(v => v.Id == objectVoucherId && v.IsShow == IsShowConstain.ACTIVE && v.FromDate <= DateTime.UtcNow
-                                                                                                                    && v.ToDate > DateTime.UtcNow);
+                                                                                                                    && v.ToDate >= DateTime.UtcNow);
             if (voucher == null)
             {
                 return await BuildError(result, ERR_MSG_DATA_NOT_FOUND, voucherId);

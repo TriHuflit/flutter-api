@@ -550,8 +550,8 @@ namespace Flutter.Backend.Service.Services
                     return await BuildError(result, ERR_MSG_ID_ISVALID_FORMART, nameof(request.VoucherId));
                 }
 
-                var voucher = await _voucherRepository.GetAsync(v => v.Id == objVoucher && v.FromDate >= DateTime.UtcNow
-                                                                        && v.ToDate <= DateTime.UtcNow && v.IsShow == IsShowConstain.ACTIVE);
+                var voucher = await _voucherRepository.GetAsync(v => v.Id == objVoucher && v.FromDate <= DateTime.UtcNow
+                                                                        && v.ToDate >= DateTime.UtcNow && v.IsShow == IsShowConstain.ACTIVE);
 
                 if (voucher == null)
                 {
