@@ -48,7 +48,7 @@ namespace Flutter.Backend.Api.Controllers
 
         }
 
-        [HttpPost]
+        [HttpGet]
         [Route("comfirm-email/{userId}")]
         public async Task<IActionResult> ComfirmAccountByEmailAsync(string userId)
         {
