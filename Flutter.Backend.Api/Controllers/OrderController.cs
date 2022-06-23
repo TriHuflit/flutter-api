@@ -93,7 +93,7 @@ namespace Flutter.Backend.Api.Controllers
         [Route("cancle-by-staff/{OrderId}")]
         [ProducesResponseType(typeof(AppActionResultMessage<string>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(AppActionResultMessage<string>), StatusCodes.Status400BadRequest)]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = RoleConstain.STAFF)]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = RoleConstain.MANAGER)]
         public async Task<IActionResult> ComfirmOrderCancelByStaffAsync(string OrderId)
         {
             var result = await _orderService.ComfirmOrderCancelByStaffAsync(OrderId);
