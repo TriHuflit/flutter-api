@@ -760,7 +760,8 @@ namespace Flutter.Backend.Service.Services
 
             }
 
-            var order = await _orderRepository.FindByAsync(o => o.UserId == objUser && o.Status != StatusOrderConstain.DRAFT);
+            var order = await _orderRepository.FindByAsync(o => o.UserId == objUser && o.Status != StatusOrderConstain.DRAFT
+            && o.Status != StatusOrderConstain.SUCCESS_STAFF && o.Status != StatusOrderConstain.PENDING_CANCEL);
             order = order.OrderBy(o => o.CreatedByTime);
 
             var dtoOrder = _mapper.Map<IEnumerable<Order>, IEnumerable<DtoOrder>>(order);
