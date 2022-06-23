@@ -538,7 +538,7 @@ namespace Flutter.Backend.Service.Services
                 }
 
                 order.TotalPrice += item.Price * item.Count;
-
+                item.Image = classifyProduct.Image;
                 classifyProduct.SetUpdatedInFor(_currentUserService.UserId, _currentUserService.UserName);
                 _classifyProductRepository.Update(classifyProduct, c => c.Id == classifyProduct.Id);
             }
